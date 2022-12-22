@@ -1,0 +1,17 @@
+http:
+  port: 8080
+  maxHeaderBytes: 1
+  readTimeout: 10s
+  writeTimeout: 10s
+  host: localhost
+
+mongo:
+  databaseName: gorest
+  mongoURI: mongodb+srv://yeldosmanap:1245emer@cluster0.ax3nacu.mongodb.net/?retryWrites=true&w=majority
+  mongoPassword: 1245emer
+  mongoUsername: yeldosmanap
+
+auth:
+  accessTokenTTL: 2h
+  refreshTokenTTL: 720h
+  verificationCodeLength: 8
