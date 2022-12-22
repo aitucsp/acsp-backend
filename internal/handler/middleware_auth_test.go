@@ -11,9 +11,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	"gorestapi/internal/logs"
-	"gorestapi/internal/service"
-	mockService "gorestapi/internal/service/mocks"
+	"acsp/internal/logs"
+	"acsp/internal/service"
+	mockService "acsp/internal/service/mocks"
 )
 
 func TestHandler_userIdentity(t *testing.T) {

@@ -7,27 +7,27 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
-	"gorestapi/internal/apperror"
-	"gorestapi/internal/dto"
-	"gorestapi/internal/logs"
-	"gorestapi/internal/validation"
+	"acsp/internal/apperror"
+	"acsp/internal/dto"
+	"acsp/internal/logs"
+	"acsp/internal/validation"
 )
 
-// @Summary Create a project
+// @Summary Create an article
 // @Security ApiKeyAuth
-// @Tags projects
-// @Description Creating a project
+// @Tags articles
+// @Description Method for creating an article
 // @ID project-id
 // @Accept  json
 // @Produce  json
-// @Param input body model.Project true "project information"
+// @Param input body model.Article true "project information"
 // @Success 200 {integer} integer 1
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/projects [post]
-func (h *Handler) createProject(c *fiber.Ctx) error {
-	log.Println("Creating a project... ")
+// @Router /api/v1/articles [post]
+func (h *Handler) createArticle(c *fiber.Ctx) error {
+	log.Println("Creating an article... ")
 
 	userId, err := getUserId(c)
 	if err != nil {
@@ -37,7 +37,7 @@ func (h *Handler) createProject(c *fiber.Ctx) error {
 		})
 	}
 
-	input := dto.CreateProject{}
+	input := dto.CreateArticle{}
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -45,15 +45,15 @@ func (h *Handler) createProject(c *fiber.Ctx) error {
 		})
 	}
 
-	validate := validator.New()
-	if err := validate.Struct(input); err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"errors":  true,
-			"message": validation.ValidatorErrors(err),
-		})
-	}
+	// validate := validator.New()
+	// if err := validate.Struct(input); err != nil {
+	// 	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+	// 		"errors":  true,
+	// 		"message": validation.ValidatorErrors(err),
+	// 	})
+	// }
 
-	id, err := h.services.Projects.Create(c.UserContext(), userId, input)
+	id, err := h.services.Articles.Create(c.UserContext(), userId, input)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -68,22 +68,22 @@ func (h *Handler) createProject(c *fiber.Ctx) error {
 	})
 }
 
-// @Summary Get all projects
+// @Summary Get all articles by user id
 // @Security ApiKeyAuth
-// @Tags projects
-// @Description Get all projects from database
-// @ID get-all-projects
+// @Tags articles
+// @Description Get all articles of user
+// @ID get-all-articles-by-user-id
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/projects [get]
+// @Router /api/v1/articles [get]
 func (h *Handler) getAllProjects(c *fiber.Ctx) error {
-	logs.Log().Info("Getting all projects... ")
+	logs.Log().Info("Getting all articles... ")
 
-	_, err := getUserId(c)
+	userId, err := getUserId(c)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -91,7 +91,7 @@ func (h *Handler) getAllProjects(c *fiber.Ctx) error {
 		})
 	}
 
-	projects, err := h.services.Projects.GetAll(c.UserContext())
+	articles, err := h.services.Articles.GetAll(c.UserContext(), userId)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -102,69 +102,25 @@ func (h *Handler) getAllProjects(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"errors":   false,
 		"message":  nil,
-		"count":    len(projects),
+		"count":    len(articles),
 		"user_id":  c.GetRespHeader(userCtx, ""),
-		"projects": projects,
+		"articles": articles,
 	})
 }
 
-// @Summary Get project by title
+// @Summary Update an article by id
 // @Security ApiKeyAuth
-// @Tags projects
-// @Description Get project by title from database
-// @ID get-project-by-title
-// @Accept  json
-// @Produce  json
-// @Success 200 {object} model.Project
-// @Failure 400,404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
-// @Failure default {object} map[string]interface{}
-// @Router /api/v1/projects/:title [get]
-func (h *Handler) getProjectByTitle(c *fiber.Ctx) error {
-	logs.Log().Info("Getting a project by title... ")
-
-	userId, err := getUserId(c)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"errors":  true,
-			"message": err.Error(),
-		})
-	}
-
-	title := c.Params("title", "")
-	if title == "" {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"errors":  true,
-			"message": apperror.ErrParameterNotFound,
-		})
-	}
-
-	project, err := h.services.Projects.GetByTitle(c.UserContext(), userId, title)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"errors":  true,
-			"message": err.Error(),
-		})
-	}
-
-	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"project": project,
-	})
-}
-
-// @Summary Update a project by id
-// @Security ApiKeyAuth
-// @Tags projects
-// @Description Update a title of project
-// @ID update-project-by-id
+// @Tags articles
+// @Description Update data of article
+// @ID update-title-by-id
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/projects/:id [put]
-func (h *Handler) updateProject(c *fiber.Ctx) error {
+// @Router /api/v1/title/:id [put]
+func (h *Handler) updateArticle(c *fiber.Ctx) error {
 	log.Println("Updating a project... ")
 
 	userId, err := getUserId(c)
@@ -175,7 +131,7 @@ func (h *Handler) updateProject(c *fiber.Ctx) error {
 		})
 	}
 
-	var input dto.UpdateProject
+	var input dto.UpdateArticle
 	projectId := c.Params("id", "")
 	if projectId == "" {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -199,29 +155,30 @@ func (h *Handler) updateProject(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := h.services.Projects.Update(c.UserContext(), userId, projectId, *input.NewTitle); err != nil {
+	result, err := h.services.Articles.Update(c.UserContext(), userId, input)
+	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"errors":  true,
 			"message": err.Error(),
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{})
+	return c.Status(http.StatusOK).JSON(fiber.Map{"result": result})
 }
 
-// @Summary Delete a project by id
+// @Summary Delete an article by id
 // @Security ApiKeyAuth
-// @Tags projects
-// @Description Delete a project from database
-// @ID delete-project-by-title
+// @Tags articles
+// @Description Delete an article from database
+// @ID delete-article-by-id
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/projects/:id [delete]
-func (h *Handler) deleteProject(c *fiber.Ctx) error {
-	logs.Log().Info("Deleting a project")
+// @Router /api/v1/article/:id [delete]
+func (h *Handler) deleteArticle(c *fiber.Ctx) error {
+	logs.Log().Info("Deleting an article")
 
 	userId, err := getUserId(c)
 	if err != nil {
@@ -239,7 +196,7 @@ func (h *Handler) deleteProject(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.services.Projects.Delete(c.UserContext(), userId, id)
+	result, err := h.services.Articles.Delete(c.UserContext(), userId, id)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -247,5 +204,5 @@ func (h *Handler) deleteProject(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(http.StatusNoContent).JSON(fiber.Map{})
+	return c.Status(http.StatusNoContent).JSON(fiber.Map{"result": result})
 }

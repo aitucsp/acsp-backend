@@ -9,10 +9,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"gorestapi/internal/logs"
-	"gorestapi/internal/model"
-	"gorestapi/internal/service"
-	mockService "gorestapi/internal/service/mocks"
+	mockService "acsp/internal/service/mocks"
+
+	"acsp/internal/logs"
+	"acsp/internal/model"
+	"acsp/internal/service"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang/mock/gomock"

@@ -1,7 +1,8 @@
 package dto
 
 type CreateUser struct {
+	ID       int    `json:"id"`
 	Name     string `json:"name" binding:"required"`
-	Email    string `json:"username" binding:"required" validate:"required, email"`
-	Password string `json:"password" binding:"required" validate:"required, min=8"`
+	Email    string `json:"email" binding:"required" validate:"required"`
+	Password string `json:"password" binding:"required" validate:"required"`
 }

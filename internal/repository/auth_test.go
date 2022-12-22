@@ -5,8 +5,8 @@ import (
 	"log"
 	"testing"
 
-	_ "gorestapi/internal/dto"
-	"gorestapi/internal/model"
+	_ "acsp/internal/dto"
+	"acsp/internal/model"
 
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -36,7 +36,7 @@ func TestAuthMongo_CreateUser(t *testing.T) {
 	log.Println(mt.Coll.Name())
 
 	collection := mt.Coll
-	db := NewAuthMongo(mt.DB)
+	// db := NewAuthPostgres(mt.DB)
 	ctx := context.Background()
 
 	tests := []struct {

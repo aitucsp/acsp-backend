@@ -3,13 +3,11 @@ package handler
 import (
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
-
 	"github.com/gofiber/fiber/v2"
 
-	"gorestapi/internal/apperror"
-	"gorestapi/internal/dto"
-	"gorestapi/internal/logs"
+	"acsp/internal/apperror"
+	"acsp/internal/dto"
+	"acsp/internal/logs"
 )
 
 // @Summary SignUp
@@ -34,12 +32,12 @@ func (h *Handler) signUp(c *fiber.Ctx) error {
 		})
 	}
 
-	validate := validator.New()
-	if validationErr := validate.Struct(&input); validationErr != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"message": apperror.ErrBadInputBody,
-		})
-	}
+	// validate := validator.New()
+	// if validationErr := validate.Struct(&input); validationErr != nil {
+	// 	return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+	// 		"message": apperror.ErrBadInputBody,
+	// 	})
+	// }
 
 	id, err := h.services.Authorization.CreateUser(c.UserContext(), input)
 	if err != nil {

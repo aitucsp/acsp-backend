@@ -6,11 +6,11 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"gorestapi/internal/apperror"
-	"gorestapi/internal/dto"
-	"gorestapi/internal/logs"
-	"gorestapi/internal/model"
-	"gorestapi/internal/repository"
+	"acsp/internal/apperror"
+	"acsp/internal/dto"
+	"acsp/internal/logs"
+	"acsp/internal/model"
+	"acsp/internal/repository"
 
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -34,7 +34,7 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) (string, error) {
+func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) (int, error) {
 	logs.Log().Info("Creating a user...")
 
 	user := model.User{

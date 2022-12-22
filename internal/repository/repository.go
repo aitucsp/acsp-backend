@@ -3,35 +3,34 @@ package repository
 import (
 	"context"
 
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/jmoiron/sqlx"
 
-	"gorestapi/internal/model"
+	"acsp/internal/model"
 )
 
 type Authorization interface {
-	CreateUser(ctx context.Context, user model.User) (string, error)
+	CreateUser(ctx context.Context, user model.User) (int, error)
 	GetUser(ctx context.Context, username, password string) (*model.User, error)
-	GetById(ctx context.Context, id string) (*model.User, error)
+	GetByID(ctx context.Context, id int) (*model.User, error)
 	GetByEmail(ctx context.Context, email string) (*model.User, error)
 	GetAll(ctx context.Context) (*[]model.User, error)
 }
 
-type Projects interface {
-	Create(ctx context.Context, project model.Project) (string, error)
-	Update(ctx context.Context, userId string, projectId string, newTitle string) error
-	Delete(ctx context.Context, userId string, projectId string) error
-	GetAll(ctx context.Context) ([]model.Project, error)
-	GetByTitle(ctx context.Context, userId string, title string) (model.Project, error)
+type Articles interface {
+	Create(ctx context.Context, article model.Article) (int64, error)
+	Update(ctx context.Context, article model.Article) (int64, error)
+	Delete(ctx context.Context, userID int, articleID int) (int64, error)
+	GetAllByUserId(ctx context.Context, userID int) ([]model.Article, error)
 }
 
 type Repository struct {
 	Authorization
-	Projects
+	Articles
 }
 
-func NewRepository(db *mongo.Database) *Repository {
+func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Authorization: NewAuthMongo(db),
-		Projects:      NewProjectsDB(db),
+		Authorization: NewAuthPostgres(db),
+		Articles:      NewArticlesPostgres(db),
 	}
 }

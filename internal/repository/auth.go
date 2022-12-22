@@ -2,50 +2,52 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-
-	"gorestapi/internal/apperror"
-	"gorestapi/internal/logs"
-	"gorestapi/internal/model"
+	"acsp/internal/apperror"
+	"acsp/internal/config"
+	"acsp/internal/logs"
+	"acsp/internal/model"
 )
 
 type AuthPostgres struct {
-	db *mongo.Collection
+	db *sqlx.DB
 }
 
-func NewAuthMongo(db *mongo.Database) *AuthPostgres {
+func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 	return &AuthPostgres{
-		db: db.Collection("users"),
+		db: db,
 	}
 }
 
-func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) (string, error) {
+func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) (int, error) {
 	logs.Log().Info("Creating a user in database...")
-	result, err := r.db.InsertOne(ctx, user)
 
-	id := result.InsertedID.(primitive.ObjectID).Hex()
+	var id int
+	query := fmt.Sprintf("INSERT INTO %s (name, email, password) values ($1, $2, $3) RETURNING id",
+		config.UsersTable)
 
-	logs.Log().Info("Inserted a user with ID: %s", id)
-	if err != nil {
-		logs.Log().Info("User with this id already exists: %s", err.Error())
-		return "", apperror.ErrEmailAlreadyExists
+	row := r.db.QueryRow(query, user.Name, user.Email, user.Password)
+	if err := row.Scan(&id); err != nil {
+		logs.Log().Info(err.Error())
+		return 0, err
 	}
 
-	return id, err
+	return id, nil
 }
 
 func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*model.User, error) {
 	logs.Log().Info("Getting a user from database...")
+	var user model.User
 
-	var user *model.User
+	query := fmt.Sprintf("SELECT * FROM users WHERE email=$1 LIMIT 1")
 
-	if err := r.db.FindOne(ctx, bson.M{"email": email}).Decode(&user); err != nil {
-		logs.Log().Info("Error occurred: %s", apperror.ErrUserNotFound.Error())
+	err := r.db.Get(&user, query, email)
+	if err != nil {
+		logs.Log().Info(err.Error())
 		return &model.User{}, apperror.ErrUserNotFound
 	}
 
@@ -54,38 +56,43 @@ func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*mo
 		return &model.User{}, apperror.ErrPasswordMismatch
 	}
 
-	return user, nil
+	return &user, nil
 }
 
-func (r *AuthPostgres) GetById(ctx context.Context, id string) (*model.User, error) {
-	userId, err := primitive.ObjectIDFromHex(id)
-	var user *model.User
+func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error) {
+	var user model.User
 
-	err = r.db.FindOne(ctx, bson.M{"_id": userId}).Decode(&user)
+	query := fmt.Sprintf("SELECT * FROM users WHERE id=$1")
+	err := r.db.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Name, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	if err != nil {
+		logs.Log().Info(err.Error())
+		return nil, apperror.ErrUserNotFound
+	}
 
-	return user, err
+	return &user, nil
 }
 
 func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.User, error) {
-	var userFound *model.User
+	var user *model.User
 
-	err := r.db.FindOne(ctx, bson.M{"email": email}).Decode(&userFound)
+	query := fmt.Sprintf("SELECT * FROM users WHERE email=$1")
+	row := r.db.QueryRow(query, email)
 
-	return userFound, err
+	if err := row.Scan(&user); err != nil {
+		return nil, apperror.ErrUserNotFound
+	}
+
+	return user, nil
 }
 
 func (r *AuthPostgres) GetAll(ctx context.Context) (*[]model.User, error) {
 	var users []model.User
 
-	result, err := r.db.Find(ctx, bson.M{})
+	query := fmt.Sprintf("SELECT * FROM users")
 
-	for result.Next(ctx) {
-		var user model.User
-
-		if err = result.Decode(&user); err != nil {
-			return nil, err
-		}
-		users = append(users, user)
+	err := r.db.Select(&users, query)
+	if err != nil {
+		return nil, apperror.ErrUserNotFound
 	}
 
 	return &users, err

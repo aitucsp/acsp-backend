@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"acsp/infrastructure/config"
+	"acsp/internal/infrastructure/config"
 )
 
 // InitDB initializes DB

@@ -10,14 +10,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-const (
-	msHost        = "https://login.microsoftonline.com/"
-	msAuthParam   = "/oauth2/authorize"
-	msTokenParam  = "/oauth2/token"
-	msLogoutParam = "/oauth2/logout"
-	slackOauthURL = "https://slack.com/oauth/v2/authorize"
-)
-
 // Environment controls environment-dependent features.
 type Environment string
 
@@ -78,23 +70,9 @@ type DatabaseConfig struct {
 
 // BaseConfig controls common features.
 type BaseConfig struct {
-	Host           *HostConfig
-	DB             *DatabaseConfig
-	Logger         *LoggerConfig
-	FeatureToggles *FeatureTogglesConfig
-	Browser        *BrowserConfig
-	AmplitudeKey   string `envconfig:"AMPLITUDE_API_KEY"`
-	MessageQueue   *MessageQueueConfig
-	MessageHandler *MessageHandlerConfig
-	AWS            *AWSConfig
-}
-
-// BotConfig controls cmd/bot behavior.
-type BotConfig struct {
-	*BaseConfig
-	Server         ServerConfig
-	RequestLogging *RequestLoggingConfig
-	TestAPI        *TestAPIConfig
+	Host   *HostConfig
+	DB     *DatabaseConfig
+	Logger *LoggerConfig
 }
 
 // LoggerConfig controls logger behavior.
@@ -156,69 +134,6 @@ func newLoggerConfig(p Provider) (*LoggerConfig, error) {
 	}, nil
 }
 
-// FeatureTogglesConfig holds feature toggles.
-type FeatureTogglesConfig struct {
-	ReportScheduling       bool `envconfig:"FEATURETOGGLES_REPORTSCHEDULING"`
-	DeletedChannelsHandler bool `envconfig:"FEATURETOGGLES_DELETEDCHANNELS_HANDLER"`
-	PaymentIntroduction    bool `envconfig:"FEATURETOGGLES_PAYMENT_INTRODUCTION"`
-}
-
-func newFeatureTogglesConfig(p Provider) *FeatureTogglesConfig {
-	const prefix = "FEATURETOGGLES"
-
-	return &FeatureTogglesConfig{
-		ReportScheduling:       getBool(p, prefix+"_REPORTSCHEDULING", false),
-		DeletedChannelsHandler: getBool(p, prefix+"_DELETEDCHANNELS_HANDLER", false),
-		PaymentIntroduction:    getBool(p, prefix+"_PAYMENT_INTRODUCTION", false),
-	}
-}
-
-// BrowserConfig controls browser behavior.
-type BrowserConfig struct {
-	Headless              bool          `envconfig:"BROWSER_HEADLESS"`
-	RedirectLog           bool          `envconfig:"BROWSER_REDIRECTLOG"`
-	TabTimeout            time.Duration `envconfig:"BROWSER_TABTIMEOUT"`
-	MinActionTimeout      time.Duration `envconfig:"BROWSER_MINACTIONTIMEOUT"`
-	DefaultViewportHeight int64         `envconfig:"BROWSER_DEFAULTVIEWPORTHEIGHT"`
-	DefaultViewportWidth  int64         `envconfig:"BROWSER_DEFAULTVIEWPORTWIDTH"`
-	ViewportMargin        int64         `envconfig:"BROWSER_VIEWPORTMARGIN"`
-	DisplayDensity        float64       `envconfig:"BROWSER_DISPLAYDENSITY"`
-	ResourcesDirectory    string        `envconfig:"BROWSER_RESOURCESDIRECTORY"`
-	ScreenshotDelay       time.Duration `envconfig:"BROWSER_SCREENSHOTDELAY"`
-}
-
-func newBrowserConfig(p Provider) (*BrowserConfig, error) {
-	const prefix = "BROWSER"
-
-	minActionTimeout, err := time.ParseDuration(p.Get(prefix+"_MINACTIONTIMEOUT", "30s"))
-	if err != nil {
-		return nil, err
-	}
-
-	tabTimeout, err := time.ParseDuration(p.Get(prefix+"_TABTIMEOUT", "15m"))
-	if err != nil {
-		return nil, err
-	}
-
-	screenshotDelay, err := time.ParseDuration(p.Get(prefix+"_SCREENSHOTDELAY", "3s"))
-	if err != nil {
-		return nil, err
-	}
-
-	return &BrowserConfig{
-		Headless:              getBool(p, prefix+"_HEADLESS", true),
-		RedirectLog:           getBool(p, prefix+"_REDIRECTLOG", false),
-		TabTimeout:            tabTimeout,
-		MinActionTimeout:      minActionTimeout,
-		DefaultViewportHeight: getInt64(p, prefix+"_DEFAULTVIEWPORTHEIGHT", 720),
-		DefaultViewportWidth:  getInt64(p, prefix+"_DEFAULTVIEWPORTWIDTH", 1280),
-		ViewportMargin:        getInt64(p, prefix+"_VIEWPORTMARGIN", 64),
-		DisplayDensity:        getFloat64(p, prefix+"_DISPLAYDENSITY", 1.0),
-		ResourcesDirectory:    p.Get(prefix+"_RESOURCESDIRECTORY", "resources"),
-		ScreenshotDelay:       screenshotDelay,
-	}, nil
-}
-
 // RequestLoggingConfig controls request logging.
 type RequestLoggingConfig struct {
 	Enable   bool `envconfig:"REQUESTLOGGING_ENABLE"`
@@ -232,120 +147,6 @@ func newRequestLoggingConfig(p Provider) *RequestLoggingConfig {
 		Enable:   getBool(p, prefix+"_ENABLE", false),
 		DumpBody: getBool(p, prefix+"_DUMPBODY", false),
 	}
-}
-
-// TestAPIConfig controls test API behavior.
-type TestAPIConfig struct {
-	ClientKey string `envconfig:"TESTAPI_CLIENTKEY"`
-	Enable    bool   `envconfig:"TESTAPI_ENABLE"`
-}
-
-func newTestAPIConfig(p Provider) (*TestAPIConfig, error) {
-	const prefix = "TESTAPI"
-
-	e := getBool(p, prefix+"_ENABLE", false)
-
-	k := p.Get(prefix+"_CLIENTKEY", "")
-	if e && k == "" {
-		return nil, fmt.Errorf("either client key must be set or test API disabled")
-	}
-
-	return &TestAPIConfig{
-		ClientKey: k,
-		Enable:    e,
-	}, nil
-}
-
-// AWSConfig keeps what's needed to communicate w/ AWS.
-type AWSConfig struct {
-	AccessKeyID string `envconfig:"AWS_ACCESSKEYID"`
-	AccessKey   string `envconfig:"AWS_ACCESSKEY"`
-	Region      string `envconfig:"AWS_REGION"`
-	LogRequests bool   `envconfig:"AWS_LOGREQUESTS"`
-}
-
-func newAWSConfig(p Provider, m *MessageQueueConfig) (*AWSConfig, error) {
-	const prefix = "AWS"
-
-	i := p.Get(prefix+"_ACCESSKEYID", "")
-	k := p.Get(prefix+"_ACCESSKEY", "")
-	r := p.Get(prefix+"_REGION", "")
-	if m.Implementation == MQSQS && (i == "" || k == "" || r == "") {
-		return nil, fmt.Errorf("access key must be set")
-	}
-
-	return &AWSConfig{
-		AccessKeyID: p.Get(prefix+"_ACCESSKEYID", ""),
-		AccessKey:   p.Get(prefix+"_ACCESSKEY", ""),
-		Region:      p.Get(prefix+"_REGION", ""),
-		LogRequests: getBool(p, prefix+"_LOGREQUESTS", false),
-	}, nil
-}
-
-// MessageQueueImplementation controls message queue implementation.
-type MessageQueueImplementation string
-
-const (
-	// MQInProcess enables in-process implementation for testing purposes.
-	MQInProcess MessageQueueImplementation = "inProcess"
-	// MQSQS enables SQS implementation.
-	MQSQS MessageQueueImplementation = "sqs"
-)
-
-func parseImplementation(s string) (MessageQueueImplementation, error) {
-	switch MessageQueueImplementation(s) {
-	case MQInProcess, MQSQS:
-		return MessageQueueImplementation(s), nil
-
-	default:
-		return "", fmt.Errorf("unknown message queue implementation: %v", s)
-	}
-}
-
-// MessageQueueConfig controls MQ behavior.
-type MessageQueueConfig struct {
-	Implementation  MessageQueueImplementation `envconfig:"MQ_IMPLEMENTATION"`
-	URL             string                     `envconfig:"MQ_URL"`
-	BatchSize       uint                       `envconfig:"MQ_BATCHSIZE"`
-	PollingInterval time.Duration              `envconfig:"MQ_POLLINGINTERVAL"`
-}
-
-func newMessageQueueConfig(p Provider) (*MessageQueueConfig, error) {
-	const prefix = "MQ"
-	v := p.Get(prefix+"_IMPLEMENTATION", "")
-	if v == "" {
-		return nil, fmt.Errorf("message queue implementation must be set")
-	}
-
-	i, err := parseImplementation(v)
-	if err != nil {
-		return nil, err
-	}
-
-	return &MessageQueueConfig{
-		Implementation:  i,
-		URL:             p.Get(prefix+"_URL", ""),
-		BatchSize:       getUint(p, prefix+"BATCHSIZE", 8),
-		PollingInterval: getDuration(p, prefix+"POLLINGINTERVAL", 20*time.Second),
-	}, nil
-}
-
-// MessageHandlerConfig controls message handler behavior.
-type MessageHandlerConfig struct {
-	ConcurrencyLevel uint `envconfig:"MESSAGEHANDLER_CONCURRENCYLEVEL"`
-}
-
-func newMessageHandlerConfig(p Provider) (*MessageHandlerConfig, error) {
-	const prefix = "MESSAGEHANDLER"
-
-	l := getUint(p, prefix+"_CONCURRENCYLEVEL", 8)
-	if l == 0 {
-		return nil, fmt.Errorf("concurrency level must be set")
-	}
-
-	return &MessageHandlerConfig{
-		ConcurrencyLevel: l,
-	}, nil
 }
 
 // Provider represents a configuration store backed by a key-value mapping.
@@ -412,7 +213,6 @@ func NewBaseConfig(p Provider) (*BaseConfig, error) {
 			Timeout:        getInt(p, "TIMEOUT", 0),
 			UserIDHashCost: getInt(p, "USERID_HASH_COST", 10),
 		},
-		FeatureToggles: newFeatureTogglesConfig(p),
 	}
 
 	h, err := newHostConfig(p)
@@ -428,63 +228,6 @@ func NewBaseConfig(p Provider) (*BaseConfig, error) {
 	}
 
 	c.Logger = l
-
-	b, err := newBrowserConfig(p)
-	if err != nil {
-		return nil, err
-	}
-
-	c.Browser = b
-
-	m, err := newMessageQueueConfig(p)
-	if err != nil {
-		return nil, err
-	}
-
-	c.MessageQueue = m
-
-	mh, err := newMessageHandlerConfig(p)
-	if err != nil {
-		return nil, err
-	}
-
-	c.MessageHandler = mh
-
-	a, err := newAWSConfig(p, m)
-	if err != nil {
-		return nil, err
-	}
-
-	c.AWS = a
-
-	return &c, nil
-}
-
-// NewBotConfig creates a BotConfig.
-func NewBotConfig(p Provider) (*BotConfig, error) {
-	base, err := NewBaseConfig(p)
-	if err != nil {
-		return nil, err
-	}
-
-	c := BotConfig{
-		BaseConfig: base,
-		Server: ServerConfig{
-			Port:        getInt(p, "SERVER_PORT", 8080),
-			TLSPort:     getInt(p, "SERVER_TLSPORT", 443),
-			Host:        p.Get("SERVER_HOST", "localhost"),
-			Certificate: p.Get("SERVER_CERTIFICATE", "certificate.pem"),
-			Key:         p.Get("SERVER_KEY", "key.pem"),
-		},
-		RequestLogging: newRequestLoggingConfig(p),
-	}
-
-	t, err := newTestAPIConfig(p)
-	if err != nil {
-		return nil, err
-	}
-
-	c.TestAPI = t
 
 	return &c, nil
 }

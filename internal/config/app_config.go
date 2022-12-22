@@ -37,7 +37,7 @@ type (
 )
 
 func Init(configsDir string) (*Config, error) {
-	viper.SetConfigFile(".env")
+	viper.SetConfigFile("base.env")
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err
 	}

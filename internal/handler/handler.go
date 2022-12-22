@@ -1,14 +1,13 @@
 package handler
 
 import (
-	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/swagger"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"gorestapi/docs"
-	"gorestapi/internal/service"
+	"acsp/docs"
+
+	"acsp/internal/service"
 
 	_ "github.com/swaggo/files"
 )
@@ -34,23 +33,17 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 	// Define API routes
 	rest := app.Group("/api/v1")
 	{
-		projects := rest.Group("/projects", logger.New(), h.userIdentity)
+		articles := rest.Group("/articles", logger.New(), h.userIdentity)
 		{
-			projects.Post("/", h.createProject)
-			projects.Get("/", h.getAllProjects)
-			projects.Get("/:title", h.getProjectByTitle)
-			projects.Put("/:id", h.updateProject)
-			projects.Delete("/:id", h.deleteProject)
+			articles.Post("/", h.createArticle)
+			articles.Get("/", h.getAllProjects)
+			articles.Put("/:id", h.updateArticle)
+			articles.Delete("/:id", h.deleteArticle)
 		}
+
 	}
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
-
-	return app
-}
-
-func (h *Handler) InitPrometheusRoutes(app *fiber.App) *fiber.App {
-	app.Get("/api/v1/metrics", adaptor.HTTPHandler(promhttp.Handler()))
 
 	return app
 }
