@@ -4,11 +4,12 @@ import (
 	"context"
 	"time"
 
+	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
 	"acsp/internal/apperror"
 	"acsp/internal/dto"
-	"acsp/internal/logs"
+	"acsp/internal/logging"
 	"acsp/internal/model"
 	"acsp/internal/repository"
 
@@ -35,23 +36,31 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 }
 
 func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) (int, error) {
-	logs.Log().Info("Creating a user...")
+	l := logging.LoggerFromContext(ctx)
+	l.Info("Creating a user...")
+
+	generatedHash, err := generatePasswordHash(userDto.Password)
+	if err != nil {
+		l.Error("Error occurred when generating hash password", zap.Error(err))
+		return -1, err
+	}
 
 	user := model.User{
 		Name:     userDto.Name,
 		Email:    userDto.Email,
-		Password: generatePasswordHash(userDto.Password),
+		Password: generatedHash,
 	}
 
 	return s.repo.CreateUser(ctx, user)
 }
 
 func (s *AuthService) GenerateToken(ctx context.Context, email, password string) (string, error) {
-	logs.Log().Info("Generating a token...")
+	l := logging.LoggerFromContext(ctx)
+	l.Info("Generating a token...")
 
 	user, err := s.repo.GetUser(ctx, email, password)
 	if err != nil {
-		logs.Log().Warn("Error happened: %s", err.Error())
+		l.Warn("Error when getting a user", zap.Error(err))
 		return "", err
 	}
 
@@ -88,11 +97,11 @@ func (s *AuthService) ParseToken(accessToken string) (string, error) {
 	return claims.UserId, nil
 }
 
-func generatePasswordHash(password string) string {
+func generatePasswordHash(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		logs.Log().Fatalf("Error occurred when generating a hash of a password")
+		return "", err
 	}
 
-	return string(bytes)
+	return string(bytes), nil
 }

@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/go-playground/validator/v10 v10.11.1
+	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gofiber/fiber/v2 v2.40.1
 	github.com/gofiber/swagger v0.1.8
 	github.com/golang-jwt/jwt/v4 v4.4.3
@@ -12,6 +13,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.2.0
 	github.com/magiconair/properties v1.8.7
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/viper v1.14.0
 	github.com/stretchr/testify v1.8.1
 	github.com/swaggo/files v1.0.0
@@ -19,6 +21,7 @@ require (
 	go.mongodb.org/mongo-driver v1.11.1
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
 
 require (
@@ -48,14 +51,12 @@ require (
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.41.0 // indirect

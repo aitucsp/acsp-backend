@@ -7,7 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"acsp/internal/config"
-	"acsp/internal/logs"
 	"acsp/internal/model"
 )
 
@@ -22,8 +21,6 @@ func NewArticlesPostgres(db *sqlx.DB) *ArticlesDatabase {
 }
 
 func (a *ArticlesDatabase) Create(ctx context.Context, article model.Article) (int64, error) {
-	logs.Log().Info("Creating an article in database...")
-
 	query := fmt.Sprintf("INSERT INTO articles (user_id, topic, description) VALUES ($1, $2, $3) RETURNING id")
 
 	result, err := a.db.Exec(query, article.Author.ID, article.Topic, article.Description)
@@ -40,8 +37,6 @@ func (a *ArticlesDatabase) Create(ctx context.Context, article model.Article) (i
 }
 
 func (a *ArticlesDatabase) Update(ctx context.Context, article model.Article) (int64, error) {
-	logs.Log().Info("Updating an article in database...")
-
 	query := fmt.Sprintf("UPDATE $1 SET topic = $2, description = $3, updated_at = now() WHERE id = $4 AND user_id = $5")
 
 	result, err := a.db.Exec(query, config.ArticlesTable, article.Topic, article.Description, article.ID, article.Author.ID)
@@ -58,8 +53,6 @@ func (a *ArticlesDatabase) Update(ctx context.Context, article model.Article) (i
 }
 
 func (a *ArticlesDatabase) Delete(ctx context.Context, userID int, articleID int) (int64, error) {
-	logs.Log().Info("Deleting an article from database...")
-
 	query := fmt.Sprintf("DELETE FROM $1 WHERE id = $2 AND user_id = $3")
 
 	result, err := a.db.Exec(query, config.ArticlesTable, articleID, userID)
@@ -76,8 +69,6 @@ func (a *ArticlesDatabase) Delete(ctx context.Context, userID int, articleID int
 }
 
 func (a *ArticlesDatabase) GetAllByUserId(ctx context.Context, userID int) ([]model.Article, error) {
-	logs.Log().Info("Getting articles by user id...")
-
 	var articles []model.Article
 	query := fmt.Sprintf("SELECT * FROM articles WHERE user_id = $1")
 

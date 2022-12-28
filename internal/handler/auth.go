@@ -7,7 +7,7 @@ import (
 
 	"acsp/internal/apperror"
 	"acsp/internal/dto"
-	"acsp/internal/logs"
+	"acsp/internal/logging"
 )
 
 // @Summary SignUp
@@ -23,7 +23,8 @@ import (
 // @Failure default {object} map[string]interface{}
 // @Router /auth/sign-up [post]
 func (h *Handler) signUp(c *fiber.Ctx) error {
-	logs.Log().Info("Signing up... ")
+	l := logging.LoggerFromContext(c.UserContext())
+	l.Info("Signing up... ")
 
 	var input dto.CreateUser
 	if err := c.BodyParser(&input); err != nil {
@@ -69,7 +70,8 @@ type signInInput struct {
 // @Failure default {object} map[string]interface{}
 // @Router /auth/sign-in [post]
 func (h *Handler) signIn(c *fiber.Ctx) error {
-	logs.Log().Info("Signing in...")
+	l := logging.LoggerFromContext(c.UserContext())
+	l.Info("Signing in...")
 
 	var input signInInput
 	if err := c.BodyParser(&input); err != nil {

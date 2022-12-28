@@ -12,9 +12,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"go.uber.org/zap"
 
 	"acsp/internal/config"
 	"acsp/internal/handler"
+	"acsp/internal/logging"
 	"acsp/internal/logs"
 	"acsp/internal/repository"
 	"acsp/internal/service"
@@ -35,10 +37,21 @@ const (
 // @in header
 // @name Authorization
 func main() {
-	// Initializing a sugared logger
-	err := logs.InitLogger()
+	fallbackLogger := log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile|log.LUTC|log.Lmsgprefix)
+
+	baseProvider, err := config.NewDotenvProvider("base.env")
 	if err != nil {
-		log.Fatalf("Logger error: %s", err.Error())
+		fallbackLogger.Println("couldn't create config provider:", err)
+
+		return
+	}
+
+	configProvider := config.NewProviderChain(baseProvider)
+	conf, err := config.NewBaseConfig(configProvider)
+	if err != nil {
+		fallbackLogger.Println("couldn't create config:", err)
+
+		return
 	}
 
 	// Initializing the application configuration
@@ -48,21 +61,42 @@ func main() {
 		os.Exit(1)
 	}
 
+	appLogger, syncLogger, err := logging.NewBuilder().
+		WithFallbackLogger(fallbackLogger).
+		WithLoggerConfig(conf.Logger).
+		WithHostConfig(conf.Host).
+		NewLogger()
+
+	defer syncLogger()
+
+	pid := os.Getpid()
+	appLogger = appLogger.With(zap.Int("pid", pid))
+
+	hostname, err := os.Hostname()
+	if err != nil {
+		appLogger.Error("couldn't get hostname", zap.Error(err))
+	} else {
+		appLogger = appLogger.With(zap.String("host", hostname))
+	}
+
+	appLogger.Info("starting")
+
 	// Initializing fiber configuration
 	fiberConfig := config.FiberConfig(appConfig)
 
 	postgresConfig, err := config.LoadConfig(".")
 	if err != nil {
-		logs.Log().Fatalf("Error occurred when initializing database config: %s", err)
+		appLogger.Fatal("Error occurred when initializing database config: ", zap.Error(err))
 	}
 
 	// Declaring a context with timeout
 	ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutSeconds*time.Second)
+	ctx = logging.ContextWithLogger(ctx, appLogger)
 
-	// Initializing mongo db client
+	// Initializing postgresql database client
 	postgresClient, err := config.NewClientPostgres(ctx, cancel, postgresConfig)
 	if err != nil {
-		logs.Log().Error(err.Error())
+		appLogger.Error("Error when initializing Postgres Client", zap.Error(err))
 		os.Exit(1)
 	}
 
@@ -75,7 +109,7 @@ func main() {
 
 	appHandler.InitRoutesFiber(app)
 
-	go start(app, appConfig.HTTP.Port)
+	go start(app, appConfig.HTTP.Port, appLogger)
 
 	stopChannel, closeChannel := createChannel()
 	defer closeChannel()
@@ -84,8 +118,8 @@ func main() {
 	shutdown(ctx, app)
 }
 
-func start(server *fiber.App, port string) {
-	logs.Log().Info("Application started")
+func start(server *fiber.App, port string, appLogger *zap.Logger) {
+	appLogger.Info("Application started")
 	if err := server.Listen(":" + port); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		panic(err)
 	} else {

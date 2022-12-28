@@ -9,7 +9,7 @@ import (
 
 	"acsp/internal/apperror"
 	"acsp/internal/dto"
-	"acsp/internal/logs"
+	"acsp/internal/logging"
 	"acsp/internal/validation"
 )
 
@@ -45,13 +45,14 @@ func (h *Handler) createArticle(c *fiber.Ctx) error {
 		})
 	}
 
-	// validate := validator.New()
-	// if err := validate.Struct(input); err != nil {
-	// 	return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-	// 		"errors":  true,
-	// 		"message": validation.ValidatorErrors(err),
-	// 	})
-	// }
+	validate := validator.New()
+	err = validate.Struct(input)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": validation.ValidatorErrors(err),
+		})
+	}
 
 	id, err := h.services.Articles.Create(c.UserContext(), userId, input)
 	if err != nil {
@@ -81,7 +82,8 @@ func (h *Handler) createArticle(c *fiber.Ctx) error {
 // @Failure default {object} map[string]interface{}
 // @Router /api/v1/articles [get]
 func (h *Handler) getAllProjects(c *fiber.Ctx) error {
-	logs.Log().Info("Getting all articles... ")
+	l := logging.LoggerFromContext(c.UserContext())
+	l.Info("Getting all articles... ")
 
 	userId, err := getUserId(c)
 	if err != nil {
@@ -121,7 +123,8 @@ func (h *Handler) getAllProjects(c *fiber.Ctx) error {
 // @Failure default {object} map[string]interface{}
 // @Router /api/v1/title/:id [put]
 func (h *Handler) updateArticle(c *fiber.Ctx) error {
-	log.Println("Updating a project... ")
+	l := logging.LoggerFromContext(c.UserContext())
+	l.Info("Updating a project... ")
 
 	userId, err := getUserId(c)
 	if err != nil {
@@ -178,7 +181,8 @@ func (h *Handler) updateArticle(c *fiber.Ctx) error {
 // @Failure default {object} map[string]interface{}
 // @Router /api/v1/article/:id [delete]
 func (h *Handler) deleteArticle(c *fiber.Ctx) error {
-	logs.Log().Info("Deleting an article")
+	l := logging.LoggerFromContext(c.UserContext())
+	l.Info("Deleting an article")
 
 	userId, err := getUserId(c)
 	if err != nil {

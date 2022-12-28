@@ -50,7 +50,7 @@ func (h *Handler) userIdentity(c *fiber.Ctx) error {
 
 func getUserId(c *fiber.Ctx) (string, error) {
 	id := c.GetRespHeader(userCtx, "")
-	if len(id) == 0 {
+	if len(id) == 0 || id == "" {
 		return "", apperror.ErrUserIDNotFound
 	}
 
