@@ -54,7 +54,7 @@ func (h *Handler) createArticle(c *fiber.Ctx) error {
 		})
 	}
 
-	id, err := h.services.Articles.Create(c.UserContext(), userId, input)
+	err = h.services.Articles.Create(c.UserContext(), userId, input)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -63,9 +63,8 @@ func (h *Handler) createArticle(c *fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(fiber.Map{
-		"errors":    false,
-		"message":   nil,
-		"projectId": id,
+		"errors":  false,
+		"message": "Created article",
 	})
 }
 
@@ -81,7 +80,7 @@ func (h *Handler) createArticle(c *fiber.Ctx) error {
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
 // @Router /api/v1/articles [get]
-func (h *Handler) getAllProjects(c *fiber.Ctx) error {
+func (h *Handler) getAllArticles(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all articles... ")
 
@@ -158,7 +157,7 @@ func (h *Handler) updateArticle(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.services.Articles.Update(c.UserContext(), userId, input)
+	err = h.services.Articles.Update(c.UserContext(), userId, input)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"errors":  true,
@@ -166,7 +165,7 @@ func (h *Handler) updateArticle(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{"result": result})
+	return c.Status(http.StatusOK).JSON(fiber.Map{"message": "Article updated"})
 }
 
 // @Summary Delete an article by id
@@ -200,7 +199,7 @@ func (h *Handler) deleteArticle(c *fiber.Ctx) error {
 		})
 	}
 
-	result, err := h.services.Articles.Delete(c.UserContext(), userId, id)
+	err = h.services.Articles.Delete(c.UserContext(), userId, id)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -208,5 +207,5 @@ func (h *Handler) deleteArticle(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(http.StatusNoContent).JSON(fiber.Map{"result": result})
+	return c.Status(http.StatusNoContent).JSON(fiber.Map{"message": "Article deleted"})
 }

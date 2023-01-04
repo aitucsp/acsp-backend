@@ -18,11 +18,11 @@ func NewArticlesService(repo repository.Articles, usersRepo repository.Authoriza
 	return &ArticlesService{repo: repo, usersRepo: usersRepo}
 }
 
-func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.CreateArticle) (int64, error) {
+func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.CreateArticle) error {
 	userId, _ := strconv.Atoi(userID)
 	user, err := s.usersRepo.GetByID(ctx, userId)
 	if err != nil {
-		return -1, err
+		return err
 	}
 
 	project := model.Article{
@@ -34,11 +34,11 @@ func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.Cre
 	return s.repo.Create(ctx, project)
 }
 
-func (s *ArticlesService) Update(ctx context.Context, userID string, articleDto dto.UpdateArticle) (int64, error) {
+func (s *ArticlesService) Update(ctx context.Context, userID string, articleDto dto.UpdateArticle) error {
 	userId, _ := strconv.Atoi(userID)
 	user, err := s.usersRepo.GetByID(ctx, userId)
 	if err != nil {
-		return -1, err
+		return err
 	}
 
 	article := model.Article{
@@ -56,8 +56,9 @@ func (s *ArticlesService) GetAll(ctx context.Context, userID string) ([]model.Ar
 	return s.repo.GetAllByUserId(ctx, userId)
 }
 
-func (s *ArticlesService) Delete(ctx context.Context, userID string, projectId string) (int64, error) {
+func (s *ArticlesService) Delete(ctx context.Context, userID string, projectId string) error {
 	userId, _ := strconv.Atoi(userID)
 	projectID, _ := strconv.Atoi(projectId)
+
 	return s.repo.Delete(ctx, userId, projectID)
 }

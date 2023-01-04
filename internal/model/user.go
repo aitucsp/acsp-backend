@@ -11,4 +11,5 @@ type User struct {
 	Password  string `json:"password" db:"password"`
 	CreatedAt string `json:"-" db:"created_at"`
 	UpdatedAt string `json:"-" db:"updated_at"`
+	Roles     []Role `json`
 }

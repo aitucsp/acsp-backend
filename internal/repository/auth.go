@@ -25,21 +25,20 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 	}
 }
 
-func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) (int, error) {
+func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
 	l := logging.LoggerFromContext(ctx).With(zap.String("email", user.Email))
 
-	var id int
 	query := fmt.Sprintf("INSERT INTO %s (name, email, password) values ($1, $2, $3) RETURNING id",
 		config.UsersTable)
 
-	row := r.db.QueryRow(query, user.Name, user.Email, user.Password)
-	if err := row.Scan(&id); err != nil {
+	_, err := r.db.Query(query, user.Name, user.Email, user.Password)
+	if err != nil {
 		l.Error("Error when creating user in database", zap.Error(err))
 
-		return 0, err
+		return err
 	}
 
-	return id, nil
+	return nil
 }
 
 func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*model.User, error) {
@@ -73,7 +72,7 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 	query := fmt.Sprintf("SELECT * FROM users WHERE id=$1")
 	err := r.db.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Name, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
-		l.Error("Error getting user from database", zap.Error(err))
+		l.Error("Error getting user by id from database", zap.Error(err))
 
 		return nil, apperror.ErrUserNotFound
 	}

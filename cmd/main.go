@@ -94,7 +94,7 @@ func main() {
 	ctx = logging.ContextWithLogger(ctx, appLogger)
 
 	// Initializing postgresql database client
-	postgresClient, err := config.NewClientPostgres(ctx, cancel, postgresConfig)
+	dbClient, err := config.NewClientPostgres(ctx, cancel, postgresConfig)
 	if err != nil {
 		appLogger.Error("Error when initializing Postgres Client", zap.Error(err))
 		os.Exit(1)
@@ -103,7 +103,7 @@ func main() {
 	app := fiber.New(fiberConfig)
 	app.Use(logger.New())
 
-	appRepository := repository.NewRepository(postgresClient)
+	appRepository := repository.NewRepository(dbClient)
 	appService := service.NewService(appRepository)
 	appHandler := handler.NewHandler(appService)
 
@@ -114,8 +114,8 @@ func main() {
 	stopChannel, closeChannel := createChannel()
 	defer closeChannel()
 
-	logs.Log().Info("Notified ", <-stopChannel)
-	shutdown(ctx, app)
+	appLogger.Info("Notified ", zap.Any("Channel ", <-stopChannel))
+	shutdown(ctx, app, appLogger)
 }
 
 func start(server *fiber.App, port string, appLogger *zap.Logger) {
@@ -123,7 +123,7 @@ func start(server *fiber.App, port string, appLogger *zap.Logger) {
 	if err := server.Listen(":" + port); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		panic(err)
 	} else {
-		logs.Log().Info("application stopped gracefully")
+		appLogger.Info("Application stopped gracefully")
 	}
 }
 
@@ -136,13 +136,13 @@ func createChannel() (chan os.Signal, func()) {
 	}
 }
 
-func shutdown(ctx context.Context, app *fiber.App) {
+func shutdown(ctx context.Context, app *fiber.App, appLogger *zap.Logger) {
 	ctx, cancel := context.WithTimeout(ctx, contextTimeoutSeconds*time.Second)
 	defer cancel()
 
 	if err := app.Shutdown(); err != nil {
 		panic(err)
 	} else {
-		logs.Log().Info("Application shutdown")
+		appLogger.Info("Application shutdown")
 	}
 }

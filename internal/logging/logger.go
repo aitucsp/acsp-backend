@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"syscall"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
@@ -120,7 +121,7 @@ func (b *Builder) NewLogger() (*zap.Logger, func(), error) {
 
 	syncLogger := func() {
 		err := logger.Sync()
-		if err != nil {
+		if err != nil && !errors.Is(err, syscall.ENOTTY) {
 			b.fallbackLogger.Println("couldn't sync logger:", err)
 		}
 	}

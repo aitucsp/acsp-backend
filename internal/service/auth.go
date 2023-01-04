@@ -35,14 +35,15 @@ func NewAuthService(repo repository.Authorization) *AuthService {
 	return &AuthService{repo: repo}
 }
 
-func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) (int, error) {
+func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) error {
 	l := logging.LoggerFromContext(ctx)
 	l.Info("Creating a user...")
 
 	generatedHash, err := generatePasswordHash(userDto.Password)
 	if err != nil {
 		l.Error("Error occurred when generating hash password", zap.Error(err))
-		return -1, err
+
+		return err
 	}
 
 	user := model.User{

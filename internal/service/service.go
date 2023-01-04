@@ -13,16 +13,19 @@ import (
 //go:generate mockgen -source=service.go -destination=mocks/mock.go
 
 type Authorization interface {
-	CreateUser(ctx context.Context, dto dto.CreateUser) (int, error)
+	CreateUser(ctx context.Context, dto dto.CreateUser) error
 	GenerateToken(ctx context.Context, email, password string) (string, error)
 	ParseToken(token string) (string, error)
 }
 
+type Roles interface {
+}
+
 type Articles interface {
-	Create(ctx context.Context, userID string, dto dto.CreateArticle) (int64, error)
+	Create(ctx context.Context, userID string, dto dto.CreateArticle) error
 	GetAll(ctx context.Context, userID string) ([]model.Article, error)
-	Update(ctx context.Context, userID string, article dto.UpdateArticle) (int64, error)
-	Delete(ctx context.Context, userID string, projectId string) (int64, error)
+	Update(ctx context.Context, userID string, article dto.UpdateArticle) error
+	Delete(ctx context.Context, userID string, projectId string) error
 }
 
 type Service struct {

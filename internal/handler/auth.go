@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 
 	"acsp/internal/apperror"
@@ -33,23 +34,21 @@ func (h *Handler) signUp(c *fiber.Ctx) error {
 		})
 	}
 
-	// validate := validator.New()
-	// if validationErr := validate.Struct(&input); validationErr != nil {
-	// 	return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-	// 		"message": apperror.ErrBadInputBody,
-	// 	})
-	// }
+	validate := validator.New()
+	if validationErr := validate.Struct(&input); validationErr != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"message": apperror.ErrBadInputBody,
+		})
+	}
 
-	id, err := h.services.Authorization.CreateUser(c.UserContext(), input)
+	err := h.services.Authorization.CreateUser(c.UserContext(), input)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{
-		"id": id,
-	})
+	return c.Status(http.StatusOK).JSON(fiber.Map{})
 }
 
 type signInInput struct {

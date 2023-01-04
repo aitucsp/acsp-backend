@@ -36,7 +36,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		articles := rest.Group("/articles", logger.New(), h.userIdentity)
 		{
 			articles.Post("/", h.createArticle)
-			articles.Get("/", h.getAllProjects)
+			articles.Get("/", h.getAllArticles)
 			articles.Put("/:id", h.updateArticle)
 			articles.Delete("/:id", h.deleteArticle)
 		}
