@@ -2,7 +2,6 @@ package handler
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/swagger"
 
 	"acsp/docs"
@@ -33,12 +32,20 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 	// Define API routes
 	rest := app.Group("/api/v1")
 	{
-		articles := rest.Group("/articles", logger.New(), h.userIdentity)
+		articles := rest.Group("/articles", h.userIdentity)
 		{
-			articles.Post("/", h.createArticle)
-			articles.Get("/", h.getAllArticles)
-			articles.Put("/:id", h.updateArticle)
-			articles.Delete("/:id", h.deleteArticle)
+			articles.Post("/", h.createArticle)      // create an article
+			articles.Get("/", h.getAllArticles)      // get all articles of user
+			articles.Get("/:id", h.getArticleByID)   // get article by id
+			articles.Put("/:id", h.updateArticle)    // update an article
+			articles.Delete("/:id", h.deleteArticle) // delete an article
+
+			comments := articles.Group("/:id/comments")
+			{
+				comments.Post("/", h.commentArticle)                       // comment an article
+				comments.Get("/", h.getCommentsByArticleID)                // get all comments by article id
+				comments.Post("/:commentID/replies", h.replyToCommentByID) // reply to comment by id and article id
+			}
 		}
 
 	}

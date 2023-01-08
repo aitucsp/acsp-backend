@@ -70,7 +70,15 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 	var user model.User
 
 	query := fmt.Sprintf("SELECT * FROM users WHERE id=$1")
-	err := r.db.QueryRow(query, id).Scan(&user.ID, &user.Email, &user.Name, &user.Password, &user.CreatedAt, &user.UpdatedAt)
+	err := r.db.
+		QueryRow(query, id).
+		Scan(&user.ID,
+			&user.Email,
+			&user.Name,
+			&user.Password,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+			&user.Roles)
 	if err != nil {
 		l.Error("Error getting user by id from database", zap.Error(err))
 
@@ -81,20 +89,25 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 }
 
 func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.User, error) {
-	l := logging.LoggerFromContext(ctx).With(zap.String("userID", email))
+	l := logging.LoggerFromContext(ctx)
 
-	var user *model.User
+	var user model.User
 
 	query := fmt.Sprintf("SELECT * FROM users WHERE email=$1")
 	row := r.db.QueryRow(query, email)
 
-	if err := row.Scan(&user); err != nil {
-		l.Error("Error when getting user by email", zap.Error(err))
-
+	if err := row.Scan(&user.ID,
+		&user.Email,
+		&user.Name,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.Roles); err != nil {
+		l.Error("Error", zap.Error(err))
 		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 func (r *AuthPostgres) GetAll(ctx context.Context) (*[]model.User, error) {

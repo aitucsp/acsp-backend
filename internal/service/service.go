@@ -24,8 +24,13 @@ type Roles interface {
 type Articles interface {
 	Create(ctx context.Context, userID string, dto dto.CreateArticle) error
 	GetAll(ctx context.Context, userID string) ([]model.Article, error)
-	Update(ctx context.Context, userID string, article dto.UpdateArticle) error
+	GetByID(ctx context.Context, articleID, userID string) (model.Article, error)
+	Update(ctx context.Context, articleID string, userID string, article dto.UpdateArticle) error
 	Delete(ctx context.Context, userID string, projectId string) error
+	CommentByID(ctx context.Context, articleID, userID string, comment dto.CreateComment) error
+	GetCommentsByArticleID(ctx context.Context, articleID string) ([]model.Comment, error)
+	ReplyToCommentByArticleIDAndCommentID(
+		ctx context.Context, articleID string, userID string, parentCommentID string, comment dto.ReplyToComment) error
 }
 
 type Service struct {

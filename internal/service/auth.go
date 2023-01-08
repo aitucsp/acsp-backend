@@ -39,6 +39,11 @@ func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) er
 	l := logging.LoggerFromContext(ctx)
 	l.Info("Creating a user...")
 
+	user, err := s.repo.GetByEmail(ctx, userDto.Email)
+	if user != nil || err == nil {
+		return apperror.ErrEmailAlreadyExists
+	}
+
 	generatedHash, err := generatePasswordHash(userDto.Password)
 	if err != nil {
 		l.Error("Error occurred when generating hash password", zap.Error(err))
@@ -46,13 +51,13 @@ func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) er
 		return err
 	}
 
-	user := model.User{
+	newUser := model.User{
 		Name:     userDto.Name,
 		Email:    userDto.Email,
 		Password: generatedHash,
 	}
 
-	return s.repo.CreateUser(ctx, user)
+	return s.repo.CreateUser(ctx, newUser)
 }
 
 func (s *AuthService) GenerateToken(ctx context.Context, email, password string) (string, error) {

@@ -1,5 +1,32 @@
 basePath: /
 definitions:
+  dto.CreateArticle:
+    properties:
+      description:
+        type: string
+      topic:
+        type: string
+    required:
+    - description
+    - topic
+    type: object
+  dto.CreateComment:
+    properties:
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  dto.UpdateArticle:
+    properties:
+      description:
+        type: string
+      topic:
+        type: string
+    required:
+    - description
+    - topic
+    type: object
   handler.signInInput:
     properties:
       email:
@@ -9,18 +36,6 @@ definitions:
     required:
     - email
     - password
-    type: object
-  model.Article:
-    properties:
-      description:
-        type: string
-      id:
-        type: integer
-      topic:
-        type: string
-    required:
-    - description
-    - topic
     type: object
   model.User:
     properties:
@@ -119,7 +134,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.Article'
+          $ref: '#/definitions/dto.CreateArticle'
       produces:
       - application/json
       responses:
@@ -152,12 +167,57 @@ paths:
       summary: Create an article
       tags:
       - articles
-  /api/v1/title/:id:
+  /api/v1/articles/:id:
+    get:
+      consumes:
+      - application/json
+      description: Get articles by id and user id
+      operationId: get-article-by-id-and-user-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get article by id and user id
+      tags:
+      - articles
     put:
       consumes:
       - application/json
       description: Update data of article
       operationId: update-title-by-id
+      parameters:
+      - description: project information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateArticle'
       produces:
       - application/json
       responses:
@@ -184,6 +244,89 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Update an article by id
+      tags:
+      - articles
+  /api/v1/articles/:id/comments:
+    get:
+      consumes:
+      - application/json
+      description: Get all comments of an article
+      operationId: get-all-comments-by-article-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all comments by article id
+      tags:
+      - articles
+    post:
+      consumes:
+      - application/json
+      description: Method for commenting an article by id and user id
+      operationId: project-id
+      parameters:
+      - description: comment information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateComment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Comment an article
       tags:
       - articles
   /auth/sign-in:

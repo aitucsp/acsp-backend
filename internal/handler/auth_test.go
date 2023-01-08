@@ -2,9 +2,7 @@ package handler
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
-	"errors"
 	"io"
 	"net/http/httptest"
 	"testing"
@@ -43,9 +41,6 @@ func TestHandler_signUp(t *testing.T) {
 				Name:     "testname",
 				Password: "qwerty123",
 			},
-			mockBehavior: func(r *mockService.MockAuthorization, user model.User) {
-				r.EXPECT().CreateUser(context.Background(), user).Return("1", nil)
-			},
 			expectedStatusCode:   200,
 			expectedResponseBody: `{"id":"1"}`,
 		},
@@ -60,9 +55,6 @@ func TestHandler_signUp(t *testing.T) {
 				Email:    "eldos2020@gmail.com",
 				Name:     "testname",
 				Password: "qwerty123",
-			},
-			mockBehavior: func(r *mockService.MockAuthorization, user model.User) {
-				r.EXPECT().CreateUser(context.Background(), user).Return("0", errors.New("something went wrong"))
 			},
 			expectedStatusCode:   500,
 			expectedResponseBody: `{"message":"something went wrong"}`,

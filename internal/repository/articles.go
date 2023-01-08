@@ -25,11 +25,11 @@ func NewArticlesPostgres(db *sqlx.DB) *ArticlesDatabase {
 func (a *ArticlesDatabase) Create(ctx context.Context, article model.Article) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", article.ID))
 
-	query := fmt.Sprint("INSERT INTO $1 (user_id, topic, description) VALUES ($2, $3, $4) RETURNING id")
+	query := fmt.Sprintf("INSERT INTO %s (user_id, topic, description) VALUES ($1, $2, $3) RETURNING id", config.ArticlesTable)
 
-	_, err := a.db.Exec(query, config.ArticlesTable, article.Author.ID, article.Topic, article.Description)
+	_, err := a.db.Exec(query, article.Author.ID, article.Topic, article.Description)
 	if err != nil {
-		l.Error("Error when getting the user from database", zap.Error(err))
+		l.Error("Error when creating the article in database", zap.Error(err))
 
 		return err
 	}
@@ -40,9 +40,10 @@ func (a *ArticlesDatabase) Create(ctx context.Context, article model.Article) er
 func (a *ArticlesDatabase) Update(ctx context.Context, article model.Article) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", article.ID))
 
-	query := fmt.Sprintf("UPDATE $1 SET topic = $2, description = $3, updated_at = now() WHERE id = $4 AND user_id = $5")
+	query := fmt.Sprintf("UPDATE %s SET topic = $1, description = $2, updated_at = now() WHERE id = $3 AND user_id = $4",
+		config.ArticlesTable)
 
-	_, err := a.db.Exec(query, config.ArticlesTable, article.Topic, article.Description, article.ID, article.Author.ID)
+	_, err := a.db.Exec(query, article.Topic, article.Description, article.ID, article.Author.ID)
 	if err != nil {
 		l.Error("Error when update the article in database", zap.Error(err))
 
@@ -53,9 +54,9 @@ func (a *ArticlesDatabase) Update(ctx context.Context, article model.Article) er
 }
 
 func (a *ArticlesDatabase) Delete(ctx context.Context, userID int, articleID int) error {
-	query := fmt.Sprintf("DELETE FROM $1 WHERE id = $2 AND user_id = $3")
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND user_id = $2", config.ArticlesTable)
 
-	_, err := a.db.Exec(query, config.ArticlesTable, articleID, userID)
+	_, err := a.db.Exec(query, articleID, userID)
 	if err != nil {
 		return err
 	}
@@ -63,14 +64,76 @@ func (a *ArticlesDatabase) Delete(ctx context.Context, userID int, articleID int
 	return nil
 }
 
+func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleID, userID int) (model.Article, error) {
+	var article model.Article
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1 AND user_id = $2",
+		config.ArticlesTable)
+
+	err := a.db.Get(&article, query, articleID, userID)
+	if err != nil {
+		return model.Article{}, err
+	}
+
+	return article, nil
+}
+
 func (a *ArticlesDatabase) GetAllByUserId(ctx context.Context, userID int) ([]model.Article, error) {
 	var articles []model.Article
-	query := fmt.Sprintf("SELECT * FROM $1 WHERE user_id = $2")
+	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", config.ArticlesTable)
 
-	err := a.db.Select(&articles, query, config.RolesTable, userID)
+	err := a.db.Select(&articles, query, userID)
 	if err != nil {
 		return []model.Article{}, err
 	}
 
 	return articles, nil
+}
+
+func (a *ArticlesDatabase) CreateComment(ctx context.Context, articleID, userID int, comment model.Comment) error {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", articleID), zap.Int("userID", userID))
+
+	query := fmt.Sprintf("INSERT INTO %s (user_id, article_id, text) VALUES ($1, $2, $3) RETURNING id",
+		config.CommentsTable)
+
+	_, err := a.db.Exec(query, userID, articleID, comment.Text)
+	if err != nil {
+		l.Error("Error when creating the comment in database", zap.Error(err))
+
+		return err
+	}
+
+	return nil
+}
+
+func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID int) ([]model.Comment, error) {
+	var comments []model.Comment
+	query := fmt.Sprintf("SELECT * FROM %s WHERE article_id = $1", config.CommentsTable)
+
+	err := a.db.Select(&comments, query, articleID)
+	if err != nil {
+		return []model.Comment{}, err
+	}
+
+	return comments, nil
+}
+
+func (a *ArticlesDatabase) ReplyToComment(ctx context.Context, articleID, userID, parentCommentID int, comment model.Comment) error {
+	l := logging.LoggerFromContext(ctx).With(
+		zap.Int("articleID", articleID),
+		zap.Int("userID", userID),
+		zap.Int("parentCommentID", parentCommentID),
+	)
+
+	query := fmt.Sprintf("INSERT INTO %s (user_id, article_id, parent_id, text) VALUES ($1, $2, $3, $4) RETURNING id",
+		config.CommentsTable)
+
+	_, err := a.db.Exec(query, userID, articleID, parentCommentID, comment.Text)
+	if err != nil {
+		l.Error("Error when creating the comment in database", zap.Error(err))
+
+		return err
+	}
+
+	return nil
 }

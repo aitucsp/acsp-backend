@@ -13,6 +13,7 @@ const (
 	ArticlesTable  = "articles"
 	UserRolesTable = "user_roles"
 	RolesTable     = "roles"
+	CommentsTable  = "comments"
 )
 
 func NewClientPostgres(ctx context.Context, cancel context.CancelFunc, config *PostgresConfig) (*sqlx.DB, error) {
