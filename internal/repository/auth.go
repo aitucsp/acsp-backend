@@ -10,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"acsp/internal/apperror"
-	"acsp/internal/config"
+	"acsp/internal/constants"
 	"acsp/internal/logging"
 	"acsp/internal/model"
 )
@@ -29,7 +29,7 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
 	l := logging.LoggerFromContext(ctx).With(zap.String("email", user.Email))
 
 	query := fmt.Sprintf("INSERT INTO %s (name, email, password) values ($1, $2, $3) RETURNING id",
-		config.UsersTable)
+		constants.UsersTable)
 
 	_, err := r.db.Query(query, user.Name, user.Email, user.Password)
 	if err != nil {
@@ -46,7 +46,8 @@ func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*mo
 
 	var user model.User
 
-	query := fmt.Sprintf("SELECT * FROM users WHERE email=$1 LIMIT 1")
+	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 LIMIT 1",
+		constants.UsersTable)
 
 	err := r.db.Get(&user, query, email)
 	if err != nil {
@@ -66,10 +67,9 @@ func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*mo
 
 func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", id))
-
 	var user model.User
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", constants.UsersTable)
 
-	query := fmt.Sprintf("SELECT * FROM users WHERE id=$1")
 	err := r.db.
 		QueryRow(query, id).
 		Scan(&user.ID,
@@ -93,7 +93,7 @@ func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.Use
 
 	var user model.User
 
-	query := fmt.Sprintf("SELECT * FROM users WHERE email=$1")
+	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1", constants.UsersTable)
 	row := r.db.QueryRow(query, email)
 
 	if err := row.Scan(&user.ID,

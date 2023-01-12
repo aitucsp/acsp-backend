@@ -8,7 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 
-	"acsp/internal/config"
+	"acsp/internal/constants"
 	"acsp/internal/logging"
 	"acsp/internal/model"
 )
@@ -26,7 +26,8 @@ func NewArticlesPostgres(db *sqlx.DB) *ArticlesDatabase {
 func (a *ArticlesDatabase) Create(ctx context.Context, article model.Article) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", article.ID))
 
-	query := fmt.Sprintf("INSERT INTO %s (user_id, topic, description) VALUES ($1, $2, $3) RETURNING id", config.ArticlesTable)
+	query := fmt.Sprintf("INSERT INTO %s (user_id, topic, description) VALUES ($1, $2, $3) RETURNING id",
+		constants.ArticlesTable)
 
 	_, err := a.db.Exec(query, article.Author.ID, article.Topic, article.Description)
 	if err != nil {
@@ -42,7 +43,7 @@ func (a *ArticlesDatabase) Update(ctx context.Context, article model.Article) er
 	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", article.ID))
 
 	query := fmt.Sprintf("UPDATE %s SET topic = $1, description = $2, updated_at = now() WHERE id = $3 AND user_id = $4",
-		config.ArticlesTable)
+		constants.ArticlesTable)
 
 	_, err := a.db.Exec(query, article.Topic, article.Description, article.ID, article.Author.ID)
 	if err != nil {
@@ -55,7 +56,7 @@ func (a *ArticlesDatabase) Update(ctx context.Context, article model.Article) er
 }
 
 func (a *ArticlesDatabase) Delete(ctx context.Context, userID int, articleID int) error {
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND user_id = $2", config.ArticlesTable)
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1 AND user_id = $2", constants.ArticlesTable)
 
 	_, err := a.db.Exec(query, articleID, userID)
 	if err != nil {
@@ -69,7 +70,7 @@ func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleI
 	var article model.Article
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1 AND user_id = $2",
-		config.ArticlesTable)
+		constants.ArticlesTable)
 
 	err := a.db.Get(&article, query, articleID, userID)
 	if err != nil {
@@ -81,7 +82,7 @@ func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleI
 
 func (a *ArticlesDatabase) GetAllByUserId(ctx context.Context, userID int) ([]model.Article, error) {
 	var articles []model.Article
-	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", config.ArticlesTable)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", constants.ArticlesTable)
 
 	err := a.db.Select(&articles, query, userID)
 	if err != nil {
@@ -95,7 +96,7 @@ func (a *ArticlesDatabase) CreateComment(ctx context.Context, articleID, userID 
 	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", articleID), zap.Int("userID", userID))
 
 	query := fmt.Sprintf("INSERT INTO %s (user_id, article_id, text) VALUES ($1, $2, $3) RETURNING id",
-		config.CommentsTable)
+		constants.CommentsTable)
 
 	_, err := a.db.Exec(query, userID, articleID, comment.Text)
 	if err != nil {
@@ -114,8 +115,8 @@ func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID
 		       u.name AS "user.name",
 		       u.roles AS "user.roles" 
                FROM %s c INNER JOIN %s u ON u.id = c.user_id WHERE article_id = $1`,
-		config.CommentsTable,
-		config.UsersTable)
+		constants.CommentsTable,
+		constants.UsersTable)
 
 	rows, err := a.db.Queryx(query, articleID)
 
@@ -160,7 +161,7 @@ func (a *ArticlesDatabase) ReplyToComment(ctx context.Context, articleID, userID
 	)
 
 	query := fmt.Sprintf("INSERT INTO %s (user_id, article_id, parent_id, text) VALUES ($1, $2, $3, $4) RETURNING id",
-		config.CommentsTable)
+		constants.CommentsTable)
 
 	_, err := a.db.Exec(query, userID, articleID, parentCommentID, comment.Text)
 	if err != nil {
@@ -182,9 +183,9 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(ctx context.Context
                INNER JOIN %s u ON u.id = c.user_id 
 			   INNER JOIN %s a ON a.id = c.article_id
 			   WHERE c.article_id = $1 AND c.parent_id = $2`,
-		config.CommentsTable,
-		config.UsersTable,
-		config.ArticlesTable)
+		constants.CommentsTable,
+		constants.UsersTable,
+		constants.ArticlesTable)
 
 	rows, err := a.db.Queryx(query, articleID, parentCommentID)
 

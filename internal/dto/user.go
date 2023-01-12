@@ -1,5 +1,6 @@
 package dto
 
+// CreateUser DTO for Creating a User
 type CreateUser struct {
 	ID       int    `json:"id"`
 	Name     string `json:"name" binding:"required" validate:"required"`

@@ -14,6 +14,7 @@ type CreateComment struct {
 	Text string `json:"text" binding:"required" validate:"required"`
 }
 
+// ReplyToComment DTO for Replying to a Comment of an Article
 type ReplyToComment struct {
 	Text string `json:"text" binding:"required" validate:"required"`
 }

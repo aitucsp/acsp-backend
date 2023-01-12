@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"acsp/internal/apperror"
-	"acsp/internal/config"
+	"acsp/internal/constants"
 	"acsp/internal/logging"
 	"acsp/internal/model"
 )
@@ -27,7 +27,7 @@ func NewRolesPostgres(db *sqlx.DB) *RolesDatabase {
 func (r RolesDatabase) CreateRole(ctx context.Context, name string) error {
 	l := logging.LoggerFromContext(ctx).With(zap.String("roleName", name))
 
-	query := fmt.Sprintf("INSERT INTO %s (name) values ($1) RETURNING id", config.RolesTable)
+	query := fmt.Sprintf("INSERT INTO %s (name) values ($1) RETURNING id", constants.RolesTable)
 
 	_, err := r.db.Exec(query, name)
 	if err != nil {
@@ -43,9 +43,9 @@ func (r RolesDatabase) UpdateRole(ctx context.Context, roleID int, newName strin
 	l := logging.LoggerFromContext(ctx).With(zap.Int("roleID", roleID), zap.String("roleName", newName))
 
 	query := fmt.Sprintf("UPDATE %s (name) SET name = $1 WHERE id = $2",
-		config.RolesTable)
+		constants.RolesTable)
 
-	_, err := r.db.Exec(query, config.RolesTable, roleID, newName)
+	_, err := r.db.Exec(query, constants.RolesTable, roleID, newName)
 	if err != nil {
 		l.Error("Error when updating role in database", zap.Error(err))
 
@@ -58,7 +58,7 @@ func (r RolesDatabase) UpdateRole(ctx context.Context, roleID int, newName strin
 func (r RolesDatabase) DeleteRole(ctx context.Context, roleID int) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("roleID", roleID))
 
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", config.RolesTable)
+	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", constants.RolesTable)
 
 	_, err := r.db.Exec(query, roleID)
 	if err != nil {
@@ -74,7 +74,7 @@ func (r RolesDatabase) SaveUserRole(ctx context.Context, userID, roleID int) err
 	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", userID), zap.Int("roleID", roleID))
 
 	query := fmt.Sprintf("INSERT INTO %s (user_id, role_id) values ($1, $2) RETURNING id",
-		config.UserRolesTable)
+		constants.UserRolesTable)
 
 	_, err := r.db.Exec(query, userID, roleID)
 	if err != nil {
@@ -91,7 +91,7 @@ func (r RolesDatabase) DeleteUserRole(ctx context.Context, userID, roleID int) e
 
 	query := fmt.Sprint("DELETE FROM $1 WHERE user_id = $2 AND role_id = $3")
 
-	_, err := r.db.Exec(query, config.UserRolesTable, userID, roleID)
+	_, err := r.db.Exec(query, constants.UserRolesTable, userID, roleID)
 	if err != nil {
 		l.Error("Error when deleting user role from database", zap.Error(err))
 
@@ -106,7 +106,7 @@ func (r RolesDatabase) GetUserRoles(ctx context.Context, userID int) ([]model.Ro
 
 	var roles []model.Role
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", config.UserRolesTable)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", constants.UserRolesTable)
 
 	err := r.db.Select(&roles, query, userID)
 	if err != nil {
