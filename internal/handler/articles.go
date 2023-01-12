@@ -435,3 +435,60 @@ func (h *Handler) replyToCommentByID(c *fiber.Ctx) error {
 		"message": "Replied to the comment successfully",
 	})
 }
+
+// @Summary Get all comments by article id
+// @Security ApiKeyAuth
+// @Tags articles
+// @Description Get all comments of an article
+// @ID get-all-comments-by-article-id
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400,404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Failure default {object} map[string]interface{}
+// @Router /api/v1/articles/:id/comments/:commentID/replies [get]
+func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
+	l := logging.LoggerFromContext(c.UserContext())
+	l.Info("Get all replies by comment id... ")
+
+	userID, err := getUserId(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	articleID := c.Params("id")
+	if articleID == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrParameterNotFound,
+		})
+	}
+
+	commentID := c.Params("commentID")
+	if commentID == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrParameterNotFound,
+		})
+	}
+
+	comments, err := h.services.Articles.GetRepliesByArticleIDAndCommentID(c.UserContext(), articleID, userID, commentID)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"errors":   false,
+		"message":  nil,
+		"count":    len(comments),
+		"user_id":  c.GetRespHeader(userCtx, ""),
+		"comments": comments,
+	})
+}

@@ -34,6 +34,7 @@ type Articles interface {
 	CreateComment(ctx context.Context, articleID, userID int, comment model.Comment) error
 	GetCommentsByArticleID(ctx context.Context, articleID int) ([]model.Comment, error)
 	ReplyToComment(ctx context.Context, articleID, userID, parentCommentID int, comment model.Comment) error
+	GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) ([]model.Comment, error)
 }
 
 type Repository struct {

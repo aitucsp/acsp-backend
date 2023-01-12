@@ -31,6 +31,8 @@ type Articles interface {
 	GetCommentsByArticleID(ctx context.Context, articleID string) ([]model.Comment, error)
 	ReplyToCommentByArticleIDAndCommentID(
 		ctx context.Context, articleID string, userID string, parentCommentID string, comment dto.ReplyToComment) error
+	GetRepliesByArticleIDAndCommentID(
+		ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error)
 }
 
 type Service struct {

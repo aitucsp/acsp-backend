@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
@@ -108,12 +109,45 @@ func (a *ArticlesDatabase) CreateComment(ctx context.Context, articleID, userID 
 
 func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID int) ([]model.Comment, error) {
 	var comments []model.Comment
-	query := fmt.Sprintf("SELECT * FROM %s WHERE article_id = $1", config.CommentsTable)
+	query := fmt.Sprintf(`SELECT c.*, u.id as "user.user_id",
+		       u.email AS "user.email",
+		       u.name AS "user.name",
+		       u.roles AS "user.roles" 
+               FROM %s c INNER JOIN %s u ON u.id = c.user_id WHERE article_id = $1`,
+		config.CommentsTable,
+		config.UsersTable)
 
-	err := a.db.Select(&comments, query, articleID)
-	if err != nil {
-		return []model.Comment{}, err
+	rows, err := a.db.Queryx(query, articleID)
+
+	for rows.Next() {
+		var comment model.Comment
+		var user model.User
+		var parentID sql.NullInt64
+
+		err = rows.Scan(&comment.ID,
+			&comment.UserID,
+			&comment.ArticleID,
+			&parentID,
+			&comment.Text,
+			&comment.CreatedAt,
+			&comment.UpdatedAt,
+			&user.ID,
+			&user.Email,
+			&user.Name,
+			&user.Roles)
+		if err != nil {
+			return []model.Comment{}, err
+		}
+
+		comment.Author = user
+		comment.ParentID = int(parentID.Int64)
+		comments = append(comments, comment)
 	}
+
+	// err := a.db.Select(&comments, query, articleID)
+	// if err != nil {
+	// 	return []model.Comment{}, err
+	// }
 
 	return comments, nil
 }
@@ -136,4 +170,53 @@ func (a *ArticlesDatabase) ReplyToComment(ctx context.Context, articleID, userID
 	}
 
 	return nil
+}
+
+func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) ([]model.Comment, error) {
+	var comments []model.Comment
+	query := fmt.Sprintf(`SELECT c.*, u.id as "user.user_id",
+		       u.email AS "user.email",
+		       u.name AS "user.name",
+		       u.roles AS "user.roles" 
+               FROM %s c 
+               INNER JOIN %s u ON u.id = c.user_id 
+			   INNER JOIN %s a ON a.id = c.article_id
+			   WHERE c.article_id = $1 AND c.parent_id = $2`,
+		config.CommentsTable,
+		config.UsersTable,
+		config.ArticlesTable)
+
+	rows, err := a.db.Queryx(query, articleID, parentCommentID)
+
+	for rows.Next() {
+		var comment model.Comment
+		var user model.User
+		var parentID sql.NullInt64
+
+		err = rows.Scan(&comment.ID,
+			&comment.UserID,
+			&comment.ArticleID,
+			&parentID,
+			&comment.Text,
+			&comment.CreatedAt,
+			&comment.UpdatedAt,
+			&user.ID,
+			&user.Email,
+			&user.Name,
+			&user.Roles)
+		if err != nil {
+			return []model.Comment{}, err
+		}
+
+		comment.Author = user
+		comment.ParentID = int(parentID.Int64)
+		comments = append(comments, comment)
+	}
+
+	// err := a.db.Select(&comments, query, articleID)
+	// if err != nil {
+	// 	return []model.Comment{}, err
+	// }
+
+	return comments, nil
 }

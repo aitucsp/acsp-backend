@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"strconv"
 
 	"acsp/internal/dto"
@@ -99,7 +98,7 @@ func (s *ArticlesService) CommentByID(ctx context.Context, articleID, userID str
 		UserID:    userId,
 		ArticleID: articleId,
 		Text:      commentDTO.Text,
-		Author:    user,
+		Author:    *user,
 	}
 
 	return s.repo.CreateComment(ctx, articleId, userId, comment)
@@ -135,17 +134,36 @@ func (s *ArticlesService) ReplyToCommentByArticleIDAndCommentID(ctx context.Cont
 		return err
 	}
 
-	convertedCommentID := sql.NullInt64{
-		Int64: int64(parentCommentId),
-		Valid: true,
-	}
+	// convertedCommentID := sql.NullInt64{
+	// 	Int64: int64(parentCommentId),
+	// 	Valid: true,
+	// }
 
 	replyComment := model.Comment{
 		UserID:    userId,
 		ArticleID: articleId,
-		ParentID:  convertedCommentID,
+		ParentID:  parentCommentId,
 		Text:      comment.Text,
 	}
 
 	return s.repo.ReplyToComment(ctx, articleId, userId, parentCommentId, replyComment)
+}
+
+func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error) {
+	articleId, err := strconv.Atoi(articleID)
+	if err != nil {
+		return []model.Comment{}, err
+	}
+
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return []model.Comment{}, err
+	}
+
+	parentCommentId, err := strconv.Atoi(commentID)
+	if err != nil {
+		return []model.Comment{}, err
+	}
+
+	return s.repo.GetRepliesByArticleIDAndCommentID(ctx, articleId, userId, parentCommentId)
 }

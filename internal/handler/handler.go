@@ -45,6 +45,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 				comments.Post("/", h.commentArticle)                       // comment an article
 				comments.Get("/", h.getCommentsByArticleID)                // get all comments by article id
 				comments.Post("/:commentID/replies", h.replyToCommentByID) // reply to comment by id and article id
+				comments.Get("/:commentID/replies", h.getRepliesByCommentID)
 			}
 		}
 
