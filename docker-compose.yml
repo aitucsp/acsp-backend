@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: acsp-backend
+    build: ./
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+    volumes:
+      - app:/usr/src/app/
+    environment:
+      - DB_PASSWORD=1245emer
+    networks:
+      - cloud
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    container_name: postgres
+    volumes:
+      - ./postgres:/data/db
+    ports:
+      - 5432:5432
+
+volumes:
+  app:
+  postgres:
+
+networks:
+  cloud:
+    driver: bridge
