@@ -16,8 +16,8 @@ import (
 
 	"acsp/internal/config"
 	"acsp/internal/handler"
+	"acsp/internal/infrastructure/db"
 	"acsp/internal/logging"
-	"acsp/internal/logs"
 	"acsp/internal/repository"
 	"acsp/internal/service"
 )
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	configProvider := config.NewProviderChain(baseProvider)
-	conf, err := config.NewBaseConfig(configProvider)
+	appConfig, err := config.NewBaseConfig(configProvider)
 	if err != nil {
 		fallbackLogger.Println("couldn't create config:", err)
 
@@ -55,16 +55,17 @@ func main() {
 	}
 
 	// Initializing the application configuration
-	appConfig, err := config.Init(configsDirectory)
-	if err != nil {
-		logs.Log().Error(err.Error())
-		os.Exit(1)
-	}
+	// _, err = config.Init(configsDirectory)
+	// if err != nil {
+	// 	fallbackLogger.Println("couldn't create app config:", err)
+	//
+	// 	return
+	// }
 
 	appLogger, syncLogger, err := logging.NewBuilder().
 		WithFallbackLogger(fallbackLogger).
-		WithLoggerConfig(conf.Logger).
-		WithHostConfig(conf.Host).
+		WithLoggerConfig(appConfig.Logger).
+		WithHostConfig(appConfig.Host).
 		NewLogger()
 
 	defer syncLogger()
@@ -84,7 +85,12 @@ func main() {
 	// Initializing fiber configuration
 	fiberConfig := config.FiberConfig(appConfig)
 
-	postgresConfig, err := config.LoadConfig(".")
+	postgresConfig, err := db.LoadConfig(".")
+	if err != nil {
+		appLogger.Fatal("Error occurred when initializing database config: ", zap.Error(err))
+	}
+
+	redisConfig, err := db.LoadRedisConfig(".")
 	if err != nil {
 		appLogger.Fatal("Error occurred when initializing database config: ", zap.Error(err))
 	}
@@ -94,17 +100,25 @@ func main() {
 	ctx = logging.ContextWithLogger(ctx, appLogger)
 
 	// Initializing postgresql database client
-	dbClient, err := config.NewClientPostgres(ctx, cancel, postgresConfig)
+	dbClient, err := db.NewDBClient(ctx, cancel, postgresConfig)
 	if err != nil {
 		appLogger.Error("Error when initializing Postgres Client", zap.Error(err))
 		os.Exit(1)
 	}
 
+	redisClient, err := db.NewClientRedis(ctx, cancel, redisConfig)
+	if err != nil {
+		appLogger.Error("Error when initializing Redis Client", zap.Error(err))
+		os.Exit(1)
+	}
+
+	dbEngine := db.NewDBEngine(dbClient, *redisClient)
+
 	app := fiber.New(fiberConfig)
 	app.Use(logger.New())
 
-	appRepository := repository.NewRepository(dbClient)
-	appService := service.NewService(appRepository)
+	appRepository := repository.NewRepository(dbEngine.DB)
+	appService := service.NewService(appRepository, &dbEngine.Cache, *appConfig.Auth)
 	appHandler := handler.NewHandler(appService)
 
 	appHandler.InitRoutesFiber(app)

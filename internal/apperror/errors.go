@@ -20,4 +20,6 @@ const (
 	ErrBadCredentials         = Error("bad connection credentials")
 	ErrBadSigningMethod       = Error("invalid signing method")
 	ErrBadClaimsType          = Error("token claims are not of type *tokenClaims")
+	ErrEnvVariableParsing     = Error("environment variable not parsed")
+	ErrIncorrectRole          = Error("does not have access, less permissions")
 )

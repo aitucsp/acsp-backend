@@ -19,26 +19,32 @@ type AuthPostgres struct {
 	db *sqlx.DB
 }
 
-func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
+func NewAuthRepository(db *sqlx.DB) *AuthPostgres {
 	return &AuthPostgres{
 		db: db,
 	}
 }
 
-func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
+func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) (int, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.String("email", user.Email))
 
-	query := fmt.Sprintf("INSERT INTO %s (name, email, password) values ($1, $2, $3) RETURNING id",
+	var userID int
+	query := fmt.Sprintf(
+		`INSERT INTO %s (name, email, password) 
+			    values ($1, $2, $3) 
+  				RETURNING id`,
 		constants.UsersTable)
 
-	_, err := r.db.Query(query, user.Name, user.Email, user.Password)
+	row := r.db.QueryRow(query, user.Name, user.Email, user.Password)
+
+	err := row.Scan(&userID)
 	if err != nil {
 		l.Error("Error when creating user in database", zap.Error(err))
 
-		return err
+		return -1, err
 	}
 
-	return nil
+	return userID, nil
 }
 
 func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*model.User, error) {
@@ -46,7 +52,7 @@ func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*mo
 
 	var user model.User
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1 LIMIT 1",
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE email=$1 LIMIT 1`,
 		constants.UsersTable)
 
 	err := r.db.Get(&user, query, email)
@@ -68,7 +74,7 @@ func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*mo
 func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", id))
 	var user model.User
-	query := fmt.Sprintf("SELECT * FROM %s WHERE id=$1", constants.UsersTable)
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE id=$1`, constants.UsersTable)
 
 	err := r.db.
 		QueryRow(query, id).
@@ -93,7 +99,7 @@ func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.Use
 
 	var user model.User
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE email=$1", constants.UsersTable)
+	query := fmt.Sprintf(`SELECT * FROM %s WHERE email=$1`, constants.UsersTable)
 	row := r.db.QueryRow(query, email)
 
 	if err := row.Scan(&user.ID,
@@ -115,7 +121,7 @@ func (r *AuthPostgres) GetAll(ctx context.Context) (*[]model.User, error) {
 
 	var users []model.User
 
-	query := fmt.Sprintf("SELECT * FROM users")
+	query := fmt.Sprintf(`SELECT * FROM %s`, constants.UsersTable)
 
 	err := r.db.Select(&users, query)
 	if err != nil {

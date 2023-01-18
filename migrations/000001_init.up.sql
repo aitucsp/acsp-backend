@@ -6,6 +6,7 @@ CREATE TABLE users
     password   VARCHAR     NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    is_admin   BOOL        NOT NULL DEFAULT FALSE,
     roles      VARCHAR[]            DEFAULT ARRAY ['user']
 );
 
@@ -39,12 +40,6 @@ CREATE TABLE comments
             ON DELETE SET NULL ON UPDATE CASCADE
 );
 
-INSERT INTO comments(user_id, article_id, text, parent_id)
-VALUES (1, 1, 'Very well-structured article', null);
-
-INSERT INTO comments(user_id, article_id, text, parent_id)
-VALUES (8, 1, 'Agree with you', 1);
-
 CREATE TABLE roles
 (
     id   INT          NOT NULL PRIMARY KEY,
@@ -66,5 +61,6 @@ INSERT INTO roles (id, name)
 VALUES (2, 'admin');
 
 ALTER TABLE articles
-    ADD CONSTRAINT fk_articles_users FOREIGN KEY (user_id) REFERENCES users (id)
-        ON DELETE CASCADE ON UPDATE CASCADE;
+    ADD CONSTRAINT fk_articles_users
+        FOREIGN KEY (user_id) REFERENCES users (id)
+            ON DELETE CASCADE ON UPDATE CASCADE;

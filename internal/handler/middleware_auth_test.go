@@ -11,7 +11,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	"acsp/internal/logs"
 	"acsp/internal/service"
 	mockService "acsp/internal/service/mocks"
 )
@@ -84,7 +83,6 @@ func TestHandler_userIdentity(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 
-			_ = logs.InitLogger()
 			repo := mockService.NewMockAuthorization(c)
 			test.mockBehavior(repo, test.token)
 
@@ -103,12 +101,6 @@ func TestHandler_userIdentity(t *testing.T) {
 
 			response, _ := app.Test(request)
 			data, _ := io.ReadAll(response.Body)
-
-			logs.Log().Info("Code ", response.StatusCode)
-			logs.Log().Info("Expected code ", test.expectedStatusCode)
-
-			logs.Log().Info("Response ", string(data))
-			logs.Log().Info("Expected code ", test.expectedResponseBody)
 
 			assert.Equal(t, response.StatusCode, test.expectedStatusCode)
 			assert.Equal(t, string(data), test.expectedResponseBody)

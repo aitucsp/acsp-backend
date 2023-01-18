@@ -10,6 +10,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
+
+	"acsp/internal/apperror"
 )
 
 const (
@@ -26,8 +28,8 @@ const (
 type (
 	Config struct {
 		Environment string
-		HTTP        HTTPConfig
-		Auth        AuthConfig
+		HTTP        *HTTPConfig
+		Auth        *AuthConfig
 		Logger      *LoggerConfig
 		Host        *HostConfig
 	}
@@ -37,17 +39,18 @@ type (
 	}
 
 	JWTConfig struct {
-		AccessTokenTTL  time.Duration `mapstructure:"accessTokenTTL"`
-		RefreshTokenTTL time.Duration `mapstructure:"refreshTokenTTL"`
-		SigningKey      string
+		AccessTokenTTL     time.Duration `envconfig:"ACCESS_TOKEN_TTL"`
+		RefreshTokenTTL    time.Duration `envconfig:"REFRESH_TOKEN_TTL"`
+		AccessTokenSecret  string        `envconfig:"ACCESS_TOKEN_SECRET_KEY"`
+		RefreshTokenSecret string        `envconfig:"REFRESH_TOKEN_SECRET_KEY"`
 	}
 
 	HTTPConfig struct {
-		Host               string        `mapstructure:"host"`
-		Port               string        `mapstructure:"port"`
-		ReadTimeout        time.Duration `mapstructure:"readTimeout"`
-		WriteTimeout       time.Duration `mapstructure:"writeTimeout"`
-		MaxHeaderMegabytes int           `mapstructure:"maxHeaderBytes"`
+		Host               string        `envconfig:"HOST"`
+		Port               string        `envconfig:"PORT"`
+		ReadTimeout        time.Duration `envconfig:"READ_TIMEOUT"`
+		WriteTimeout       time.Duration `envconfig:"WRITE_TIMEOUT"`
+		MaxHeaderMegabytes int           `envconfig:"MAX_HEADER_BYTES"`
 	}
 
 	LoggerConfig struct {
@@ -94,8 +97,15 @@ func Init(configsDir string) (*Config, error) {
 func NewBaseConfig(p Provider) (*Config, error) {
 	c := Config{
 		Environment: p.Get("ENVIRONMENT", "development"),
-		HTTP:        HTTPConfig{},
+		HTTP:        &HTTPConfig{},
 	}
+
+	http, err := newHTTPConfig(p)
+	if err != nil {
+		return nil, err
+	}
+
+	c.HTTP = http
 
 	h, err := newHostConfig(p)
 	if err != nil {
@@ -110,6 +120,13 @@ func NewBaseConfig(p Provider) (*Config, error) {
 	}
 
 	c.Logger = l
+
+	a, err := newAuthConfig(p)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Auth = a
 
 	return &c, nil
 }
@@ -213,6 +230,18 @@ type Provider interface {
 	Get(key, fallback string) string
 }
 
+func newHTTPConfig(p Provider) (*HTTPConfig, error) {
+	const prefix = "HTTP"
+
+	return &HTTPConfig{
+		Host:               p.Get(prefix+"_HOST", "localhost"),
+		Port:               p.Get(prefix+"_PORT", "8080"),
+		ReadTimeout:        getDuration(p, prefix+"_READ_TIMEOUT", 10),
+		WriteTimeout:       getDuration(p, prefix+"_WRITE_TIMEOUT", 10),
+		MaxHeaderMegabytes: getInt(p, prefix+"_MAX_HEADER_BYTES", 1),
+	}, nil
+}
+
 func newLoggerConfig(p Provider) (*LoggerConfig, error) {
 	const prefix = "LOGGER"
 
@@ -256,6 +285,44 @@ func newLoggerConfig(p Provider) (*LoggerConfig, error) {
 		MaxAgeDays:   getInt(p, "LOGGER_MAXAGEDAYS", 168),
 		MaxBackups:   getInt(p, "LOGGER_MAXBACKUPS", 16),
 		BatchSize:    getUint(p, "LOGGER_BATCHSIZE", 2),
+	}, nil
+}
+
+func newAuthConfig(p Provider) (*AuthConfig, error) {
+
+	const prefix = "JWT"
+
+	var accessTokenKey string
+	accessTokenKey = p.Get(prefix+"_ACCESS_TOKEN_SECRET_KEY", "")
+	if accessTokenKey == "" {
+		return nil, apperror.ErrEnvVariableParsing
+	}
+
+	var refreshTokenKey string
+	refreshTokenKey = p.Get(prefix+"_ACCESS_TOKEN_SECRET_KEY", "")
+	if refreshTokenKey == "" {
+		return nil, apperror.ErrEnvVariableParsing
+	}
+
+	var accessTokenTTL time.Duration
+	accessTokenTTL = getDuration(p, prefix+"_ACCESS_TOKEN_TTL", 0)
+	if accessTokenTTL == 0 {
+		return nil, apperror.ErrEnvVariableParsing
+	}
+
+	var refreshTokenTTL time.Duration
+	refreshTokenTTL = getDuration(p, prefix+"_ACCESS_TOKEN_TTL", 0)
+	if refreshTokenTTL == 0 {
+		return nil, apperror.ErrEnvVariableParsing
+	}
+
+	return &AuthConfig{
+		JWT: JWTConfig{
+			AccessTokenTTL:     accessTokenTTL,
+			RefreshTokenTTL:    refreshTokenTTL,
+			AccessTokenSecret:  accessTokenKey,
+			RefreshTokenSecret: refreshTokenKey,
+		},
 	}, nil
 }
 

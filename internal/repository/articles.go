@@ -17,7 +17,7 @@ type ArticlesDatabase struct {
 	db *sqlx.DB
 }
 
-func NewArticlesPostgres(db *sqlx.DB) *ArticlesDatabase {
+func NewArticlesRepository(db *sqlx.DB) *ArticlesDatabase {
 	return &ArticlesDatabase{
 		db: db,
 	}
@@ -66,7 +66,7 @@ func (a *ArticlesDatabase) Delete(ctx context.Context, userID int, articleID int
 	return nil
 }
 
-func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleID, userID int) (model.Article, error) {
+func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleID, userID int) (*model.Article, error) {
 	var article model.Article
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1 AND user_id = $2",
@@ -74,22 +74,22 @@ func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleI
 
 	err := a.db.Get(&article, query, articleID, userID)
 	if err != nil {
-		return model.Article{}, err
+		return nil, err
 	}
 
-	return article, nil
+	return &article, nil
 }
 
-func (a *ArticlesDatabase) GetAllByUserId(ctx context.Context, userID int) ([]model.Article, error) {
+func (a *ArticlesDatabase) GetAllByUserId(ctx context.Context, userID int) (*[]model.Article, error) {
 	var articles []model.Article
 	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", constants.ArticlesTable)
 
 	err := a.db.Select(&articles, query, userID)
 	if err != nil {
-		return []model.Article{}, err
+		return nil, err
 	}
 
-	return articles, nil
+	return &articles, nil
 }
 
 func (a *ArticlesDatabase) CreateComment(ctx context.Context, articleID, userID int, comment model.Comment) error {
@@ -173,7 +173,11 @@ func (a *ArticlesDatabase) ReplyToComment(ctx context.Context, articleID, userID
 	return nil
 }
 
-func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) ([]model.Comment, error) {
+func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(
+	ctx context.Context, articleID,
+	userID,
+	parentCommentID int) (*[]model.Comment, error) {
+
 	var comments []model.Comment
 	query := fmt.Sprintf(`SELECT c.*, u.id as "user.user_id",
 		       u.email AS "user.email",
@@ -206,7 +210,7 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(ctx context.Context
 			&user.Name,
 			&user.Roles)
 		if err != nil {
-			return []model.Comment{}, err
+			return nil, err
 		}
 
 		comment.Author = user
@@ -219,5 +223,5 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(ctx context.Context
 	// 	return []model.Comment{}, err
 	// }
 
-	return comments, nil
+	return &comments, nil
 }

@@ -18,7 +18,7 @@ type RolesDatabase struct {
 	db *sqlx.DB
 }
 
-func NewRolesPostgres(db *sqlx.DB) *RolesDatabase {
+func NewRolesRepository(db *sqlx.DB) *RolesDatabase {
 	return &RolesDatabase{
 		db: db,
 	}
@@ -27,7 +27,10 @@ func NewRolesPostgres(db *sqlx.DB) *RolesDatabase {
 func (r RolesDatabase) CreateRole(ctx context.Context, name string) error {
 	l := logging.LoggerFromContext(ctx).With(zap.String("roleName", name))
 
-	query := fmt.Sprintf("INSERT INTO %s (name) values ($1) RETURNING id", constants.RolesTable)
+	query := fmt.Sprintf(
+		`INSERT INTO %s (name) values ($1) 
+               RETURNING id`,
+		constants.RolesTable)
 
 	_, err := r.db.Exec(query, name)
 	if err != nil {
@@ -42,7 +45,10 @@ func (r RolesDatabase) CreateRole(ctx context.Context, name string) error {
 func (r RolesDatabase) UpdateRole(ctx context.Context, roleID int, newName string) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("roleID", roleID), zap.String("roleName", newName))
 
-	query := fmt.Sprintf("UPDATE %s (name) SET name = $1 WHERE id = $2",
+	query := fmt.Sprintf(
+		`UPDATE %s (name) 
+				SET name = $1 
+				WHERE id = $2`,
 		constants.RolesTable)
 
 	_, err := r.db.Exec(query, constants.RolesTable, roleID, newName)
@@ -58,7 +64,10 @@ func (r RolesDatabase) UpdateRole(ctx context.Context, roleID int, newName strin
 func (r RolesDatabase) DeleteRole(ctx context.Context, roleID int) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("roleID", roleID))
 
-	query := fmt.Sprintf("DELETE FROM %s WHERE id = $1", constants.RolesTable)
+	query := fmt.Sprintf(
+		`DELETE FROM %s 
+				WHERE id = $1`,
+		constants.RolesTable)
 
 	_, err := r.db.Exec(query, roleID)
 	if err != nil {
@@ -73,7 +82,9 @@ func (r RolesDatabase) DeleteRole(ctx context.Context, roleID int) error {
 func (r RolesDatabase) SaveUserRole(ctx context.Context, userID, roleID int) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", userID), zap.Int("roleID", roleID))
 
-	query := fmt.Sprintf("INSERT INTO %s (user_id, role_id) values ($1, $2) RETURNING id",
+	query := fmt.Sprintf(
+		`INSERT INTO %s (user_id, role_id) 
+				VALUES ($1, $2) RETURNING id`,
 		constants.UserRolesTable)
 
 	_, err := r.db.Exec(query, userID, roleID)
@@ -89,7 +100,10 @@ func (r RolesDatabase) SaveUserRole(ctx context.Context, userID, roleID int) err
 func (r RolesDatabase) DeleteUserRole(ctx context.Context, userID, roleID int) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", userID), zap.Int("roleID", roleID))
 
-	query := fmt.Sprint("DELETE FROM $1 WHERE user_id = $2 AND role_id = $3")
+	query := fmt.Sprintf(
+		`DELETE FROM %s 
+				WHERE user_id = $1 AND role_id = $2`,
+		constants.UserRolesTable)
 
 	_, err := r.db.Exec(query, constants.UserRolesTable, userID, roleID)
 	if err != nil {
@@ -106,13 +120,16 @@ func (r RolesDatabase) GetUserRoles(ctx context.Context, userID int) ([]model.Ro
 
 	var roles []model.Role
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", constants.UserRolesTable)
+	query := fmt.Sprintf(
+		`SELECT * FROM %s 
+				WHERE user_id = $1`,
+		constants.UserRolesTable)
 
 	err := r.db.Select(&roles, query, userID)
 	if err != nil {
 		l.Error("Error when getting user roles from database", zap.Error(err))
 
-		return nil, errors.Wrap(apperror.ErrUserNotFound, "user not found")
+		return nil, errors.Wrap(apperror.ErrUserNotFound, "User not found")
 	}
 
 	return roles, err

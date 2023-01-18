@@ -36,7 +36,7 @@ func TestAuthMongo_CreateUser(t *testing.T) {
 	log.Println(mt.Coll.Name())
 
 	collection := mt.Coll
-	// db := NewAuthPostgres(mt.DB)
+	// db := NewAuthRepository(mt.DB)
 	ctx := context.Background()
 
 	tests := []struct {

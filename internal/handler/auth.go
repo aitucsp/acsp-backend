@@ -23,32 +23,32 @@ import (
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
 // @Router /auth/sign-up [post]
-func (h *Handler) signUp(c *fiber.Ctx) error {
-	l := logging.LoggerFromContext(c.UserContext())
+func (h *Handler) signUp(ctx *fiber.Ctx) error {
+	l := logging.LoggerFromContext(ctx.UserContext())
 	l.Info("Signing up... ")
 
 	var input dto.CreateUser
-	if err := c.BodyParser(&input); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+	if err := ctx.BodyParser(&input); err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"message": apperror.ErrBodyParsed,
 		})
 	}
 
 	validate := validator.New()
 	if validationErr := validate.Struct(&input); validationErr != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"message": apperror.ErrBadInputBody,
 		})
 	}
 
-	err := h.services.Authorization.CreateUser(c.UserContext(), input)
+	err := h.services.Authorization.CreateUser(ctx.UserContext(), input)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+		return ctx.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"message": err.Error(),
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{})
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{"message": "Successfully registered"})
 }
 
 type signInInput struct {
@@ -68,21 +68,46 @@ type signInInput struct {
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
 // @Router /auth/sign-in [post]
-func (h *Handler) signIn(c *fiber.Ctx) error {
-	l := logging.LoggerFromContext(c.UserContext())
+func (h *Handler) signIn(ctx *fiber.Ctx) error {
+	l := logging.LoggerFromContext(ctx.UserContext())
 	l.Info("Signing in...")
 
 	var input signInInput
-	if err := c.BodyParser(&input); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"message": apperror.ErrBodyParsed})
+	if err := ctx.BodyParser(&input); err != nil {
+		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"message": apperror.ErrBodyParsed,
+		})
 	}
 
-	token, err := h.services.Authorization.GenerateToken(c.UserContext(), input.Email, input.Password)
+	tokenPair, err := h.services.Authorization.GenerateTokenPair(ctx.UserContext(), input.Email, input.Password)
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"message": err.Error()})
+		return ctx.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": err.Error(),
+		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{"token": token})
+	err = h.services.Authorization.SaveTokenPair(ctx.UserContext(), tokenPair.UserID, tokenPair)
+
+	return ctx.Status(http.StatusOK).JSON(tokenPair)
+}
+
+// @Summary RefreshToken
+// @Tags auth
+// @Description Refresh a token
+// @ID refresh-token
+// @Accept  json
+// @Produce  json
+// @Param input body signInInput true "credentials"
+// @Success 200 {string} string "token"
+// @Failure 400,404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Failure default {object} map[string]interface{}
+// @Router /auth/sign-in [post]
+func (h *Handler) refreshToken(ctx *fiber.Ctx) error {
+
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{})
+}
+
+func (h *Handler) logout(ctx *fiber.Ctx) error {
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{})
 }

@@ -25,8 +25,10 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 	// Define auth routes
 	auth := app.Group("/auth")
 	{
-		auth.Post("sign-up", h.signUp)
-		auth.Post("sign-in", h.signIn)
+		auth.Post("/sign-up", h.signUp)
+		auth.Post("/sign-in", h.signIn)
+		auth.Post("/refresh", h.refreshToken)
+		auth.Post("/logout", h.logout)
 	}
 
 	// Define API routes

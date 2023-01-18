@@ -4,10 +4,12 @@ import (
 	"context"
 	"time"
 
+	"github.com/go-redis/redis/v9"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 
 	"acsp/internal/apperror"
+	"acsp/internal/config"
 	"acsp/internal/dto"
 	"acsp/internal/logging"
 	"acsp/internal/model"
@@ -21,18 +23,41 @@ const (
 	tokenTTL   = 24 * time.Hour
 )
 
-type tokenClaims struct {
+type accessTokenClaims struct {
 	jwt.RegisteredClaims
 	UserId    string `json:"user_id"`
 	UserEmail string `json:"user_email"`
 }
 
-type AuthService struct {
-	repo repository.Authorization
+type refreshTokenClaims struct {
+	jwt.RegisteredClaims
+	UserId string `json:"user_id"`
 }
 
-func NewAuthService(repo repository.Authorization) *AuthService {
-	return &AuthService{repo: repo}
+type TokenDetails struct {
+	UserID           string `json:"-"`
+	AccessToken      string `json:"access_token"`
+	RefreshToken     string `json:"refresh_token"`
+	AccessTokenUUID  string `json:"-"`
+	RefreshTokenUUID string `json:"-"`
+	AccessExpiresAt  int64  `json:"-"`
+	RefreshExpiresAt int64  `json:"-"`
+}
+
+type AuthService struct {
+	repo        repository.Authorization
+	roles       repository.Roles
+	redisClient *redis.Client
+	authConfig  config.AuthConfig
+}
+
+func NewAuthService(repo repository.Authorization, rolesRepo repository.Roles, r *redis.Client, a config.AuthConfig) *AuthService {
+	return &AuthService{
+		repo:        repo,
+		roles:       rolesRepo,
+		redisClient: r,
+		authConfig:  a,
+	}
 }
 
 func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) error {
@@ -57,33 +82,73 @@ func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) er
 		Password: generatedHash,
 	}
 
-	return s.repo.CreateUser(ctx, newUser)
+	userID, err := s.repo.CreateUser(ctx, newUser)
+	if err != nil {
+		l.Error("Error occurred when creating a user", zap.Error(err))
+
+		return err
+	}
+
+	err = s.roles.SaveUserRole(ctx, userID, 1)
+	if err != nil {
+		l.Error("Error occurred when adding a role to a user", zap.Error(err))
+
+		return err
+	}
+
+	return nil
 }
 
-func (s *AuthService) GenerateToken(ctx context.Context, email, password string) (string, error) {
+func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password string) (*TokenDetails, error) {
 	l := logging.LoggerFromContext(ctx)
 	l.Info("Generating a token...")
+
+	var tokenDetails TokenDetails
 
 	user, err := s.repo.GetUser(ctx, email, password)
 	if err != nil {
 		l.Warn("Error when getting a user", zap.Error(err))
-		return "", err
+		return &TokenDetails{}, err
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &tokenClaims{
-		jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenTTL)),
+	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		&accessTokenClaims{jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.authConfig.JWT.AccessTokenTTL)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 		},
-		user.ID,
-		user.Email,
-	})
+			user.ID,
+			user.Email,
+		})
 
-	return token.SignedString([]byte(signingKey))
+	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256,
+		&refreshTokenClaims{jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.authConfig.JWT.RefreshTokenTTL)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+			user.ID,
+		})
+
+	accessTokenJWT, err := accessToken.SignedString([]byte(s.authConfig.JWT.AccessTokenSecret))
+	if err != nil {
+		return nil, err
+	}
+
+	refreshTokenJWT, err := refreshToken.SignedString([]byte(s.authConfig.JWT.RefreshTokenSecret))
+	if err != nil {
+		return nil, err
+	}
+
+	tokenDetails.UserID = user.ID
+	tokenDetails.AccessToken = accessTokenJWT
+	tokenDetails.RefreshToken = refreshTokenJWT
+	tokenDetails.AccessExpiresAt = time.Now().Add(time.Minute * s.authConfig.JWT.AccessTokenTTL).Unix()
+	tokenDetails.AccessExpiresAt = time.Now().Add(time.Minute * s.authConfig.JWT.RefreshTokenTTL).Unix()
+
+	return &tokenDetails, nil
 }
 
 func (s *AuthService) ParseToken(accessToken string) (string, error) {
-	token, err := jwt.ParseWithClaims(accessToken, &tokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(accessToken, &accessTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, apperror.ErrBadSigningMethod
 		}
@@ -95,7 +160,7 @@ func (s *AuthService) ParseToken(accessToken string) (string, error) {
 		return "", err
 	}
 
-	claims, ok := token.Claims.(*tokenClaims)
+	claims, ok := token.Claims.(*accessTokenClaims)
 	if !ok {
 		return "", apperror.ErrBadClaimsType
 	}
@@ -110,4 +175,21 @@ func generatePasswordHash(password string) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func (s *AuthService) SaveTokenPair(ctx context.Context, userID string, details *TokenDetails) error {
+	at := time.Unix(details.AccessExpiresAt, 0) // converting Unix to UTC(to Time object)
+	rt := time.Unix(details.RefreshExpiresAt, 0)
+	now := time.Now()
+
+	errAccess := s.redisClient.Set(ctx, details.AccessTokenUUID, userID, at.Sub(now)).Err()
+	if errAccess != nil {
+		return errAccess
+	}
+	errRefresh := s.redisClient.Set(ctx, details.RefreshTokenUUID, userID, rt.Sub(now)).Err()
+	if errRefresh != nil {
+		return errRefresh
+	}
+
+	return nil
 }

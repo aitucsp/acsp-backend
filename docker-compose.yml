@@ -8,6 +8,7 @@ services:
       - 8080:8080
     depends_on:
       - postgres
+      - redis
     volumes:
       - app:/usr/src/app/
     environment:
@@ -24,9 +25,25 @@ services:
     ports:
       - 5432:5432
 
+  redis:
+    image: redis-image
+    container_name: redis_db
+    networks:
+      - cloud
+    ports:
+      - "6380:6380"
+    volumes:
+      - redis-volume:/data
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+
 volumes:
   app:
   postgres:
+  redis:
 
 networks:
   cloud:
