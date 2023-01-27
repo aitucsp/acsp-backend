@@ -52,8 +52,8 @@ func NewClientRedis(ctx context.Context, cancel context.CancelFunc, config *Redi
 	client := redis.NewClient(
 		&redis.Options{
 			Addr:     config.Addr,
-			DB:       config.Database,
-			Password: config.Password,
+			DB:       0,
+			Password: "",
 		},
 	)
 

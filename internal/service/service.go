@@ -38,8 +38,8 @@ type Roles interface {
 
 type Articles interface {
 	Create(ctx context.Context, userID string, dto dto.CreateArticle) error
-	GetAll(ctx context.Context, userID string) ([]model.Article, error)
-	GetByID(ctx context.Context, articleID, userID string) (model.Article, error)
+	GetAll(ctx context.Context, userID string) (*[]model.Article, error)
+	GetByID(ctx context.Context, articleID, userID string) (*model.Article, error)
 	Update(ctx context.Context, articleID string, userID string, article dto.UpdateArticle) error
 	Delete(ctx context.Context, userID string, projectId string) error
 	CommentByID(ctx context.Context, articleID, userID string, comment dto.CreateComment) error
@@ -47,7 +47,7 @@ type Articles interface {
 	ReplyToCommentByArticleIDAndCommentID(
 		ctx context.Context, articleID string, userID string, parentCommentID string, comment dto.ReplyToComment) error
 	GetRepliesByArticleIDAndCommentID(
-		ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error)
+		ctx context.Context, articleID, userID, commentID string) (*[]model.Comment, error)
 }
 
 func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig) *Service {

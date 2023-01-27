@@ -39,6 +39,8 @@ definitions:
     type: object
   model.User:
     properties:
+      created_at:
+        type: string
       email:
         type: string
       id:
@@ -46,6 +48,8 @@ definitions:
       name:
         type: string
       password:
+        type: string
+      updated_at:
         type: string
     type: object
 host: localhost:8080
@@ -329,6 +333,84 @@ paths:
       summary: Comment an article
       tags:
       - articles
+  /api/v1/articles/:id/comments/:comment-id/replies:
+    post:
+      consumes:
+      - application/json
+      description: Reply to comment of an article
+      operationId: reply-to-comment-by-article-id-and-comment-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Reply to comment by article id and comment id
+      tags:
+      - articles
+  /api/v1/articles/:id/comments/:commentID/replies:
+    get:
+      consumes:
+      - application/json
+      description: Get all comments of an article
+      operationId: get-all-replies-of-comment
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all comments by article id
+      tags:
+      - articles
   /auth/sign-in:
     post:
       consumes:
@@ -389,7 +471,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: message
           schema:
             type: integer
         "400":

@@ -59,8 +59,3 @@ INSERT INTO roles (id, name)
 VALUES (1, 'user');
 INSERT INTO roles (id, name)
 VALUES (2, 'admin');
-
-ALTER TABLE articles
-    ADD CONSTRAINT fk_articles_users
-        FOREIGN KEY (user_id) REFERENCES users (id)
-            ON DELETE CASCADE ON UPDATE CASCADE;

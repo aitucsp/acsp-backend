@@ -8,3 +8,8 @@ const (
 	CommentsTable  = "comments"
 	DatabaseName   = "postgres"
 )
+
+const (
+	ContextTimeoutSeconds   = 10
+	FallBackDurationSeconds = 10
+)

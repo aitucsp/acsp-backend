@@ -20,30 +20,35 @@ services:
     image: postgres:latest
     restart: always
     container_name: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1245emer
+      - POSTGRES_DB=acsp
+      - DATABASE_HOST=localhost
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - ./postgres:/data/db
-    ports:
-      - 5432:5432
-
-  redis:
-    image: redis-image
-    container_name: redis_db
+      - ./migrations/000001_init.up.sql:/docker-entrypoint-initdb.d/000001_init.up.sql
     networks:
       - cloud
+
+
+  redis:
+    image: redis:latest
+    container_name: redis
     ports:
-      - "6380:6380"
+      - "6379:6379"
     volumes:
       - redis-volume:/data
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "5"
-        max-size: "10m"
+    networks:
+      - cloud
 
 volumes:
   app:
   postgres:
-  redis:
+  redis-volume:
 
 networks:
   cloud:

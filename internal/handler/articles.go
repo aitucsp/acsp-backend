@@ -103,7 +103,7 @@ func (h *Handler) getAllArticles(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"errors":   false,
 		"message":  nil,
-		"count":    len(articles),
+		"count":    len(*articles),
 		"user_id":  c.GetRespHeader(userCtx, ""),
 		"articles": articles,
 	})
@@ -440,14 +440,14 @@ func (h *Handler) replyToCommentByID(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Tags articles
 // @Description Get all comments of an article
-// @ID get-all-comments-by-article-id
+// @ID get-all-replies-of-comment
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/articles/:id/comments/:commentID/replies [get]
+// @Router /api/v1/articles/:id/comments/:comment-id/replies [get]
 func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Get all replies by comment id... ")
@@ -468,7 +468,7 @@ func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 		})
 	}
 
-	commentID := c.Params("commentID")
+	commentID := c.Params("comment-id")
 	if commentID == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"errors":  true,
@@ -487,7 +487,7 @@ func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"errors":   false,
 		"message":  nil,
-		"count":    len(comments),
+		"count":    len(*comments),
 		"user_id":  c.GetRespHeader(userCtx, ""),
 		"comments": comments,
 	})

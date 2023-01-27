@@ -5,7 +5,6 @@ import (
 	"github.com/gofiber/swagger"
 
 	"acsp/docs"
-
 	"acsp/internal/service"
 
 	_ "github.com/swaggo/files"
@@ -27,8 +26,8 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 	{
 		auth.Post("/sign-up", h.signUp)
 		auth.Post("/sign-in", h.signIn)
-		auth.Post("/refresh", h.refreshToken)
-		auth.Post("/logout", h.logout)
+		// auth.Post("/refresh", h.refreshToken)
+		// auth.Post("/logout", h.logout)
 	}
 
 	// Define API routes
@@ -44,10 +43,10 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 
 			comments := articles.Group("/:id/comments")
 			{
-				comments.Post("/", h.commentArticle)                       // comment an article
-				comments.Get("/", h.getCommentsByArticleID)                // get all comments by article id
-				comments.Post("/:commentID/replies", h.replyToCommentByID) // reply to comment by id and article id
-				comments.Get("/:commentID/replies", h.getRepliesByCommentID)
+				comments.Post("/", h.commentArticle)                        // comment an article
+				comments.Get("/", h.getCommentsByArticleID)                 // get all comments by article id
+				comments.Post("/:comment-id/replies", h.replyToCommentByID) // reply to comment by id and article id
+				comments.Get("/:comment-id/replies", h.getRepliesByCommentID)
 			}
 		}
 

@@ -20,7 +20,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 COPY --from=builder /github.com/aitucsp/acsp-backend/.bin/app .
-COPY --from=builder /github.com/aitucsp/acsp-backend/.env ./.env
+COPY --from=builder /github.com/aitucsp/acsp-backend/base.env ./base.env
 
 EXPOSE 8080
 

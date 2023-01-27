@@ -12,9 +12,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+
 	"go.uber.org/zap"
 
 	"acsp/internal/config"
+	"acsp/internal/constants"
 	"acsp/internal/handler"
 	"acsp/internal/infrastructure/db"
 	"acsp/internal/logging"
@@ -22,13 +24,8 @@ import (
 	"acsp/internal/service"
 )
 
-const (
-	configsDirectory      = "configs"
-	contextTimeoutSeconds = 10
-)
-
-// @title           Go REST API
-// @version         1.0
+// @title Go REST API
+// @version 1.0
 // @description Articles REST API for Go.
 
 // @host localhost:8080
@@ -54,14 +51,6 @@ func main() {
 		return
 	}
 
-	// Initializing the application configuration
-	// _, err = config.Init(configsDirectory)
-	// if err != nil {
-	// 	fallbackLogger.Println("couldn't create app config:", err)
-	//
-	// 	return
-	// }
-
 	appLogger, syncLogger, err := logging.NewBuilder().
 		WithFallbackLogger(fallbackLogger).
 		WithLoggerConfig(appConfig.Logger).
@@ -85,25 +74,24 @@ func main() {
 	// Initializing fiber configuration
 	fiberConfig := config.FiberConfig(appConfig)
 
-	postgresConfig, err := db.LoadConfig(".")
+	postgresConfig, err := db.LoadPostgresConfig(configProvider)
 	if err != nil {
 		appLogger.Fatal("Error occurred when initializing database config: ", zap.Error(err))
 	}
 
-	redisConfig, err := db.LoadRedisConfig(".")
+	redisConfig, err := db.LoadRedisConfig(configProvider)
 	if err != nil {
 		appLogger.Fatal("Error occurred when initializing database config: ", zap.Error(err))
 	}
 
 	// Declaring a context with timeout
-	ctx, cancel := context.WithTimeout(context.Background(), contextTimeoutSeconds*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.ContextTimeoutSeconds*time.Second)
 	ctx = logging.ContextWithLogger(ctx, appLogger)
 
 	// Initializing postgresql database client
 	dbClient, err := db.NewDBClient(ctx, cancel, postgresConfig)
 	if err != nil {
 		appLogger.Error("Error when initializing Postgres Client", zap.Error(err))
-		os.Exit(1)
 	}
 
 	redisClient, err := db.NewClientRedis(ctx, cancel, redisConfig)
@@ -151,7 +139,7 @@ func createChannel() (chan os.Signal, func()) {
 }
 
 func shutdown(ctx context.Context, app *fiber.App, appLogger *zap.Logger) {
-	ctx, cancel := context.WithTimeout(ctx, contextTimeoutSeconds*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, constants.ContextTimeoutSeconds*time.Second)
 	defer cancel()
 
 	if err := app.Shutdown(); err != nil {

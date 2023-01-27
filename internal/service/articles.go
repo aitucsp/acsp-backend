@@ -34,20 +34,20 @@ func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.Cre
 	return s.repo.Create(ctx, project)
 }
 
-func (s *ArticlesService) GetAll(ctx context.Context, userID string) ([]model.Article, error) {
+func (s *ArticlesService) GetAll(ctx context.Context, userID string) (*[]model.Article, error) {
 	userId, _ := strconv.Atoi(userID)
 	return s.repo.GetAllByUserId(ctx, userId)
 }
 
-func (s *ArticlesService) GetByID(ctx context.Context, articleID, userID string) (model.Article, error) {
+func (s *ArticlesService) GetByID(ctx context.Context, articleID, userID string) (*model.Article, error) {
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return model.Article{}, err
+		return &model.Article{}, err
 	}
 
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return model.Article{}, err
+		return &model.Article{}, err
 	}
 
 	return s.repo.GetArticleByIDAndUserID(ctx, articleId, userId)
@@ -149,20 +149,20 @@ func (s *ArticlesService) ReplyToCommentByArticleIDAndCommentID(ctx context.Cont
 	return s.repo.ReplyToComment(ctx, articleId, userId, parentCommentId, replyComment)
 }
 
-func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error) {
+func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, commentID string) (*[]model.Comment, error) {
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return []model.Comment{}, err
+		return &[]model.Comment{}, err
 	}
 
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return []model.Comment{}, err
+		return &[]model.Comment{}, err
 	}
 
 	parentCommentId, err := strconv.Atoi(commentID)
 	if err != nil {
-		return []model.Comment{}, err
+		return &[]model.Comment{}, err
 	}
 
 	return s.repo.GetRepliesByArticleIDAndCommentID(ctx, articleId, userId, parentCommentId)

@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"acsp/internal/apperror"
+	"acsp/internal/constants"
 )
 
 const (
@@ -139,7 +140,7 @@ func newHostConfig(p Provider) (*HostConfig, error) {
 
 	return &HostConfig{
 		Environment:     e,
-		ShutdownTimeout: getInt(p, "SERVER_SHUTDOWNTIMEOUT", 10),
+		ShutdownTimeout: GetInt(p, "SERVER_SHUTDOWNTIMEOUT", 10),
 	}, nil
 }
 
@@ -236,9 +237,9 @@ func newHTTPConfig(p Provider) (*HTTPConfig, error) {
 	return &HTTPConfig{
 		Host:               p.Get(prefix+"_HOST", "localhost"),
 		Port:               p.Get(prefix+"_PORT", "8080"),
-		ReadTimeout:        getDuration(p, prefix+"_READ_TIMEOUT", 10),
-		WriteTimeout:       getDuration(p, prefix+"_WRITE_TIMEOUT", 10),
-		MaxHeaderMegabytes: getInt(p, prefix+"_MAX_HEADER_BYTES", 1),
+		ReadTimeout:        getDuration(p, prefix+"_READ_TIMEOUT", constants.FallBackDurationSeconds*time.Second),
+		WriteTimeout:       getDuration(p, prefix+"_WRITE_TIMEOUT", constants.FallBackDurationSeconds*time.Second),
+		MaxHeaderMegabytes: GetInt(p, prefix+"_MAX_HEADER_BYTES", 1),
 	}, nil
 }
 
@@ -281,9 +282,9 @@ func newLoggerConfig(p Provider) (*LoggerConfig, error) {
 		LevelEncoder: le,
 		Sinks:        ss,
 		ErrorSinks:   ess,
-		MaxSizeMB:    getInt(p, "LOGGER_MAXSIZEMB", 128),
-		MaxAgeDays:   getInt(p, "LOGGER_MAXAGEDAYS", 168),
-		MaxBackups:   getInt(p, "LOGGER_MAXBACKUPS", 16),
+		MaxSizeMB:    GetInt(p, "LOGGER_MAXSIZEMB", 128),
+		MaxAgeDays:   GetInt(p, "LOGGER_MAXAGEDAYS", 168),
+		MaxBackups:   GetInt(p, "LOGGER_MAXBACKUPS", 16),
 		BatchSize:    getUint(p, "LOGGER_BATCHSIZE", 2),
 	}, nil
 }
@@ -299,7 +300,7 @@ func newAuthConfig(p Provider) (*AuthConfig, error) {
 	}
 
 	var refreshTokenKey string
-	refreshTokenKey = p.Get(prefix+"_ACCESS_TOKEN_SECRET_KEY", "")
+	refreshTokenKey = p.Get(prefix+"_REFRESH_TOKEN_SECRET_KEY", "")
 	if refreshTokenKey == "" {
 		return nil, apperror.ErrEnvVariableParsing
 	}
@@ -311,7 +312,7 @@ func newAuthConfig(p Provider) (*AuthConfig, error) {
 	}
 
 	var refreshTokenTTL time.Duration
-	refreshTokenTTL = getDuration(p, prefix+"_ACCESS_TOKEN_TTL", 0)
+	refreshTokenTTL = getDuration(p, prefix+"_REFRESH_TOKEN_TTL", 0)
 	if refreshTokenTTL == 0 {
 		return nil, apperror.ErrEnvVariableParsing
 	}
@@ -336,7 +337,7 @@ func getBool(p Provider, key string, fallback bool) bool {
 	return fallback
 }
 
-func getInt(p Provider, key string, fallback int) int {
+func GetInt(p Provider, key string, fallback int) int {
 	v := p.Get(key, "")
 	i, err := strconv.Atoi(v)
 	if err == nil {

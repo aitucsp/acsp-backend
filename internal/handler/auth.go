@@ -18,7 +18,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param input body model.User true "account info"
-// @Success 200 {integer} integer 1
+// @Success 200 {integer} string "message"
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
@@ -63,7 +63,7 @@ type signInInput struct {
 // @Accept  json
 // @Produce  json
 // @Param input body signInInput true "credentials"
-// @Success 200 {string} string "token"
+// @Success 200 {string} service.TokenDetails "token"
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
@@ -91,23 +91,11 @@ func (h *Handler) signIn(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(tokenPair)
 }
 
-// @Summary RefreshToken
-// @Tags auth
-// @Description Refresh a token
-// @ID refresh-token
-// @Accept  json
-// @Produce  json
-// @Param input body signInInput true "credentials"
-// @Success 200 {string} string "token"
-// @Failure 400,404 {object} map[string]interface{}
-// @Failure 500 {object} map[string]interface{}
-// @Failure default {object} map[string]interface{}
-// @Router /auth/sign-in [post]
-func (h *Handler) refreshToken(ctx *fiber.Ctx) error {
-
-	return ctx.Status(http.StatusOK).JSON(fiber.Map{})
-}
-
-func (h *Handler) logout(ctx *fiber.Ctx) error {
-	return ctx.Status(http.StatusOK).JSON(fiber.Map{})
-}
+// func (h *Handler) refreshToken(ctx *fiber.Ctx) error {
+//
+// 	return ctx.Status(http.StatusOK).JSON(fiber.Map{})
+// }
+//
+// func (h *Handler) logout(ctx *fiber.Ctx) error {
+// 	return ctx.Status(http.StatusOK).JSON(fiber.Map{})
+// }

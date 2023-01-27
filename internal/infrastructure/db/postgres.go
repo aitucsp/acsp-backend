@@ -1,6 +1,8 @@
 package db
 
-import "github.com/spf13/viper"
+import (
+	"acsp/internal/config"
+)
 
 type PostgresConfig struct {
 	Username string `yaml:"username" env:"PSQL_USERNAME"`
@@ -10,22 +12,14 @@ type PostgresConfig struct {
 	Database string `yaml:"database" env:"PSQL_DATABASE"`
 }
 
-func LoadConfig(path string) (*PostgresConfig, error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigFile("base.env")
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		return nil, err
-	}
-
+func LoadPostgresConfig(path config.Provider) (*PostgresConfig, error) {
 	config := &PostgresConfig{
-		Username: viper.GetString("PSQL_USERNAME"),
-		Password: viper.GetString("PSQL_PASSWORD"),
-		Host:     viper.GetString("PSQL_HOST"),
-		Port:     viper.GetString("PSQL_PORT"),
-		Database: viper.GetString("PSQL_DATABASE"),
+		Username: path.Get("PSQL_USERNAME", ""),
+		Password: path.Get("PSQL_PASSWORD", ""),
+		Host:     path.Get("PSQL_HOST", ""),
+		Port:     path.Get("PSQL_PORT", ""),
+		Database: path.Get("PSQL_DATABASE", ""),
 	}
 
-	return config, err
+	return config, nil
 }
