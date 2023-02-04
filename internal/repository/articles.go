@@ -80,7 +80,7 @@ func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleI
 	return &article, nil
 }
 
-func (a *ArticlesDatabase) GetAllByUserId(ctx context.Context, userID int) (*[]model.Article, error) {
+func (a *ArticlesDatabase) GetAllByUserID(ctx context.Context, userID int) (*[]model.Article, error) {
 	var articles []model.Article
 	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", constants.ArticlesTable)
 
@@ -217,11 +217,6 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(
 		comment.ParentID = int(parentID.Int64)
 		comments = append(comments, comment)
 	}
-
-	// err := a.db.Select(&comments, query, articleID)
-	// if err != nil {
-	// 	return []model.Comment{}, err
-	// }
 
 	return &comments, nil
 }

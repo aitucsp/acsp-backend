@@ -24,9 +24,9 @@ import (
 	"acsp/internal/service"
 )
 
-// @title Go REST API
+// @title ACSP Backend
 // @version 1.0
-// @description Articles REST API for Go.
+// @description Backend for AITU Corporate Self-Study Portal.
 
 // @host localhost:8080
 // @BasePath /

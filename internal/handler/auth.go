@@ -22,7 +22,7 @@ import (
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /auth/sign-up [post]
+// @Router /api/v1/auth/sign-up [post]
 func (h *Handler) signUp(ctx *fiber.Ctx) error {
 	l := logging.LoggerFromContext(ctx.UserContext())
 	l.Info("Signing up... ")
@@ -30,6 +30,7 @@ func (h *Handler) signUp(ctx *fiber.Ctx) error {
 	var input dto.CreateUser
 	if err := ctx.BodyParser(&input); err != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
 			"message": apperror.ErrBodyParsed,
 		})
 	}
@@ -37,6 +38,7 @@ func (h *Handler) signUp(ctx *fiber.Ctx) error {
 	validate := validator.New()
 	if validationErr := validate.Struct(&input); validationErr != nil {
 		return ctx.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error":   true,
 			"message": apperror.ErrBadInputBody,
 		})
 	}
@@ -44,6 +46,7 @@ func (h *Handler) signUp(ctx *fiber.Ctx) error {
 	err := h.services.Authorization.CreateUser(ctx.UserContext(), input)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
 			"message": err.Error(),
 		})
 	}
@@ -67,7 +70,7 @@ type signInInput struct {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /auth/sign-in [post]
+// @Router /api/v1/auth/sign-in [post]
 func (h *Handler) signIn(ctx *fiber.Ctx) error {
 	l := logging.LoggerFromContext(ctx.UserContext())
 	l.Info("Signing in...")
@@ -82,20 +85,50 @@ func (h *Handler) signIn(ctx *fiber.Ctx) error {
 	tokenPair, err := h.services.Authorization.GenerateTokenPair(ctx.UserContext(), input.Email, input.Password)
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
 			"message": err.Error(),
 		})
 	}
 
-	err = h.services.Authorization.SaveTokenPair(ctx.UserContext(), tokenPair.UserID, tokenPair)
+	err = h.services.Authorization.SaveRefreshToken(ctx.UserContext(), tokenPair.UserID, tokenPair)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
 
 	return ctx.Status(http.StatusOK).JSON(tokenPair)
 }
 
-// func (h *Handler) refreshToken(ctx *fiber.Ctx) error {
-//
-// 	return ctx.Status(http.StatusOK).JSON(fiber.Map{})
-// }
-//
-// func (h *Handler) logout(ctx *fiber.Ctx) error {
-// 	return ctx.Status(http.StatusOK).JSON(fiber.Map{})
-// }
+// @Description Logout user and delete refresh token from cache.
+// @Summary de-authorize user and delete refresh token from Redis
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Success 204 {string} status "ok"
+// @Failure 500 {object} map[string]interface{}
+// @Security ApiKeyAuth
+// @Router /api/v1/auth/logout [post]
+func (h *Handler) logout(ctx *fiber.Ctx) error {
+	l := logging.LoggerFromContext(ctx.UserContext())
+	l.Info("Logging out... ")
+
+	userId, err := getUserId(ctx)
+	if err != nil {
+		return ctx.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error":   true,
+			"message": err.Error(),
+		})
+	}
+
+	err = h.services.Authorization.DeleteRefreshToken(ctx.UserContext(), userId)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	return ctx.Status(http.StatusOK).JSON(fiber.Map{})
+}

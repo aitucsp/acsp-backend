@@ -18,13 +18,16 @@ type Service struct {
 	Authorization
 	Articles
 	Roles
+	Cards
 }
 
 type Authorization interface {
 	CreateUser(ctx context.Context, dto dto.CreateUser) error
+	GetUserByID(ctx context.Context, userID string) (model.User, error)
 	GenerateTokenPair(ctx context.Context, email, password string) (*TokenDetails, error)
 	ParseToken(token string) (string, error)
-	SaveTokenPair(ctx context.Context, userID string, details *TokenDetails) error
+	SaveRefreshToken(ctx context.Context, userID string, details *TokenDetails) error
+	DeleteRefreshToken(ctx context.Context, userID string) error
 }
 
 type Roles interface {
@@ -40,14 +43,25 @@ type Articles interface {
 	Create(ctx context.Context, userID string, dto dto.CreateArticle) error
 	GetAll(ctx context.Context, userID string) (*[]model.Article, error)
 	GetByID(ctx context.Context, articleID, userID string) (*model.Article, error)
-	Update(ctx context.Context, articleID string, userID string, article dto.UpdateArticle) error
-	Delete(ctx context.Context, userID string, projectId string) error
+	Update(ctx context.Context, articleID, userID string, article dto.UpdateArticle) error
+	Delete(ctx context.Context, userID, projectId string) error
 	CommentByID(ctx context.Context, articleID, userID string, comment dto.CreateComment) error
 	GetCommentsByArticleID(ctx context.Context, articleID string) ([]model.Comment, error)
 	ReplyToCommentByArticleIDAndCommentID(
-		ctx context.Context, articleID string, userID string, parentCommentID string, comment dto.ReplyToComment) error
+		ctx context.Context, articleID, userID, parentCommentID string, comment dto.ReplyToComment) error
 	GetRepliesByArticleIDAndCommentID(
 		ctx context.Context, articleID, userID, commentID string) (*[]model.Comment, error)
+}
+
+type Cards interface {
+	Create(ctx context.Context, userID string, dto dto.CreateCard) error
+	Update(ctx context.Context, userID string, cardID int, dto dto.UpdateCard) error
+	Delete(ctx context.Context, userID string, cardID int) error
+	GetAllByUserID(ctx context.Context, userID string) (*[]model.Card, error)
+	GetAll(ctx context.Context) (*[]model.Card, error)
+	GetByID(ctx context.Context, cardID int) (*model.Card, error)
+	CreateInvitation(ctx context.Context, userID string, cardID int) error
+	GetInvitationsByUserID(ctx context.Context, userID string) (*[]model.InvitationCard, error)
 }
 
 func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig) *Service {
@@ -55,5 +69,6 @@ func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfi
 		Authorization: NewAuthService(repo.Authorization, repo.Roles, r, c),
 		Articles:      NewArticlesService(repo.Articles, repo.Authorization),
 		Roles:         NewRolesService(repo.Roles, repo.Authorization),
+		Cards:         NewCardsService(repo.Cards, repo.Authorization),
 	}
 }

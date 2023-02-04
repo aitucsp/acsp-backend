@@ -133,7 +133,7 @@ func NewBaseConfig(p Provider) (*Config, error) {
 }
 
 func newHostConfig(p Provider) (*HostConfig, error) {
-	e, err := parseEnvironment(p.Get("ENV", string(EnvironmentDevelopment)))
+	e, err := parseEnvironment(p.Get("ENVIRONMENT", string(EnvironmentDevelopment)))
 	if err != nil {
 		return nil, err
 	}

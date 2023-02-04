@@ -132,3 +132,22 @@ func (r *AuthPostgres) GetAll(ctx context.Context) (*[]model.User, error) {
 
 	return &users, err
 }
+
+func (r *AuthPostgres) ExistsUserByID(ctx context.Context, id int) (bool, error) {
+	l := logging.LoggerFromContext(ctx)
+
+	var isExists bool
+
+	query := fmt.Sprintf(`SELECT EXISTS(SELECT 1 FROM %s WHERE id=$1)`, constants.UsersTable)
+
+	row := r.db.QueryRow(query, id)
+
+	err := row.Scan(&isExists)
+	if err != nil {
+		l.Error("Error when finding user in database", zap.Error(err))
+
+		return false, err
+	}
+
+	return isExists, nil
+}

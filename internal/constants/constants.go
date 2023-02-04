@@ -1,12 +1,15 @@
 package constants
 
 const (
-	UsersTable     = "users"
-	ArticlesTable  = "articles"
-	UserRolesTable = "user_roles"
-	RolesTable     = "roles"
-	CommentsTable  = "comments"
-	DatabaseName   = "postgres"
+	UsersTable               = "users"
+	RolesTable               = "roles"
+	UserRolesTable           = "user_roles"
+	ArticlesTable            = "scholar_articles"
+	CommentsTable            = "scholar_comments"
+	CardsTable               = "code_connection_cards"
+	InvitationsTable         = "code_connection_invitations"
+	InvitationResponsesTable = "code_connection_responses"
+	DatabaseName             = "postgres"
 )
 
 const (

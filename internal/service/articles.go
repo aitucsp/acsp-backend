@@ -36,7 +36,7 @@ func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.Cre
 
 func (s *ArticlesService) GetAll(ctx context.Context, userID string) (*[]model.Article, error) {
 	userId, _ := strconv.Atoi(userID)
-	return s.repo.GetAllByUserId(ctx, userId)
+	return s.repo.GetAllByUserID(ctx, userId)
 }
 
 func (s *ArticlesService) GetByID(ctx context.Context, articleID, userID string) (*model.Article, error) {

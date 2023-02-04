@@ -25,7 +25,7 @@ import (
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/articles [post]
+// @Router /api/v1/scholar/articles [post]
 func (h *Handler) createArticle(c *fiber.Ctx) error {
 	log.Println("Creating an article... ")
 
@@ -79,7 +79,7 @@ func (h *Handler) createArticle(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/articles [get]
+// @Router /api/v1/scholar/articles [get]
 func (h *Handler) getAllArticles(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all articles... ")
@@ -120,7 +120,7 @@ func (h *Handler) getAllArticles(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/articles/:id [get]
+// @Router /api/v1/scholar/articles/:id [get]
 func (h *Handler) getArticleByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting article by id... ")
@@ -169,7 +169,7 @@ func (h *Handler) getArticleByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/articles/:id [put]
+// @Router /api/v1/scholar/articles/:id [put]
 func (h *Handler) updateArticle(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Updating a project... ")
@@ -228,7 +228,7 @@ func (h *Handler) updateArticle(c *fiber.Ctx) error {
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/article/:id [delete]
+// @Router /api/v1/scholar/articles/:id [delete]
 func (h *Handler) deleteArticle(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Deleting an article")
@@ -272,7 +272,7 @@ func (h *Handler) deleteArticle(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/articles/:id/comments [post]
+// @Router /api/v1/scholar/articles/:id/comments [post]
 func (h *Handler) commentArticle(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Commenting an article")
@@ -331,7 +331,7 @@ func (h *Handler) commentArticle(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/articles/:id/comments [get]
+// @Router /api/v1/scholar/articles/:id/comments [get]
 func (h *Handler) getCommentsByArticleID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Get all comments by article id... ")
@@ -372,7 +372,7 @@ func (h *Handler) getCommentsByArticleID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/articles/:id/comments/:comment-id/replies [post]
+// @Router /api/v1/scholar/articles/:id/comments/:comment-id/replies [post]
 func (h *Handler) replyToCommentByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Replying to comment... ")
@@ -447,7 +447,7 @@ func (h *Handler) replyToCommentByID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/articles/:id/comments/:comment-id/replies [get]
+// @Router /api/v1/scholar/articles/:id/comments/:comment-id/replies [get]
 func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Get all replies by comment id... ")

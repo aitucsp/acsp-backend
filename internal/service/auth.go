@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v9"
@@ -35,13 +36,11 @@ type refreshTokenClaims struct {
 }
 
 type TokenDetails struct {
-	UserID           string `json:"-"`
-	AccessToken      string `json:"access_token"`
-	RefreshToken     string `json:"refresh_token"`
-	AccessTokenUUID  string `json:"-"`
-	RefreshTokenUUID string `json:"-"`
-	AccessExpiresAt  int64  `json:"-"`
-	RefreshExpiresAt int64  `json:"-"`
+	UserID                string        `json:"-"`
+	AccessToken           string        `json:"access_token"`
+	RefreshToken          string        `json:"refresh_token"`
+	AccessTokenExpiresIn  time.Duration `json:"-"`
+	RefreshTokenExpiresIn time.Duration `json:"-"`
 }
 
 type AuthService struct {
@@ -99,6 +98,17 @@ func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) er
 	return nil
 }
 
+func (s *AuthService) GetUserByID(ctx context.Context, userID string) (model.User, error) {
+	userId, _ := strconv.Atoi(userID)
+
+	user, err := s.repo.GetByID(ctx, userId)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	return *user, nil
+}
+
 func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password string) (*TokenDetails, error) {
 	l := logging.LoggerFromContext(ctx)
 	l.Info("Generating a token...")
@@ -112,19 +122,21 @@ func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password str
 	}
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		&accessTokenClaims{jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.authConfig.JWT.AccessTokenTTL)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
+		&accessTokenClaims{
+			jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.authConfig.JWT.AccessTokenTTL)),
+				IssuedAt:  jwt.NewNumericDate(time.Now()),
+			},
 			user.ID,
 			user.Email,
 		})
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256,
-		&refreshTokenClaims{jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.authConfig.JWT.RefreshTokenTTL)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
+		&refreshTokenClaims{
+			jwt.RegisteredClaims{
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(s.authConfig.JWT.RefreshTokenTTL)),
+				IssuedAt:  jwt.NewNumericDate(time.Now()),
+			},
 			user.ID,
 		})
 
@@ -141,8 +153,8 @@ func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password str
 	tokenDetails.UserID = user.ID
 	tokenDetails.AccessToken = accessTokenJWT
 	tokenDetails.RefreshToken = refreshTokenJWT
-	tokenDetails.AccessExpiresAt = time.Now().Add(time.Minute * s.authConfig.JWT.AccessTokenTTL).Unix()
-	tokenDetails.AccessExpiresAt = time.Now().Add(time.Minute * s.authConfig.JWT.RefreshTokenTTL).Unix()
+	tokenDetails.AccessTokenExpiresIn = time.Minute * s.authConfig.JWT.AccessTokenTTL
+	tokenDetails.RefreshTokenExpiresIn = time.Minute * s.authConfig.JWT.RefreshTokenTTL
 
 	return &tokenDetails, nil
 }
@@ -153,7 +165,7 @@ func (s *AuthService) ParseToken(accessToken string) (string, error) {
 			return nil, apperror.ErrBadSigningMethod
 		}
 
-		return []byte(signingKey), nil
+		return []byte(s.authConfig.JWT.AccessTokenSecret), nil
 	})
 
 	if err != nil {
@@ -168,6 +180,24 @@ func (s *AuthService) ParseToken(accessToken string) (string, error) {
 	return claims.UserId, nil
 }
 
+func (s *AuthService) SaveRefreshToken(ctx context.Context, userID string, details *TokenDetails) error {
+	err := s.redisClient.Set(ctx, userID, details.RefreshToken, details.RefreshTokenExpiresIn).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *AuthService) DeleteRefreshToken(ctx context.Context, userID string) error {
+	err := s.redisClient.Del(ctx, userID).Err()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func generatePasswordHash(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -175,21 +205,4 @@ func generatePasswordHash(password string) (string, error) {
 	}
 
 	return string(bytes), nil
-}
-
-func (s *AuthService) SaveTokenPair(ctx context.Context, userID string, details *TokenDetails) error {
-	at := time.Unix(details.AccessExpiresAt, 0) // converting Unix to UTC(to Time object)
-	rt := time.Unix(details.RefreshExpiresAt, 0)
-	now := time.Now()
-
-	errAccess := s.redisClient.Set(ctx, details.AccessTokenUUID, userID, at.Sub(now)).Err()
-	if errAccess != nil {
-		return errAccess
-	}
-	errRefresh := s.redisClient.Set(ctx, details.RefreshTokenUUID, userID, rt.Sub(now)).Err()
-	if errRefresh != nil {
-		return errRefresh
-	}
-
-	return nil
 }

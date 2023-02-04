@@ -10,6 +10,21 @@ definitions:
     - description
     - topic
     type: object
+  dto.CreateCard:
+    properties:
+      description:
+        type: string
+      position:
+        type: string
+      skills:
+        items:
+          type: string
+        type: array
+    required:
+    - description
+    - position
+    - skills
+    type: object
   dto.CreateComment:
     properties:
       text:
@@ -26,6 +41,21 @@ definitions:
     required:
     - description
     - topic
+    type: object
+  dto.UpdateCard:
+    properties:
+      description:
+        type: string
+      position:
+        type: string
+      skills:
+        items:
+          type: string
+        type: array
+    required:
+    - description
+    - position
+    - skills
     type: object
   handler.signInInput:
     properties:
@@ -55,16 +85,281 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: Articles REST API for Go.
-  title: Go REST API
+  description: Backend for AITU Corporate Self-Study Portal.
+  title: ACSP Backend
   version: "1.0"
 paths:
-  /api/v1/article/:id:
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: De-authorize user and delete refresh token from Redis.
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: ok
+          schema:
+            type: string
+      security:
+      - ApiKeyAuth: []
+      summary: de-authorize user and delete refresh token from Redis
+      tags:
+      - auth
+  /api/v1/auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: login
+      operationId: login
+      parameters:
+      - description: credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.signInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      summary: SignIn
+      tags:
+      - auth
+  /api/v1/auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: create account
+      operationId: create-account
+      parameters:
+      - description: account info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/model.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      summary: SignUp
+      tags:
+      - auth
+  /api/v1/code-connection/applicants/:
+    get:
+      consumes:
+      - application/json
+      description: Get all cards
+      operationId: get-all-cards
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all cards
+      tags:
+      - cards
+  /api/v1/code-connection/applicants/:id:
+    get:
+      consumes:
+      - application/json
+      description: Get applicant card by id
+      operationId: get-applicant-card-by-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get applicant card by id
+      tags:
+      - cards
+  /api/v1/code-connection/cards:
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a card
+      operationId: card-id
+      parameters:
+      - description: card information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCard'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a card
+      tags:
+      - cards
+  /api/v1/code-connection/cards/:
+    get:
+      consumes:
+      - application/json
+      description: Get all cards of user
+      operationId: get-all-cards-by-user-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all cards by user id
+      tags:
+      - cards
+  /api/v1/code-connection/cards/:id:
     delete:
       consumes:
       - application/json
-      description: Delete an article from database
-      operationId: delete-article-by-id
+      description: Delete a card from database
+      operationId: delete-card-by-id
       produces:
       - application/json
       responses:
@@ -85,10 +380,138 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Delete an article by id
+      summary: Delete a card by id
       tags:
-      - articles
-  /api/v1/articles:
+      - cards
+    put:
+      consumes:
+      - application/json
+      description: Update data of card
+      operationId: update-card-by-id
+      parameters:
+      - description: card information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCard'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a card by id
+      tags:
+      - cards
+  /api/v1/code-connection/cards/:id/invite:
+    post:
+      consumes:
+      - application/json
+      description: Invite a user by card
+      operationId: create-an-invitation
+      parameters:
+      - description: card id
+        in: path
+        name: input
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: SUCCESS
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create an invitation
+      tags:
+      - cards
+  /api/v1/code-connection/invitations/:
+    get:
+      consumes:
+      - application/json
+      description: Invite a user by card
+      operationId: get-invitations
+      parameters:
+      - description: card id
+        in: path
+        name: input
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get invitations
+      tags:
+      - cards
+  /api/v1/scholar/articles:
     get:
       consumes:
       - application/json
@@ -171,7 +594,35 @@ paths:
       summary: Create an article
       tags:
       - articles
-  /api/v1/articles/:id:
+  /api/v1/scholar/articles/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an article from database
+      operationId: delete-article-by-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete an article by id
+      tags:
+      - articles
     get:
       consumes:
       - application/json
@@ -250,7 +701,7 @@ paths:
       summary: Update an article by id
       tags:
       - articles
-  /api/v1/articles/:id/comments:
+  /api/v1/scholar/articles/:id/comments:
     get:
       consumes:
       - application/json
@@ -333,46 +784,7 @@ paths:
       summary: Comment an article
       tags:
       - articles
-  /api/v1/articles/:id/comments/:comment-id/replies:
-    post:
-      consumes:
-      - application/json
-      description: Reply to comment of an article
-      operationId: reply-to-comment-by-article-id-and-comment-id
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-        default:
-          description: ""
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Reply to comment by article id and comment id
-      tags:
-      - articles
-  /api/v1/articles/:id/comments/:commentID/replies:
+  /api/v1/scholar/articles/:id/comments/:comment-id/replies:
     get:
       consumes:
       - application/json
@@ -411,26 +823,19 @@ paths:
       summary: Get all comments by article id
       tags:
       - articles
-  /auth/sign-in:
     post:
       consumes:
       - application/json
-      description: login
-      operationId: login
-      parameters:
-      - description: credentials
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/handler.signInInput'
+      description: Reply to comment of an article
+      operationId: reply-to-comment-by-article-id-and-comment-id
       produces:
       - application/json
       responses:
         "200":
-          description: token
+          description: OK
           schema:
-            type: string
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -451,52 +856,11 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: SignIn
+      security:
+      - ApiKeyAuth: []
+      summary: Reply to comment by article id and comment id
       tags:
-      - auth
-  /auth/sign-up:
-    post:
-      consumes:
-      - application/json
-      description: create account
-      operationId: create-account
-      parameters:
-      - description: account info
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/model.User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: message
-          schema:
-            type: integer
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-        default:
-          description: ""
-          schema:
-            additionalProperties: true
-            type: object
-      summary: SignUp
-      tags:
-      - auth
+      - articles
 securityDefinitions:
   ApiKeyAuth:
     in: header
