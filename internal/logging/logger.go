@@ -7,7 +7,6 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -133,13 +132,6 @@ func (b *Builder) NewLogger() (*zap.Logger, func(), error) {
 		syncLogger()
 
 		return nil, nil, errors.Wrap(err, "couldn't redirect std logger")
-	}
-
-	err = mysql.SetLogger(newZapMySQLAdapter(logger.Named("mysql")))
-	if err != nil {
-		syncLogger()
-
-		return nil, nil, errors.Wrap(err, "couldn't set DB logger")
 	}
 
 	return logger, syncLogger, nil

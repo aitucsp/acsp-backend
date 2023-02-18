@@ -93,7 +93,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: De-authorize user and delete refresh token from Redis.
+      description: Logout user and delete refresh token from cache.
       produces:
       - application/json
       responses:
@@ -101,9 +101,14 @@ paths:
           description: ok
           schema:
             type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
       security:
       - ApiKeyAuth: []
-      summary: de-authorize user and delete refresh token from Redis
+      summary: Logout user
       tags:
       - auth
   /api/v1/auth/sign-in:
@@ -319,7 +324,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get all cards of user
+      description: Get all cards of a user
       operationId: get-all-cards-by-user-id
       produces:
       - application/json
@@ -351,7 +356,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get all cards by user id
+      summary: Get all cards of a user
       tags:
       - cards
   /api/v1/code-connection/cards/:id:
@@ -554,7 +559,7 @@ paths:
       consumes:
       - application/json
       description: Method for creating an article
-      operationId: project-id
+      operationId: create-article
       parameters:
       - description: project information
         in: body
@@ -744,7 +749,7 @@ paths:
       consumes:
       - application/json
       description: Method for commenting an article by id and user id
-      operationId: project-id
+      operationId: comment-an-article
       parameters:
       - description: comment information
         in: body

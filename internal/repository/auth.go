@@ -28,18 +28,58 @@ func NewAuthRepository(db *sqlx.DB) *AuthPostgres {
 func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) (int, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.String("email", user.Email))
 
+	tx, err := r.db.Begin()
+	if err != nil {
+		l.Error("Error when beginning the transaction", zap.Error(err))
+
+		return -1, err
+	}
+
 	var userID int
 	query := fmt.Sprintf(
 		`INSERT INTO %s (name, email, password) 
-			    values ($1, $2, $3) 
+			    VALUES ($1, $2, $3) 
   				RETURNING id`,
 		constants.UsersTable)
 
-	row := r.db.QueryRow(query, user.Name, user.Email, user.Password)
+	row := tx.QueryRow(query, user.Name, user.Email, user.Password)
 
-	err := row.Scan(&userID)
+	err = row.Scan(&userID)
 	if err != nil {
 		l.Error("Error when creating user in database", zap.Error(err))
+
+		return -1, err
+	}
+
+	if userID < 1 {
+		err := tx.Rollback()
+		if err != nil {
+			return -1, err
+		}
+	}
+
+	querySecond := fmt.Sprintf(`INSERT INTO %s (user_id, role_id) 
+										VALUES ($1, $2) RETURNING id`, constants.UserRolesTable)
+	var userRoleID int
+
+	err = tx.QueryRow(querySecond, userID, constants.DefaultUserRoleID).Scan(&userRoleID)
+	if err != nil {
+		l.Error("Error when executing the query", zap.Error(err))
+
+		err := tx.Rollback()
+		if err != nil {
+			return -1, err
+		}
+
+		return -1, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		err := tx.Rollback()
+		if err != nil {
+			return -1, err
+		}
 
 		return -1, err
 	}
@@ -95,8 +135,6 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 }
 
 func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.User, error) {
-	l := logging.LoggerFromContext(ctx)
-
 	var user model.User
 
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE email=$1`, constants.UsersTable)
@@ -109,8 +147,7 @@ func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.Use
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.Roles); err != nil {
-		l.Error("Error", zap.Error(err))
-		return nil, err
+		return nil, apperror.ErrEmailNotFound
 	}
 
 	return &user, nil

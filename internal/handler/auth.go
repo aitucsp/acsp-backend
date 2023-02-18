@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -9,6 +10,7 @@ import (
 	"acsp/internal/apperror"
 	"acsp/internal/dto"
 	"acsp/internal/logging"
+	"acsp/internal/utils"
 )
 
 // @Summary SignUp
@@ -101,9 +103,112 @@ func (h *Handler) signIn(ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(tokenPair)
 }
 
-// @Description Logout user and delete refresh token from cache.
-// @Summary de-authorize user and delete refresh token from Redis
+// @Description Renew access and refresh tokens.
+// @Summary renew access and refresh tokens
 // @Tags auth
+// @ID refresh-token
+// @Accept json
+// @Produce json
+// @Param refresh_token body string true "Refresh token"
+// @Success 200 {string} status "ok"
+// @Security ApiKeyAuth
+// @Router /v1/token/renew [post]
+func (h *Handler) refreshToken(ctx *fiber.Ctx) error {
+	now := time.Now().Unix()
+
+	// Get claims from JWT
+	claims, err := utils.ExtractTokenMetadata(ctx)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	expiresAccessToken := claims.Expires
+
+	if now > expiresAccessToken {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": true,
+			"msg":   "unauthorized, token has expired",
+		})
+	}
+
+	var newToken string
+
+	// Checking received data from JSON body.
+	if err := ctx.BodyParser(newToken); err != nil {
+		// Return, if JSON data is not correct.
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	// Set expiration time from Refresh token of current user.
+	expiresRefreshToken, err := utils.ParseRefreshToken(newToken)
+	if err != nil {
+		// Return status 400 and error message.
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": true,
+			"msg":   err.Error(),
+		})
+	}
+
+	if now < expiresRefreshToken {
+		// Define user ID.
+		userID := claims.UserID
+
+		// Get user by ID.
+		foundedUser, err := h.services.Authorization.GetUserByID(ctx.UserContext(), userID)
+		if err != nil {
+			// Return, if user not found.
+			return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+				"error": true,
+				"msg":   "user with the given ID is not found",
+			})
+		}
+
+		// Generate JWT Access & Refresh tokens.
+		tokenPair, err := h.services.Authorization.GenerateTokenPair(ctx.UserContext(), foundedUser.Email, foundedUser.Password)
+		if err != nil {
+			// Return status 500 and token generation error.
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": true,
+				"msg":   err.Error(),
+			})
+		}
+
+		// Save refresh token to Redis.
+		errRedis := h.services.SaveRefreshToken(ctx.UserContext(), userID, tokenPair)
+		if errRedis != nil {
+			// Return status 500 and Redis connection error.
+			return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": true,
+				"msg":   errRedis.Error(),
+			})
+		}
+
+		return ctx.JSON(fiber.Map{
+			"error": false,
+			"msg":   nil,
+			"tokens": fiber.Map{
+				"access_token":  tokenPair.AccessToken,
+				"refresh_token": tokenPair.RefreshToken,
+			},
+		})
+	} else {
+		return ctx.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": true,
+			"msg":   "unauthorized, your session was ended earlier",
+		})
+	}
+}
+
+// @Description Logout user and delete refresh token from cache.
+// @Summary Logout user
+// @Tags auth
+// @ID logout-user
 // @Accept json
 // @Produce json
 // @Success 204 {string} status "ok"

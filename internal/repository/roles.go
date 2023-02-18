@@ -121,9 +121,9 @@ func (r RolesDatabase) GetUserRoles(ctx context.Context, userID int) ([]model.Ro
 	var roles []model.Role
 
 	query := fmt.Sprintf(
-		`SELECT * FROM %s 
+		`SELECT r.* FROM %s u INNER JOIN %s r ON u.role_id = r.id
 				WHERE user_id = $1`,
-		constants.UserRolesTable)
+		constants.UserRolesTable, constants.RolesTable)
 
 	err := r.db.Select(&roles, query, userID)
 	if err != nil {

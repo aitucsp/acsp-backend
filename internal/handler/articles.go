@@ -17,7 +17,7 @@ import (
 // @Security ApiKeyAuth
 // @Tags articles
 // @Description Method for creating an article
-// @ID project-id
+// @ID create-article
 // @Accept  json
 // @Produce  json
 // @Param input body dto.CreateArticle true "project information"
@@ -264,7 +264,7 @@ func (h *Handler) deleteArticle(c *fiber.Ctx) error {
 // @Security ApiKeyAuth
 // @Tags articles
 // @Description Method for commenting an article by id and user id
-// @ID project-id
+// @ID comment-an-article
 // @Accept  json
 // @Produce  json
 // @Param input body dto.CreateComment true "comment information"

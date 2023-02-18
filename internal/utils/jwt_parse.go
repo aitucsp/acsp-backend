@@ -29,7 +29,7 @@ func ExtractTokenMetadata(c *fiber.Ctx) (*TokenMetadata, error) {
 		userID := claims["user_id"].(string)
 
 		// Expires time.
-		expires := int64(claims["expires"].(float64))
+		expires := int64(claims["exp"].(float64))
 
 		return &TokenMetadata{
 			UserID:  userID,

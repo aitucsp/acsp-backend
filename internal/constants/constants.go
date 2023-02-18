@@ -15,4 +15,5 @@ const (
 const (
 	ContextTimeoutSeconds   = 10
 	FallBackDurationSeconds = 10
+	DefaultUserRoleID       = 1 // ID of 'user' role
 )

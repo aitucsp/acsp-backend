@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pkg/errors"
 
 	"acsp/internal/apperror"
 )
@@ -46,6 +47,38 @@ func (h *Handler) userIdentity(c *fiber.Ctx) error {
 
 	c.Set(userCtx, userId)
 	return c.Next()
+}
+
+func (h *Handler) Authorize(allowedRoles ...string) func(*fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		userID, err := getUserId(c)
+		if len(userID) == 0 || userID == "" {
+			return errors.Wrap(err, apperror.ErrUserIDNotFound.Error())
+		}
+
+		roles, err := h.services.Roles.GetUserRoles(c.UserContext(), userID)
+		if err != nil {
+			return errors.Wrap(err, "Error when getting roles of user")
+		}
+
+		roleAllowed := false
+		for _, role := range roles {
+			for _, allowedRole := range allowedRoles {
+				if role.Name == allowedRole {
+					roleAllowed = true
+					break
+				}
+			}
+		}
+
+		if !roleAllowed {
+			return c.Status(http.StatusForbidden).JSON(fiber.Map{
+				"message": "You are not allowed to call this endpoint",
+			})
+		}
+
+		return c.Next()
+	}
 }
 
 func getUserId(c *fiber.Ctx) (string, error) {

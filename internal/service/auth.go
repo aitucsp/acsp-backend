@@ -19,11 +19,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-const (
-	signingKey = "qrkjk#4#%35FSFJlja#4353KSFjH"
-	tokenTTL   = 24 * time.Hour
-)
-
 type accessTokenClaims struct {
 	jwt.RegisteredClaims
 	UserId    string `json:"user_id"`
@@ -88,11 +83,8 @@ func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) er
 		return err
 	}
 
-	err = s.roles.SaveUserRole(ctx, userID, 1)
-	if err != nil {
-		l.Error("Error occurred when adding a role to a user", zap.Error(err))
-
-		return err
+	if userID == -1 {
+		return apperror.ErrUserIDNotFound
 	}
 
 	return nil
@@ -153,8 +145,8 @@ func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password str
 	tokenDetails.UserID = user.ID
 	tokenDetails.AccessToken = accessTokenJWT
 	tokenDetails.RefreshToken = refreshTokenJWT
-	tokenDetails.AccessTokenExpiresIn = time.Minute * s.authConfig.JWT.AccessTokenTTL
-	tokenDetails.RefreshTokenExpiresIn = time.Minute * s.authConfig.JWT.RefreshTokenTTL
+	tokenDetails.AccessTokenExpiresIn = s.authConfig.JWT.AccessTokenTTL
+	tokenDetails.RefreshTokenExpiresIn = s.authConfig.JWT.RefreshTokenTTL
 
 	return &tokenDetails, nil
 }

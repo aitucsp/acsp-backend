@@ -8,6 +8,7 @@ func (e Error) Error() string {
 
 const (
 	ErrUserNotFound           = Error("user doesn't exists")
+	ErrEmailNotFound          = Error("email not found in the database")
 	ErrPasswordMismatch       = Error("password mismatched")
 	ErrBodyParsed             = Error("request body parsed badly")
 	ErrProjectNotFound        = Error("project doesn't exists")

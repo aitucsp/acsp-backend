@@ -293,26 +293,22 @@ func newAuthConfig(p Provider) (*AuthConfig, error) {
 
 	const prefix = "JWT"
 
-	var accessTokenKey string
-	accessTokenKey = p.Get(prefix+"_ACCESS_TOKEN_SECRET_KEY", "")
+	accessTokenKey := p.Get(prefix+"_ACCESS_TOKEN_SECRET_KEY", "")
 	if accessTokenKey == "" {
 		return nil, apperror.ErrEnvVariableParsing
 	}
 
-	var refreshTokenKey string
-	refreshTokenKey = p.Get(prefix+"_REFRESH_TOKEN_SECRET_KEY", "")
+	refreshTokenKey := p.Get(prefix+"_REFRESH_TOKEN_SECRET_KEY", "")
 	if refreshTokenKey == "" {
 		return nil, apperror.ErrEnvVariableParsing
 	}
 
-	var accessTokenTTL time.Duration
-	accessTokenTTL = getDuration(p, prefix+"_ACCESS_TOKEN_TTL", 0)
+	accessTokenTTL := getDuration(p, prefix+"_ACCESS_TOKEN_TTL", 0)
 	if accessTokenTTL == 0 {
 		return nil, apperror.ErrEnvVariableParsing
 	}
 
-	var refreshTokenTTL time.Duration
-	refreshTokenTTL = getDuration(p, prefix+"_REFRESH_TOKEN_TTL", 0)
+	refreshTokenTTL := getDuration(p, prefix+"_REFRESH_TOKEN_TTL", 0)
 	if refreshTokenTTL == 0 {
 		return nil, apperror.ErrEnvVariableParsing
 	}

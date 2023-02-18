@@ -23,7 +23,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "De-authorize user and delete refresh token from Redis.",
+                "description": "Logout user and delete refresh token from cache.",
                 "consumes": [
                     "application/json"
                 ],
@@ -33,12 +33,19 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "de-authorize user and delete refresh token from Redis",
+                "summary": "Logout user",
                 "responses": {
                     "204": {
                         "description": "ok",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -361,7 +368,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get all cards of user",
+                "description": "Get all cards of a user",
                 "consumes": [
                     "application/json"
                 ],
@@ -371,7 +378,7 @@ const docTemplate = `{
                 "tags": [
                     "cards"
                 ],
-                "summary": "Get all cards by user id",
+                "summary": "Get all cards of a user",
                 "operationId": "get-all-cards-by-user-id",
                 "responses": {
                     "200": {
@@ -722,7 +729,7 @@ const docTemplate = `{
                     "articles"
                 ],
                 "summary": "Create an article",
-                "operationId": "project-id",
+                "operationId": "create-article",
                 "parameters": [
                     {
                         "description": "project information",
@@ -1006,7 +1013,7 @@ const docTemplate = `{
                     "articles"
                 ],
                 "summary": "Comment an article",
-                "operationId": "project-id",
+                "operationId": "comment-an-article",
                 "parameters": [
                     {
                         "description": "comment information",
