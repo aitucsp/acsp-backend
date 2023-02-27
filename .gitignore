@@ -18,3 +18,5 @@ configs/
 # vendor/
 .idea
 internal/service/mocks
+
+docs

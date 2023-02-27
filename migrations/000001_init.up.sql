@@ -87,26 +87,6 @@ CREATE TABLE code_connection_responses
     FOREIGN KEY (invitation_id) REFERENCES code_connection_invitations (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-SELECT user_id, skills, position, description, status, created_at, updated_at FROM code_connection_cards c
-    INNER JOIN code_connection_invitations cr ON c.id = cr.card_id
-    INNER JOIN code_connection_responses ci on cr.id = ci.invitation_id
-    WHERE inviter_id = 1;
-
-INSERT INTO code_connection_cards(user_id, position, skills, description)
-VALUES(1, 'Front-end', ['React.js', 'TypeScript'], 'Strong motivated student who wants to find new opportunities');
-
-INSERT INTO code_connection_invitations(card_id, inviter_id)
-VALUES (1, 10); --- id = 1
-
-INSERT INTO code_connection_invitations(card_id, inviter_id)
-VALUES (1, 11); --- id = 2
-
-INSERT INTO code_connection_responses(invitation_id)
-VALUES (1); --- id = 1
-
-INSERT INTO code_connection_responses(invitation_id)
-VALUES (2); --- id = 2
-
 INSERT INTO roles (id, name)
 VALUES (1, 'user');
 INSERT INTO roles (id, name)

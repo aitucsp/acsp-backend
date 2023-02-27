@@ -29,7 +29,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		{
 			auth.Post("/sign-up", h.signUp)
 			auth.Post("/sign-in", h.signIn)
-			// auth.Post("/refresh", h.refreshToken)
+			auth.Post("/refresh", h.refreshToken)
 			auth.Post("/logout", h.userIdentity, h.logout)
 		}
 
