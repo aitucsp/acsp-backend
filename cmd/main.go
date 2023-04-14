@@ -51,13 +51,11 @@ func main() {
 		return
 	}
 
-	appLogger, syncLogger, err := logging.NewBuilder().
+	appLogger, err := logging.NewBuilder().
 		WithFallbackLogger(fallbackLogger).
 		WithLoggerConfig(appConfig.Logger).
 		WithHostConfig(appConfig.Host).
 		NewLogger()
-
-	defer syncLogger()
 
 	pid := os.Getpid()
 	appLogger = appLogger.With(zap.Int("pid", pid))

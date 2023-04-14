@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"syscall"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -60,7 +59,7 @@ func (b *Builder) WithFallbackLogger(l *log.Logger) *Builder {
 }
 
 // NewLogger creates a zap.Logger.
-func (b *Builder) NewLogger() (*zap.Logger, func(), error) {
+func (b *Builder) NewLogger() (*zap.Logger, error) {
 	loggerConfig := zap.Config{
 		Level:             zap.NewAtomicLevelAt(b.loggerConfig.Level),
 		Development:       false,
@@ -96,12 +95,12 @@ func (b *Builder) NewLogger() (*zap.Logger, func(), error) {
 		loggerConfig.Development = false
 
 	default:
-		return nil, nil, fmt.Errorf("unknown environment: %v", b.hostConfig.Environment)
+		return nil, fmt.Errorf("unknown environment: %v", b.hostConfig.Environment)
 	}
 
 	hostname, err := os.Hostname()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	o := pathOptions{
@@ -110,31 +109,22 @@ func (b *Builder) NewLogger() (*zap.Logger, func(), error) {
 
 	err = zap.RegisterSink("lumberjack", lumberjackSinkFactory(b.loggerConfig, &o))
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "couldn't register sink")
+		return nil, errors.Wrap(err, "couldn't register sink")
 	}
 
 	logger, err := loggerConfig.Build()
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "couldn't build logger")
-	}
-
-	syncLogger := func() {
-		err := logger.Sync()
-		if err != nil && !errors.Is(err, syscall.ENOTTY) {
-			b.fallbackLogger.Println("couldn't sync logger:", err)
-		}
+		return nil, errors.Wrap(err, "couldn't build logger")
 	}
 
 	zap.ReplaceGlobals(logger)
 
 	_, err = zap.RedirectStdLogAt(logger.Named("std"), zapcore.InfoLevel)
 	if err != nil {
-		syncLogger()
-
-		return nil, nil, errors.Wrap(err, "couldn't redirect std logger")
+		return nil, errors.Wrap(err, "couldn't redirect std logger")
 	}
 
-	return logger, syncLogger, nil
+	return logger, nil
 }
 
 type ctxLogger struct{}
