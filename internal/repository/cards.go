@@ -210,10 +210,13 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 	var invitationCards []model.InvitationCard
 
 	query := fmt.Sprintf(`SELECT user_id, skills, position, description, status, created_at, updated_at 
-	FROM %s c
-    INNER JOIN %s cr ON c.id = cr.card_id
-    INNER JOIN %s ci on cr.id = ci.invitation_id
-    WHERE inviter_id = $1`, constants.CardsTable, constants.InvitationsTable, constants.InvitationResponsesTable)
+								 FROM %s c
+								 INNER JOIN %s cr ON c.id = cr.card_id
+								 INNER JOIN %s ci on cr.id = ci.invitation_id
+								 WHERE inviter_id = $1`,
+		constants.CardsTable,
+		constants.InvitationsTable,
+		constants.InvitationResponsesTable)
 
 	rows, err := c.db.Queryx(query, userID)
 

@@ -28,7 +28,7 @@ import (
 // @version 1.0
 // @description Backend for AITU Corporate Self-Study Portal.
 
-// @host localhost:8080
+// @host https://monkfish-app-pxfhy.ondigitalocean.app
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
