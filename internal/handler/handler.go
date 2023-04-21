@@ -33,6 +33,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 			auth.Post("/logout", h.userIdentity, h.logout)
 		}
 
+		// Define user routes with authentication middleware (userIdentity) for all routes
 		scholar := rest.Group("/scholar", h.userIdentity)
 		{
 			articles := scholar.Group("/articles", h.userIdentity)
@@ -43,16 +44,18 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 				articles.Put("/:id", h.updateArticle)    // update an article
 				articles.Delete("/:id", h.deleteArticle) // delete an article
 
-				comments := articles.Group("/:id/comments")
+				comments := articles.Group("/:id/comments", h.userIdentity)
 				{
-					comments.Post("/", h.commentArticle)                        // comment an article
-					comments.Get("/", h.getCommentsByArticleID)                 // get all comments by article id
-					comments.Post("/:comment-id/replies", h.replyToCommentByID) // reply to comment by id and article id
-					comments.Get("/:comment-id/replies", h.getRepliesByCommentID)
+					comments.Post("/", h.commentArticle)                         // comment an article
+					comments.Get("/", h.getCommentsByArticleID)                  // get all comments by article id
+					comments.Post("/:commentID/replies", h.replyToCommentByID)   // reply to comment by id and article id
+					comments.Get("/:commentID/replies", h.getRepliesByCommentID) // get all replies by comment id and article id
 				}
+
 			}
 		}
 
+		// Define code connection routes
 		codeConnection := rest.Group("/code-connection", h.userIdentity)
 		{
 			applicants := codeConnection.Group("/applicants")

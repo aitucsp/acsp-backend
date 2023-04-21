@@ -145,11 +145,6 @@ func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID
 		comments = append(comments, comment)
 	}
 
-	// err := a.db.Select(&comments, query, articleID)
-	// if err != nil {
-	// 	return []model.Comment{}, err
-	// }
-
 	return comments, nil
 }
 
@@ -176,9 +171,10 @@ func (a *ArticlesDatabase) ReplyToComment(ctx context.Context, articleID, userID
 func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(
 	ctx context.Context, articleID,
 	userID,
-	parentCommentID int) (*[]model.Comment, error) {
+	parentCommentID int) ([]model.Comment, error) {
 
 	var comments []model.Comment
+
 	query := fmt.Sprintf(`SELECT c.*, u.id as "user.user_id",
 		       u.email AS "user.email",
 		       u.name AS "user.name",
@@ -218,5 +214,5 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(
 		comments = append(comments, comment)
 	}
 
-	return &comments, nil
+	return comments, nil
 }

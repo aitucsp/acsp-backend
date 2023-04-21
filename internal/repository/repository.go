@@ -16,7 +16,7 @@ type Repository struct {
 }
 
 type Authorization interface {
-	CreateUser(ctx context.Context, user model.User) (int, error)
+	CreateUser(ctx context.Context, user model.User) error
 	GetUser(ctx context.Context, username, password string) (*model.User, error)
 	GetByID(ctx context.Context, id int) (*model.User, error)
 	GetByEmail(ctx context.Context, email string) (*model.User, error)
@@ -42,7 +42,7 @@ type Articles interface {
 	CreateComment(ctx context.Context, articleID, userID int, comment model.Comment) error
 	GetCommentsByArticleID(ctx context.Context, articleID int) ([]model.Comment, error)
 	ReplyToComment(ctx context.Context, articleID, userID, parentCommentID int, comment model.Comment) error
-	GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) (*[]model.Comment, error)
+	GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) ([]model.Comment, error)
 }
 
 type Cards interface {
@@ -51,9 +51,9 @@ type Cards interface {
 	Delete(ctx context.Context, userID int, cardID int) error
 	GetByID(ctx context.Context, cardID int) (*model.Card, error)
 	GetAllByUserID(ctx context.Context, userID int) (*[]model.Card, error)
-	GetAll(ctx context.Context) (*[]model.Card, error)
+	GetAll(ctx context.Context) ([]model.Card, error)
 	CreateInvitation(ctx context.Context, inviterID int, card model.Card) error
-	GetInvitationsByUserID(ctx context.Context, userID int) (*[]model.InvitationCard, error)
+	GetInvitationsByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error)
 }
 
 func NewRepository(db *sqlx.DB) *Repository {

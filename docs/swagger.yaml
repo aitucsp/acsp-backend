@@ -82,7 +82,7 @@ definitions:
       updated_at:
         type: string
     type: object
-host: localhost:8080
+host: https://squid-app-8kray.ondigitalocean.app
 info:
   contact: {}
   description: Backend for AITU Corporate Self-Study Portal.
@@ -93,11 +93,12 @@ paths:
     post:
       consumes:
       - application/json
-      description: Logout user and delete refresh token from cache.
+      description: Logout user and delete refresh token from cache by user ID
+      operationId: logout
       produces:
       - application/json
       responses:
-        "204":
+        "200":
           description: ok
           schema:
             type: string
@@ -108,15 +109,16 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Logout user
+      summary: logout user
       tags:
       - auth
   /api/v1/auth/sign-in:
     post:
       consumes:
       - application/json
-      description: login
-      operationId: login
+      description: signing in a user to the system and returning a token pair (access
+        and refresh) to the client for further requests
+      operationId: sign-in
       parameters:
       - description: credentials
         in: body
@@ -128,7 +130,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: token
+          description: token pair
           schema:
             type: string
         "400":
@@ -158,8 +160,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: create account
-      operationId: create-account
+      description: signing up a new user to the system
+      operationId: sign-up
       parameters:
       - description: account info
         in: body
@@ -558,7 +560,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Method for creating an article
+      description: Method for creating an article for a user by id in the database
+        by user id
       operationId: create-article
       parameters:
       - description: project information
@@ -866,6 +869,52 @@ paths:
       summary: Reply to comment by article id and comment id
       tags:
       - articles
+  /v1/token/renew:
+    post:
+      consumes:
+      - application/json
+      description: Renew access and refresh tokens by refresh token from request body
+        and set new expiration time for refresh token in database
+      operationId: refresh-token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token pair
+          schema:
+            type: string
+        "400":
+          description: error" "message
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error" "message
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error" "message
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: error" "message
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: renew access and refresh tokens
+      tags:
+      - auth
 securityDefinitions:
   ApiKeyAuth:
     in: header

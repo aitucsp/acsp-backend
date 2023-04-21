@@ -109,8 +109,8 @@ func (c *CardsService) GetAllByUserID(ctx context.Context, userID string) (*[]mo
 	}
 }
 
-func (c *CardsService) GetAll(ctx context.Context) (*[]model.Card, error) {
-	var cards *[]model.Card
+func (c *CardsService) GetAll(ctx context.Context) ([]model.Card, error) {
+	var cards []model.Card
 
 	cards, err := c.cardsRepo.GetAll(ctx)
 	if err != nil {
@@ -161,7 +161,7 @@ func (c *CardsService) CreateInvitation(ctx context.Context, userID string, card
 	return nil
 }
 
-func (c *CardsService) GetInvitationsByUserID(ctx context.Context, userID string) (*[]model.InvitationCard, error) {
+func (c *CardsService) GetInvitationsByUserID(ctx context.Context, userID string) ([]model.InvitationCard, error) {
 	userId, _ := strconv.Atoi(userID)
 	_, err := c.usersRepo.GetByID(ctx, userId)
 	if err != nil {

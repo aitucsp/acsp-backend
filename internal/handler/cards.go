@@ -386,7 +386,7 @@ func (h *Handler) getInvitations(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"errors":  false,
 		"message": nil,
-		"count":   len(*invitations),
+		"count":   len(invitations),
 		"cards":   invitations,
 	})
 }

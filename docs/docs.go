@@ -23,7 +23,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Logout user and delete refresh token from cache.",
+                "description": "Logout user and delete refresh token from cache by user ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -33,9 +33,10 @@ const docTemplate = `{
                 "tags": [
                     "auth"
                 ],
-                "summary": "Logout user",
+                "summary": "logout user",
+                "operationId": "logout",
                 "responses": {
-                    "204": {
+                    "200": {
                         "description": "ok",
                         "schema": {
                             "type": "string"
@@ -53,7 +54,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/sign-in": {
             "post": {
-                "description": "login",
+                "description": "signing in a user to the system and returning a token pair (access and refresh) to the client for further requests",
                 "consumes": [
                     "application/json"
                 ],
@@ -64,7 +65,7 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "SignIn",
-                "operationId": "login",
+                "operationId": "sign-in",
                 "parameters": [
                     {
                         "description": "credentials",
@@ -78,7 +79,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "token",
+                        "description": "token pair",
                         "schema": {
                             "type": "string"
                         }
@@ -116,7 +117,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/sign-up": {
             "post": {
-                "description": "create account",
+                "description": "signing up a new user to the system",
                 "consumes": [
                     "application/json"
                 ],
@@ -127,7 +128,7 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "SignUp",
-                "operationId": "create-account",
+                "operationId": "sign-up",
                 "parameters": [
                     {
                         "description": "account info",
@@ -718,7 +719,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Method for creating an article",
+                "description": "Method for creating an article for a user by id in the database by user id",
                 "consumes": [
                     "application/json"
                 ],
@@ -1176,6 +1177,74 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/token/renew": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Renew access and refresh tokens by refresh token from request body and set new expiration time for refresh token in database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "renew access and refresh tokens",
+                "operationId": "refresh-token",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "refresh_token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "token pair",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "error\" \"message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error\" \"message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error\" \"message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "error\" \"message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1315,7 +1384,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
+	Host:             "https://squid-app-8kray.ondigitalocean.app",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "ACSP Backend",

@@ -25,14 +25,15 @@ func NewAuthRepository(db *sqlx.DB) *AuthPostgres {
 	}
 }
 
-func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) (int, error) {
+func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
 	l := logging.LoggerFromContext(ctx).With(zap.String("email", user.Email))
 
+	// Begin a transaction to create a user and a role for the user
 	tx, err := r.db.Begin()
 	if err != nil {
 		l.Error("Error when beginning the transaction", zap.Error(err))
 
-		return -1, err
+		return errors.Wrap(err, "Error when beginning the transaction")
 	}
 
 	var userID int
@@ -42,19 +43,22 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) (int, er
   				RETURNING id`,
 		constants.UsersTable)
 
+	// Create a user
 	row := tx.QueryRow(query, user.Name, user.Email, user.Password)
 
+	// Get the user id
 	err = row.Scan(&userID)
 	if err != nil {
 		l.Error("Error when creating user in database", zap.Error(err))
 
-		return -1, err
+		return errors.Wrap(err, "Error when creating user in database")
 	}
 
+	// Rollback the transaction if the user id is less than 1
 	if userID < 1 {
 		err := tx.Rollback()
 		if err != nil {
-			return -1, err
+			return errors.Wrap(err, "Error when rolling back the transaction")
 		}
 	}
 
@@ -62,29 +66,36 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) (int, er
 										VALUES ($1, $2) RETURNING id`, constants.UserRolesTable)
 	var userRoleID int
 
+	// Create a role for the user
 	err = tx.QueryRow(querySecond, userID, constants.DefaultUserRoleID).Scan(&userRoleID)
 	if err != nil {
 		l.Error("Error when executing the query", zap.Error(err))
 
+		// Rollback the transaction if the user role id is less than 1
 		err := tx.Rollback()
 		if err != nil {
-			return -1, err
+			return errors.Wrap(err, "Error when rolling back the transaction")
 		}
 
-		return -1, err
+		// Return the error
+		return errors.Wrap(err, "Error when executing the query")
 	}
 
+	// Commit the transaction
 	err = tx.Commit()
 	if err != nil {
+		// Rollback the transaction if the commit fails
 		err := tx.Rollback()
 		if err != nil {
-			return -1, err
+			return errors.Wrap(err, "Error when rolling back the transaction")
 		}
 
-		return -1, err
+		// Return the error
+		return errors.Wrap(err, "Error when committing the transaction")
 	}
 
-	return userID, nil
+	// Return nil if the transaction is successful
+	return nil
 }
 
 func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*model.User, error) {
@@ -124,6 +135,7 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 			&user.Password,
 			&user.CreatedAt,
 			&user.UpdatedAt,
+			&user.IsAdmin,
 			&user.Roles)
 	if err != nil {
 		l.Error("Error getting user by id from database", zap.Error(err))
@@ -140,14 +152,15 @@ func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.Use
 	query := fmt.Sprintf(`SELECT * FROM %s WHERE email=$1`, constants.UsersTable)
 	row := r.db.QueryRow(query, email)
 
-	if err := row.Scan(&user.ID,
+	err := row.Scan(&user.ID,
 		&user.Email,
 		&user.Name,
 		&user.Password,
 		&user.CreatedAt,
 		&user.UpdatedAt,
-		&user.Roles); err != nil {
-		return nil, apperror.ErrEmailNotFound
+		&user.Roles)
+	if err != nil {
+		return nil, errors.Wrap(apperror.ErrEmailNotFound, "email not found")
 	}
 
 	return &user, nil

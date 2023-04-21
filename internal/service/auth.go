@@ -74,17 +74,14 @@ func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) er
 		Name:     userDto.Name,
 		Email:    userDto.Email,
 		Password: generatedHash,
+		IsAdmin:  false,
 	}
 
-	userID, err := s.repo.CreateUser(ctx, newUser)
+	err = s.repo.CreateUser(ctx, newUser)
 	if err != nil {
 		l.Error("Error occurred when creating a user", zap.Error(err))
 
 		return err
-	}
-
-	if userID == -1 {
-		return apperror.ErrUserIDNotFound
 	}
 
 	return nil
@@ -107,12 +104,14 @@ func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password str
 
 	var tokenDetails TokenDetails
 
+	// Get the user from the database
 	user, err := s.repo.GetUser(ctx, email, password)
 	if err != nil {
 		l.Warn("Error when getting a user", zap.Error(err))
 		return &TokenDetails{}, err
 	}
 
+	// Create the access token with the user ID as the subject
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&accessTokenClaims{
 			jwt.RegisteredClaims{
@@ -123,6 +122,7 @@ func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password str
 			user.Email,
 		})
 
+	// Create the refresh token with the user ID as the subject
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		&refreshTokenClaims{
 			jwt.RegisteredClaims{
@@ -132,6 +132,7 @@ func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password str
 			user.ID,
 		})
 
+	// Sign the tokens using the secret key
 	accessTokenJWT, err := accessToken.SignedString([]byte(s.authConfig.JWT.AccessTokenSecret))
 	if err != nil {
 		return nil, err
@@ -142,6 +143,7 @@ func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password str
 		return nil, err
 	}
 
+	// Store the tokens in the token details struct and return it
 	tokenDetails.UserID = user.ID
 	tokenDetails.AccessToken = accessTokenJWT
 	tokenDetails.RefreshToken = refreshTokenJWT
@@ -151,19 +153,25 @@ func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password str
 	return &tokenDetails, nil
 }
 
+// ParseToken parses the access token and returns the user ID
 func (s *AuthService) ParseToken(accessToken string) (string, error) {
+	// Parse the token
 	token, err := jwt.ParseWithClaims(accessToken, &accessTokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		// Validate the signing method used to sign the token (HMAC)
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, apperror.ErrBadSigningMethod
 		}
 
+		// Return the secret key used to sign the token
 		return []byte(s.authConfig.JWT.AccessTokenSecret), nil
 	})
 
+	// Check if the token is valid
 	if err != nil {
 		return "", err
 	}
 
+	// Check if the token is expired or not active yet
 	claims, ok := token.Claims.(*accessTokenClaims)
 	if !ok {
 		return "", apperror.ErrBadClaimsType
@@ -172,7 +180,12 @@ func (s *AuthService) ParseToken(accessToken string) (string, error) {
 	return claims.UserId, nil
 }
 
+// SaveRefreshToken parses the refresh token and returns the user ID
 func (s *AuthService) SaveRefreshToken(ctx context.Context, userID string, details *TokenDetails) error {
+	// Save the refresh token in the database with the user ID as the key and the refresh token as the value
+	// The refresh token is stored with an expiration time equal to the refresh token TTL
+	// This is so that we can delete the refresh token from the database when it expires
+	// The refresh token is also stored in the token details struct so that it can be returned to the client
 	err := s.redisClient.Set(ctx, userID, details.RefreshToken, details.RefreshTokenExpiresIn).Err()
 	if err != nil {
 		return err
@@ -181,7 +194,13 @@ func (s *AuthService) SaveRefreshToken(ctx context.Context, userID string, detai
 	return nil
 }
 
+// DeleteRefreshToken deletes the refresh token from the database
 func (s *AuthService) DeleteRefreshToken(ctx context.Context, userID string) error {
+	// Delete the refresh token from the database
+	// The refresh token is stored in the database with the user ID as the key and the refresh token as the value
+	// When the user logs out, we delete the refresh token from the database
+	// This way, the user will not be able to use the refresh token to get a new access token
+	// The user will have to log in again to get a new refresh token
 	err := s.redisClient.Del(ctx, userID).Err()
 	if err != nil {
 		return err
@@ -190,11 +209,14 @@ func (s *AuthService) DeleteRefreshToken(ctx context.Context, userID string) err
 	return nil
 }
 
+// RefreshToken generates a new access token and refresh token pair
 func generatePasswordHash(password string) (string, error) {
+	// Generate a hash from the password using the bcrypt algorithm with the default cost (10)
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
 
+	// Return the hash as a string
 	return string(bytes), nil
 }

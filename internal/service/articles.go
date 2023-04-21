@@ -149,21 +149,32 @@ func (s *ArticlesService) ReplyToCommentByArticleIDAndCommentID(ctx context.Cont
 	return s.repo.ReplyToComment(ctx, articleId, userId, parentCommentId, replyComment)
 }
 
-func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, commentID string) (*[]model.Comment, error) {
+func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error) {
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return &[]model.Comment{}, err
+		return []model.Comment{}, err
 	}
 
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return &[]model.Comment{}, err
+		return []model.Comment{}, err
 	}
 
 	parentCommentId, err := strconv.Atoi(commentID)
 	if err != nil {
-		return &[]model.Comment{}, err
+		return []model.Comment{}, err
 	}
 
-	return s.repo.GetRepliesByArticleIDAndCommentID(ctx, articleId, userId, parentCommentId)
+	comments, err := s.repo.GetRepliesByArticleIDAndCommentID(ctx, articleId, userId, parentCommentId)
+
+	if err != nil {
+		return []model.Comment{}, err
+	}
+
+	// check if comments are empty and if empty, return empty slice
+	if len(comments) == 0 {
+		return []model.Comment{}, nil
+	}
+
+	return comments, nil
 }

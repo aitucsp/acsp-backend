@@ -94,7 +94,7 @@ func (c *CardsDatabase) GetByID(ctx context.Context, cardID int) (*model.Card, e
 func (c *CardsDatabase) GetAllByUserID(ctx context.Context, userID int) (*[]model.Card, error) {
 	var cards []model.Card
 
-	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", constants.CardsTable)
+	query := fmt.Sprintf("SELECT	 * FROM %s WHERE user_id = $1", constants.CardsTable)
 
 	err := c.db.Select(&cards, query, userID)
 	if err != nil {
@@ -104,7 +104,7 @@ func (c *CardsDatabase) GetAllByUserID(ctx context.Context, userID int) (*[]mode
 	return &cards, nil
 }
 
-func (c *CardsDatabase) GetAll(ctx context.Context) (*[]model.Card, error) {
+func (c *CardsDatabase) GetAll(ctx context.Context) ([]model.Card, error) {
 	l := logging.LoggerFromContext(ctx)
 
 	var cards []model.Card
@@ -141,7 +141,7 @@ func (c *CardsDatabase) GetAll(ctx context.Context) (*[]model.Card, error) {
 		cards = append(cards, card)
 	}
 
-	return &cards, nil
+	return cards, nil
 }
 
 func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, card model.Card) error {
@@ -206,7 +206,7 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 	return nil
 }
 
-func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) (*[]model.InvitationCard, error) {
+func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error) {
 	var invitationCards []model.InvitationCard
 
 	query := fmt.Sprintf(`SELECT user_id, skills, position, description, status, created_at, updated_at 
@@ -240,5 +240,5 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 		invitationCards = append(invitationCards, invitationCard)
 	}
 
-	return &invitationCards, nil
+	return invitationCards, nil
 }

@@ -16,7 +16,7 @@ import (
 // @Summary Create an article
 // @Security ApiKeyAuth
 // @Tags articles
-// @Description Method for creating an article
+// @Description Method for creating an article for a user by id in the database by user id
 // @ID create-article
 // @Accept  json
 // @Produce  json
@@ -468,7 +468,7 @@ func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 		})
 	}
 
-	commentID := c.Params("comment-id")
+	commentID := c.Params("commentID")
 	if commentID == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"errors":  true,
@@ -487,7 +487,7 @@ func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"errors":   false,
 		"message":  nil,
-		"count":    len(*comments),
+		"count":    len(comments),
 		"user_id":  c.GetRespHeader(userCtx, ""),
 		"comments": comments,
 	})

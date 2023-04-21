@@ -50,7 +50,7 @@ type Articles interface {
 	ReplyToCommentByArticleIDAndCommentID(
 		ctx context.Context, articleID, userID, parentCommentID string, comment dto.ReplyToComment) error
 	GetRepliesByArticleIDAndCommentID(
-		ctx context.Context, articleID, userID, commentID string) (*[]model.Comment, error)
+		ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error)
 }
 
 type Cards interface {
@@ -61,7 +61,7 @@ type Cards interface {
 	GetAll(ctx context.Context) (*[]model.Card, error)
 	GetByID(ctx context.Context, cardID int) (*model.Card, error)
 	CreateInvitation(ctx context.Context, userID string, cardID int) error
-	GetInvitationsByUserID(ctx context.Context, userID string) (*[]model.InvitationCard, error)
+	GetInvitationsByUserID(ctx context.Context, userID string) ([]model.InvitationCard, error)
 }
 
 func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig) *Service {

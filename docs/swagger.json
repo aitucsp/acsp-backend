@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "localhost:8080",
+    "host": "https://squid-app-8kray.ondigitalocean.app",
     "basePath": "/",
     "paths": {
         "/api/v1/auth/logout": {
@@ -16,7 +16,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Logout user and delete refresh token from cache.",
+                "description": "Logout user and delete refresh token from cache by user ID",
                 "consumes": [
                     "application/json"
                 ],
@@ -26,9 +26,10 @@
                 "tags": [
                     "auth"
                 ],
-                "summary": "Logout user",
+                "summary": "logout user",
+                "operationId": "logout",
                 "responses": {
-                    "204": {
+                    "200": {
                         "description": "ok",
                         "schema": {
                             "type": "string"
@@ -46,7 +47,7 @@
         },
         "/api/v1/auth/sign-in": {
             "post": {
-                "description": "login",
+                "description": "signing in a user to the system and returning a token pair (access and refresh) to the client for further requests",
                 "consumes": [
                     "application/json"
                 ],
@@ -57,7 +58,7 @@
                     "auth"
                 ],
                 "summary": "SignIn",
-                "operationId": "login",
+                "operationId": "sign-in",
                 "parameters": [
                     {
                         "description": "credentials",
@@ -71,7 +72,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "token",
+                        "description": "token pair",
                         "schema": {
                             "type": "string"
                         }
@@ -109,7 +110,7 @@
         },
         "/api/v1/auth/sign-up": {
             "post": {
-                "description": "create account",
+                "description": "signing up a new user to the system",
                 "consumes": [
                     "application/json"
                 ],
@@ -120,7 +121,7 @@
                     "auth"
                 ],
                 "summary": "SignUp",
-                "operationId": "create-account",
+                "operationId": "sign-up",
                 "parameters": [
                     {
                         "description": "account info",
@@ -711,7 +712,7 @@
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Method for creating an article",
+                "description": "Method for creating an article for a user by id in the database by user id",
                 "consumes": [
                     "application/json"
                 ],
@@ -1162,6 +1163,74 @@
                     },
                     "default": {
                         "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/token/renew": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Renew access and refresh tokens by refresh token from request body and set new expiration time for refresh token in database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "renew access and refresh tokens",
+                "operationId": "refresh-token",
+                "parameters": [
+                    {
+                        "description": "Refresh token",
+                        "name": "refresh_token",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "token pair",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "error\" \"message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "error\" \"message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "error\" \"message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "error\" \"message",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
