@@ -58,7 +58,7 @@ type Cards interface {
 	Update(ctx context.Context, userID string, cardID int, dto dto.UpdateCard) error
 	Delete(ctx context.Context, userID string, cardID int) error
 	GetAllByUserID(ctx context.Context, userID string) (*[]model.Card, error)
-	GetAll(ctx context.Context) (*[]model.Card, error)
+	GetAll(ctx context.Context) ([]model.Card, error)
 	GetByID(ctx context.Context, cardID int) (*model.Card, error)
 	CreateInvitation(ctx context.Context, userID string, cardID int) error
 	GetInvitationsByUserID(ctx context.Context, userID string) ([]model.InvitationCard, error)

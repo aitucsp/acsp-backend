@@ -12,6 +12,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	"go.uber.org/zap"
 
@@ -115,14 +116,17 @@ func main() {
 
 	// Initializing fiber app with fiber config and logger
 	app := fiber.New(fiberConfig)
+
+	// Initializing built-in logger and recover middlewares
 	app.Use(logger.New())
+	app.Use(recover.New())
 
 	// Initializing app repository, service and handler
 	appRepository := repository.NewRepository(dbEngine.DB)
 	appService := service.NewService(appRepository, &dbEngine.Cache, *appConfig.Auth)
 	appHandler := handler.NewHandler(appService)
 
-	// Initializing routes
+	// Initializing routes with fiber app
 	appHandler.InitRoutesFiber(app)
 
 	// Initializing graceful shutdown with fiber app, port and logger

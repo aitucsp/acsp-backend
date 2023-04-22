@@ -249,7 +249,7 @@ func (h *Handler) getAllCards(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"errors":  false,
 		"message": nil,
-		"count":   len(*applicants),
+		"count":   len(applicants),
 		"cards":   applicants,
 	})
 }
