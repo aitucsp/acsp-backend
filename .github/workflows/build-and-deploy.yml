@@ -29,7 +29,11 @@ jobs:
     steps:
       - name: Checkout the repo 
         uses: actions/checkout@v2
-        
+
+      - name: Load ENV file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > base.env
+
       - name: Build container image
         run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
 
