@@ -44,6 +44,10 @@ type Articles interface {
 	GetCommentsByArticleID(ctx context.Context, articleID int) ([]model.Comment, error)
 	ReplyToComment(ctx context.Context, articleID, userID, parentCommentID int, comment model.Comment) error
 	GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) ([]model.Comment, error)
+	UpvoteCommentByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) error
+	DownvoteCommentByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) error
+	GetVotesByArticleIDAndCommentID(ctx context.Context, articleID, commentID int) (int, error)
+	HasUserVotedForComment(ctx context.Context, userID, commentID int) (bool, error)
 }
 
 type Materials interface {

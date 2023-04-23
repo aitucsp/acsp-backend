@@ -4,6 +4,8 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/pkg/errors"
+
 	"acsp/internal/dto"
 	"acsp/internal/model"
 	"acsp/internal/repository"
@@ -177,4 +179,74 @@ func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context,
 	}
 
 	return comments, nil
+}
+
+func (s *ArticlesService) UpvoteCommentByArticleIDAndCommentID(userContext context.Context, articleID, commentID, userID string) error {
+	articleId, err := strconv.Atoi(articleID)
+	if err != nil {
+		return err
+	}
+
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return err
+	}
+
+	commentId, err := strconv.Atoi(commentID)
+	if err != nil {
+		return err
+	}
+
+	voted, err := s.repo.HasUserVotedForComment(userContext, userId, commentId)
+	if err != nil {
+		return err
+	}
+
+	if voted {
+		return errors.New("user has already voted for this comment")
+	}
+
+	return s.repo.UpvoteCommentByArticleIDAndCommentID(userContext, articleId, userId, commentId)
+}
+
+func (s *ArticlesService) DownvoteCommentByArticleIDAndCommentID(userContext context.Context, articleID, commentID, userID string) error {
+	articleId, err := strconv.Atoi(articleID)
+	if err != nil {
+		return err
+	}
+
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return err
+	}
+
+	commentId, err := strconv.Atoi(commentID)
+	if err != nil {
+		return err
+	}
+
+	voted, err := s.repo.HasUserVotedForComment(userContext, userId, commentId)
+	if err != nil {
+		return err
+	}
+
+	if voted {
+		return errors.New("user has already voted for this comment")
+	}
+
+	return s.repo.DownvoteCommentByArticleIDAndCommentID(userContext, articleId, userId, commentId)
+}
+
+func (s *ArticlesService) GetVotesByArticleIDAndCommentID(userContext context.Context, articleID, commentID string) (int, error) {
+	articleId, err := strconv.Atoi(articleID)
+	if err != nil {
+		return 0, err
+	}
+
+	commentId, err := strconv.Atoi(commentID)
+	if err != nil {
+		return 0, err
+	}
+
+	return s.repo.GetVotesByArticleIDAndCommentID(userContext, articleId, commentId)
 }

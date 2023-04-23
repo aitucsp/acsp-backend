@@ -132,6 +132,8 @@ func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID
 			&comment.Text,
 			&comment.CreatedAt,
 			&comment.UpdatedAt,
+			&comment.Upvotes,
+			&comment.Downvotes,
 			&user.ID,
 			&user.Email,
 			&user.Name,
@@ -142,6 +144,7 @@ func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID
 
 		comment.Author = user
 		comment.ParentID = int(parentID.Int64)
+		comment.VoteDiff = comment.Upvotes - comment.Downvotes
 		comments = append(comments, comment)
 	}
 
@@ -215,4 +218,204 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(
 	}
 
 	return comments, nil
+}
+
+func (a *ArticlesDatabase) UpvoteCommentByArticleIDAndCommentID(ctx context.Context, articleID, userID, commentID int) error {
+	l := logging.LoggerFromContext(ctx).With(
+		zap.Int("articleID", articleID),
+		zap.Int("userID", userID),
+		zap.Int("commentID", commentID),
+	)
+
+	tx, err := a.db.Begin()
+	if err != nil {
+		l.Error("Error when beginning the transaction", zap.Error(err))
+
+		return err
+	}
+
+	query := fmt.Sprintf(`UPDATE %s SET upvotes = upvotes + 1 WHERE id = $1 AND article_id = $2 AND user_id = $3;`,
+		constants.CommentsTable)
+	var id int
+
+	res, err := tx.Exec(query, commentID, articleID, userID)
+	if err != nil {
+		l.Error("Error when executing the query", zap.Error(err))
+
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting rows affected", zap.Error(err))
+
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if rowsAffected < 1 {
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+	}
+
+	querySecond := fmt.Sprintf("INSERT INTO %s (articleID, comment_id, user_id, vote_type) VALUES ($1, $2, $3, $4) RETURNING id",
+		constants.CommentVotesTable)
+	var responseID int
+
+	err = tx.QueryRow(querySecond, id).Scan(&responseID)
+	if err != nil {
+		l.Error("Error when executing the query", zap.Error(err))
+
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if responseID < 1 {
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (a *ArticlesDatabase) DownvoteCommentByArticleIDAndCommentID(ctx context.Context, articleID, userID, commentID int) error {
+	l := logging.LoggerFromContext(ctx).With(
+		zap.Int("articleID", articleID),
+		zap.Int("userID", userID),
+		zap.Int("commentID", commentID),
+	)
+
+	tx, err := a.db.Begin()
+	if err != nil {
+		l.Error("Error when beginning the transaction", zap.Error(err))
+
+		return err
+	}
+
+	query := fmt.Sprintf(`UPDATE %s SET upvotes = upvotes - 1 WHERE id = $1 AND article_id = $2 AND user_id = $3;`,
+		constants.CommentsTable)
+	var id int
+
+	res, err := tx.Exec(query, commentID, articleID, userID)
+	if err != nil {
+		l.Error("Error when executing the query", zap.Error(err))
+
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting rows affected", zap.Error(err))
+
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if rowsAffected < 1 {
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+	}
+
+	querySecond := fmt.Sprintf("INSERT INTO %s (articleID, comment_id, user_id, vote_type) VALUES ($1, $2, $3, $4) RETURNING id",
+		constants.CommentVotesTable)
+	var responseID int
+
+	err = tx.QueryRow(querySecond, id).Scan(&responseID)
+	if err != nil {
+		l.Error("Error when executing the query", zap.Error(err))
+
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	if responseID < 1 {
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		err := tx.Rollback()
+		if err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func (a *ArticlesDatabase) GetVotesByArticleIDAndCommentID(ctx context.Context, articleID, commentID int) (int, error) {
+	var upvote, downvote int
+
+	query := fmt.Sprintf("SELECT upvote, downvote FROM %s WHERE id = $1 AND article_id = $2",
+		constants.CommentsTable)
+
+	err := a.db.QueryRow(query, commentID, articleID).
+		Scan(&upvote, &downvote)
+	if err != nil {
+		return 0, err
+	}
+
+	return upvote - downvote, nil
+}
+
+func (a *ArticlesDatabase) HasUserVotedForComment(ctx context.Context, userID, commentID int) (bool, error) {
+	var id int
+
+	query := fmt.Sprintf("SELECT id FROM %s WHERE user_id = $1 AND comment_id = $2",
+		constants.CommentVotesTable)
+
+	err := a.db.QueryRow(query, userID, commentID).
+		Scan(&id)
+	if err != nil {
+		return false, err
+	}
+
+	return id > 0, nil
 }

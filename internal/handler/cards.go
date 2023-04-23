@@ -302,16 +302,16 @@ func (h *Handler) getCardByID(c *fiber.Ctx) error {
 // @Summary Create an invitation
 // @Security ApiKeyAuth
 // @Tags cards
-// @Description Invite a user by card
+// @Description Invite a user by a card id
 // @ID create-an-invitation
 // @Accept  json
 // @Produce  json
-// @Param input path string true "card id"
-// @Success 200 {integer} string "SUCCESS"
+// @Param input path string true "Created an invitation"
+// @Success 200 {integer} string "success"
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/:id/invite [post]
+// @Router /api/v1/code-connection/cards/:id/invitations [post]
 func (h *Handler) createInvitation(c *fiber.Ctx) error {
 	log.Println("Creating a card... ")
 
@@ -353,8 +353,8 @@ func (h *Handler) createInvitation(c *fiber.Ctx) error {
 // @Summary Get invitations
 // @Security ApiKeyAuth
 // @Tags cards
-// @Description Invite a user by card
-// @ID get-invitations
+// @Description Get invitations by card id and user id
+// @ID get-card-invitations
 // @Accept  json
 // @Produce  json
 // @Param input path string true "card id"
@@ -362,7 +362,7 @@ func (h *Handler) createInvitation(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/invitations/ [get]
+// @Router /api/v1/code-connection/cards/:id/invitations [get]
 func (h *Handler) getInvitations(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all cards... ")

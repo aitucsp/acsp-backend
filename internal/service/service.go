@@ -52,6 +52,9 @@ type Articles interface {
 		ctx context.Context, articleID, userID, parentCommentID string, comment dto.ReplyToComment) error
 	GetRepliesByArticleIDAndCommentID(
 		ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error)
+	UpvoteCommentByArticleIDAndCommentID(userContext context.Context, articleID, commentID, userID string) error
+	DownvoteCommentByArticleIDAndCommentID(userContext context.Context, articleID, commentID, userID string) error
+	GetVotesByArticleIDAndCommentID(userContext context.Context, articleID, commentID string) (int, error)
 }
 
 type Materials interface {

@@ -56,6 +56,8 @@ CREATE TABLE scholar_comments
     article_id BIGINT      NOT NULL,
     parent_id  BIGINT,
     text       VARCHAR     NOT NULL,
+    upvote     BIGINT      NOT NULL DEFAULT 0,
+    downvote   BIGINT      NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
     FOREIGN KEY (user_id) REFERENCES users (id)
@@ -66,6 +68,20 @@ CREATE TABLE scholar_comments
         FOREIGN KEY (parent_id) REFERENCES scholar_comments (id)
             ON DELETE SET NULL ON UPDATE CASCADE
 );
+
+CREATE TABLE scholar_article_comment_votes
+(
+    id         BIGSERIAL PRIMARY KEY,
+    user_id    BIGINT NOT NULL,
+    comment_id BIGINT NOT NULL,
+    vote_type  INT    NOT NULL,
+    FOREIGN KEY (comment_id) REFERENCES scholar_comments (id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+select * from scholar_comments;
 
 CREATE TABLE code_connection_cards
 (

@@ -50,6 +50,9 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 					comments.Get("/", h.getCommentsByArticleID)                  // get all comments by article id
 					comments.Post("/:commentID/replies", h.replyToCommentByID)   // reply to comment by id and article id
 					comments.Get("/:commentID/replies", h.getRepliesByCommentID) // get all replies by comment id and article id
+					comments.Post("/:commentID/upvote", h.upvoteCommentByID)     // like comment by id and article id
+					comments.Post("/:commentID/downvote", h.downvoteCommentByID) // dislike comment by id and article id
+					comments.Get("/:commentID/votes", h.getVotesByCommentID)     // get all upvotes by comment id and article id
 				}
 
 			}
@@ -76,22 +79,21 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 
 			cards := codeConnection.Group("/cards", h.userIdentity)
 			{
-				cards.Get("/", h.getAllCardsByUserID)         // get all cards of user
-				cards.Post("/", h.createCard)                 // create a card
-				cards.Get("/:id", h.getCardByID)              // get an information of card by id
-				cards.Put("/:id", h.updateCard)               // update card information by id
-				cards.Delete("/:id", h.deleteCard)            // delete card by id
-				cards.Post("/:id/invite", h.createInvitation) // send an invitation to a user
+				cards.Get("/", h.getAllCardsByUserID)              // get all cards of user
+				cards.Post("/", h.createCard)                      // create a card
+				cards.Get("/:id", h.getCardByID)                   // get an information of card by id
+				cards.Put("/:id", h.updateCard)                    // update card information by id
+				cards.Delete("/:id", h.deleteCard)                 // delete card by id
+				cards.Get("/:id/invitations", h.getInvitations)    // get all invitations of a user
+				cards.Post("/:id/invitations", h.createInvitation) // send an invitation to a user
 			}
 
-			invitations := codeConnection.Group("/invitations")
-			{
-				invitations.Get("/", h.getInvitations) // Get all invitations of user
-
-				// TODO: Accept and decline functionality
-				// invitations.Post("/accept")  // Accept an invitation
-				// invitations.Post("/decline") // Decline an invitation
-			}
+			// invitations := codeConnection.Group("/invitations")
+			// {
+			// 	// TODO: Accept and decline functionality
+			// 	invitations.Post("/accept")  // Accept an invitation
+			// 	invitations.Post("/decline") // Decline an invitation
+			// }
 		}
 	}
 
