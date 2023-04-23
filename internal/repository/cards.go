@@ -6,8 +6,10 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"acsp/internal/apperror"
 	"acsp/internal/constants"
 	"acsp/internal/logging"
 	"acsp/internal/model"
@@ -164,7 +166,7 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 
 		err := tx.Rollback()
 		if err != nil {
-			return err
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
 		}
 
 		return err
@@ -173,7 +175,7 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 	if id < 1 {
 		err := tx.Rollback()
 		if err != nil {
-			return err
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
 		}
 	}
 
@@ -187,7 +189,7 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 
 		err := tx.Rollback()
 		if err != nil {
-			return err
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
 		}
 
 		return err
@@ -197,7 +199,7 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 	if err != nil {
 		err := tx.Rollback()
 		if err != nil {
-			return err
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
 		}
 
 		return err

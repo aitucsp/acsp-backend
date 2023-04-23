@@ -58,7 +58,7 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
 	if userID < 1 {
 		err := tx.Rollback()
 		if err != nil {
-			return errors.Wrap(err, "Error when rolling back the transaction")
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
 		}
 	}
 
@@ -74,7 +74,7 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
 		// Rollback the transaction if the user role id is less than 1
 		err := tx.Rollback()
 		if err != nil {
-			return errors.Wrap(err, "Error when rolling back the transaction")
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back the transaction")
 		}
 
 		// Return the error
@@ -87,7 +87,7 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
 		// Rollback the transaction if the commit fails
 		err := tx.Rollback()
 		if err != nil {
-			return errors.Wrap(err, "Error when rolling back the transaction")
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
 		}
 
 		// Return the error
