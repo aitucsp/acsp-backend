@@ -13,6 +13,7 @@ type Repository struct {
 	Roles
 	Articles
 	Cards
+	Materials
 }
 
 type Authorization interface {
@@ -45,6 +46,15 @@ type Articles interface {
 	GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) ([]model.Comment, error)
 }
 
+type Materials interface {
+	Create(ctx context.Context, material model.Material) error
+	Update(ctx context.Context, material model.Material) error
+	Delete(ctx context.Context, userID int, materialID int) error
+	GetByID(ctx context.Context, materialID int) (*model.Material, error)
+	GetAllByUserID(ctx context.Context, userID int) (*[]model.Material, error)
+	GetAll(ctx context.Context) ([]model.Material, error)
+}
+
 type Cards interface {
 	Create(ctx context.Context, card model.Card) error
 	Update(ctx context.Context, card model.Card) error
@@ -62,5 +72,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Roles:         NewRolesRepository(db),
 		Articles:      NewArticlesRepository(db),
 		Cards:         NewCardsRepository(db),
+		Materials:     NewMaterialsRepository(db),
 	}
 }

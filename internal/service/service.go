@@ -19,6 +19,7 @@ type Service struct {
 	Articles
 	Roles
 	Cards
+	Materials
 }
 
 type Authorization interface {
@@ -53,6 +54,15 @@ type Articles interface {
 		ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error)
 }
 
+type Materials interface {
+	Create(ctx context.Context, userID string, dto dto.CreateMaterial) error
+	GetAll(ctx context.Context) ([]model.Material, error)
+	GetByID(ctx context.Context, materialID string) (*model.Material, error)
+	Update(ctx context.Context, materialID, userID string, material dto.UpdateMaterial) error
+	Delete(ctx context.Context, userID, materialID string) error
+	GetByUserID(ctx context.Context, userID string) (*[]model.Material, error)
+}
+
 type Cards interface {
 	Create(ctx context.Context, userID string, dto dto.CreateCard) error
 	Update(ctx context.Context, userID string, cardID int, dto dto.UpdateCard) error
@@ -70,5 +80,6 @@ func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfi
 		Articles:      NewArticlesService(repo.Articles, repo.Authorization),
 		Roles:         NewRolesService(repo.Roles, repo.Authorization),
 		Cards:         NewCardsService(repo.Cards, repo.Authorization),
+		Materials:     NewMaterialsService(repo.Materials, repo.Authorization),
 	}
 }

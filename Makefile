@@ -11,6 +11,13 @@
 
 .PHONY: build run stop clean help shell test
 
+# Variables for the docker container
+IMAGE_NAME = acsp-backend-app
+CONTAINER_NAME = acsp
+PORT = 5000
+REGISTRY_NAME = acsp
+
+
 build:
 	docker build -t $(IMAGE_NAME) .
 
@@ -40,3 +47,6 @@ shell:
 test:
 	docker exec -it $(CONTAINER_NAME) /bin/bash -c "cd /app && python -m unittest discover -s tests -p '*_test.py'"
 
+push:
+	docker tag $(IMAGE_NAME) registry.digitalocean.com/$(REGISTRY_NAME)/$(IMAGE_NAME)
+	docker push registry.digitalocean.com/$(REGISTRY_NAME)/$(IMAGE_NAME)

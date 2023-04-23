@@ -20,7 +20,7 @@ import (
 // @ID create-article
 // @Accept  json
 // @Produce  json
-// @Param input body dto.CreateArticle true "project information"
+// @Param input body dto.CreateArticle true "article information"
 // @Success 200 {integer} integer 1
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}

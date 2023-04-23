@@ -9,7 +9,6 @@ import (
 
 	mockService "acsp/internal/service/mocks"
 
-	"acsp/internal/logs"
 	"acsp/internal/model"
 	"acsp/internal/service"
 
@@ -76,7 +75,6 @@ func TestHandler_signUp(t *testing.T) {
 			c := gomock.NewController(t)
 			defer c.Finish()
 
-			_ = logs.InitLogger()
 			repo := mockService.NewMockAuthorization(c)
 			testCase.mockBehavior(repo, testCase.inputUser)
 

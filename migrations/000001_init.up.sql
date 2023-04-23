@@ -37,6 +37,18 @@ CREATE TABLE scholar_articles
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
 
+CREATE TABLE scholar_materials
+(
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     BIGINT      NOT NULL,
+    topic       VARCHAR     NOT NULL,
+    description VARCHAR     NOT NULL,
+    upvote      BIGINT      NOT NULL DEFAULT 0,
+    downvote    BIGINT      NOT NULL DEFAULT 0,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT (now())
+);
+
 CREATE TABLE scholar_comments
 (
     id         BIGSERIAL PRIMARY KEY,

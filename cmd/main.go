@@ -127,7 +127,7 @@ func main() {
 	appHandler := handler.NewHandler(appService)
 
 	// Initializing routes with fiber app
-	appHandler.InitRoutesFiber(app)
+	app = appHandler.InitRoutesFiber(app)
 
 	// Initializing graceful shutdown with fiber app, port and logger
 	go start(app, appConfig.HTTP.Port, appLogger)

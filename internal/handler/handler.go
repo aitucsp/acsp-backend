@@ -53,6 +53,16 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 				}
 
 			}
+
+			materials := scholar.Group("/materials", h.userIdentity)
+			{
+				materials.Post("/", h.createMaterial)                // create a material
+				materials.Get("/", h.getAllMaterials)                // get all materials
+				materials.Get("/:userID", h.getAllMaterialsByUserID) // get all materials of user
+				materials.Get("/:id", h.getMaterialByID)             // get material by id
+				materials.Put("/:id", h.updateMaterial)              // update a material
+				materials.Delete("/:id", h.deleteMaterial)           // delete a material
+			}
 		}
 
 		// Define code connection routes
@@ -78,7 +88,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 			{
 				invitations.Get("/", h.getInvitations) // Get all invitations of user
 
-				// TODO Accept and decline functionality
+				// TODO: Accept and decline functionality
 				// invitations.Post("/accept")  // Accept an invitation
 				// invitations.Post("/decline") // Decline an invitation
 			}

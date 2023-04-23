@@ -6,6 +6,7 @@ const (
 	UserRolesTable           = "user_roles"
 	ArticlesTable            = "scholar_articles"
 	CommentsTable            = "scholar_comments"
+	MaterialsTable           = "scholar_materials"
 	CardsTable               = "code_connection_cards"
 	InvitationsTable         = "code_connection_invitations"
 	InvitationResponsesTable = "code_connection_responses"

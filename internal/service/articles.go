@@ -25,13 +25,13 @@ func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.Cre
 		return err
 	}
 
-	project := model.Article{
+	article := model.Article{
 		Topic:       dto.Topic,
 		Description: dto.Description,
 		Author:      user,
 	}
 
-	return s.repo.Create(ctx, project)
+	return s.repo.Create(ctx, article)
 }
 
 func (s *ArticlesService) GetAll(ctx context.Context, userID string) (*[]model.Article, error) {
