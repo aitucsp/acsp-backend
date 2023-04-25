@@ -1,5 +1,10 @@
+DROP TABLE code_connection_responses;
+DROP TABLE code_connection_invitations;
+DROP TABLE code_connection_cards;
+DROP TABLE scholar_article_comment_votes;
+DROP TABLE scholar_comments;
+DROP TABLE scholar_materials;
+DROP TABLE scholar_articles;
 DROP TABLE user_roles;
 DROP TABLE roles;
-DROP TABLE articles;
 DROP TABLE users;
-

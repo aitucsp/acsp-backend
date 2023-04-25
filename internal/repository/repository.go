@@ -38,6 +38,7 @@ type Articles interface {
 	Create(ctx context.Context, article model.Article) error
 	Update(ctx context.Context, article model.Article) error
 	Delete(ctx context.Context, userID int, articleID int) error
+	GetAll(ctx context.Context) ([]model.Article, error)
 	GetAllByUserID(ctx context.Context, userID int) (*[]model.Article, error)
 	GetArticleByIDAndUserID(ctx context.Context, articleID, userID int) (*model.Article, error)
 	CreateComment(ctx context.Context, articleID, userID int, comment model.Comment) error

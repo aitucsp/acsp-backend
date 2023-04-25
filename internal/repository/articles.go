@@ -95,6 +95,19 @@ func (a *ArticlesDatabase) Delete(ctx context.Context, userID int, articleID int
 	return nil
 }
 
+func (a *ArticlesDatabase) GetAll(ctx context.Context) ([]model.Article, error) {
+	var articles []model.Article
+
+	query := fmt.Sprintf("SELECT * FROM %s", constants.ArticlesTable)
+
+	err := a.db.Select(&articles, query)
+	if err != nil {
+		return nil, errors.Wrap(err, "error when executing query")
+	}
+
+	return articles, nil
+}
+
 func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleID, userID int) (*model.Article, error) {
 	var article model.Article
 
@@ -147,6 +160,9 @@ func (a *ArticlesDatabase) CreateComment(ctx context.Context, articleID, userID 
 }
 
 func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID int) ([]model.Comment, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", articleID))
+	l.Info("Get comments by article id")
+
 	var comments []model.Comment
 	query := fmt.Sprintf(`SELECT c.*, u.id as "user.user_id",
 		       u.email AS "user.email",
@@ -328,7 +344,7 @@ func (a *ArticlesDatabase) UpvoteCommentByArticleIDAndCommentID(ctx context.Cont
 														RETURNING id`,
 		constants.CommentVotesTable)
 
-	res, err = tx.Exec(querySecond, articleID, commentID, userID, 1)
+	res, err = tx.Exec(querySecond, articleID, commentID, userID, constants.UpvoteType)
 	if err != nil {
 		l.Error("Error when executing the query", zap.Error(err))
 
@@ -390,7 +406,6 @@ func (a *ArticlesDatabase) DownvoteCommentByArticleIDAndCommentID(ctx context.Co
 
 	query := fmt.Sprintf(`UPDATE %s SET upvotes = upvotes - 1 WHERE id = $1 AND article_id = $2 AND user_id = $3;`,
 		constants.CommentsTable)
-	var id int
 
 	res, err := tx.Exec(query, commentID, articleID, userID)
 	if err != nil {
@@ -425,11 +440,12 @@ func (a *ArticlesDatabase) DownvoteCommentByArticleIDAndCommentID(ctx context.Co
 		return errors.Wrap(apperror.ErrDownvoteComment, "error occurred when down-voting the comment in database")
 	}
 
-	querySecond := fmt.Sprintf("INSERT INTO %s (articleID, comment_id, user_id, vote_type) VALUES ($1, $2, $3, $4) RETURNING id",
+	querySecond := fmt.Sprintf(`INSERT INTO %s (articleID, comment_id, user_id, vote_type) 
+														VALUES ($1, $2, $3, $4) 
+														RETURNING id`,
 		constants.CommentVotesTable)
-	var responseID int
 
-	err = tx.QueryRow(querySecond, id).Scan(&responseID)
+	res, err = tx.Exec(querySecond, articleID, commentID, userID, constants.DownvoteType)
 	if err != nil {
 		l.Error("Error when executing the query", zap.Error(err))
 
@@ -441,13 +457,25 @@ func (a *ArticlesDatabase) DownvoteCommentByArticleIDAndCommentID(ctx context.Co
 		return errors.Wrap(err, "error occurred when executing the query")
 	}
 
-	if responseID < 1 {
+	rowsAffected, err = res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting rows affected", zap.Error(err))
+
 		err := tx.Rollback()
 		if err != nil {
 			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
 		}
 
-		return errors.Wrap(apperror.ErrDownvoteComment, "error occurred when inserting downvote of the comment in database")
+		return errors.Wrap(err, "error occurred when getting rows affected")
+	}
+
+	if rowsAffected < 1 {
+		err := tx.Rollback()
+		if err != nil {
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
+		}
+
+		return errors.Wrap(apperror.ErrUpvoteComment, "error occurred when inserting downvote of the comment in database")
 	}
 
 	err = tx.Commit()

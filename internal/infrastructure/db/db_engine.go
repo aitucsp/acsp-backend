@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-redis/redis/v9"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 
 	"acsp/internal/constants"
 )
@@ -37,7 +38,7 @@ func NewDBClient(ctx context.Context, cancel context.CancelFunc, c *PostgresConf
 
 	db, err := sqlx.Open(constants.DatabaseName, connectionQuery)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error when opening the database connection")
 	}
 
 	ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
@@ -45,7 +46,7 @@ func NewDBClient(ctx context.Context, cancel context.CancelFunc, c *PostgresConf
 
 	err = db.PingContext(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error when pinging the database")
 	}
 
 	return db, nil
@@ -55,7 +56,7 @@ func NewDBClient(ctx context.Context, cancel context.CancelFunc, c *PostgresConf
 func NewClientRedis(ctx context.Context, cancel context.CancelFunc, config *RedisConfig) (*redis.Client, error) {
 	URL, err := redis.ParseURL(config.Addr)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error when parsing the redis url")
 	}
 
 	client := redis.NewClient(
@@ -76,7 +77,7 @@ func NewClientRedis(ctx context.Context, cancel context.CancelFunc, config *Redi
 
 	_, err = client.Ping(ctx).Result()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error when pinging the redis")
 	}
 
 	return client, nil

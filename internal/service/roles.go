@@ -27,7 +27,7 @@ func (r *RolesService) CreateRole(ctx context.Context, userID, name string) erro
 		return err
 	}
 
-	if user.IsAdmin != true {
+	if !user.IsAdmin {
 		return errors.Wrap(apperror.ErrIncorrectRole, "Incorrect role")
 	}
 
@@ -45,7 +45,7 @@ func (r *RolesService) UpdateRole(ctx context.Context, userID, roleID, newName s
 		return err
 	}
 
-	if user.IsAdmin != true {
+	if !user.IsAdmin {
 		return errors.Wrap(apperror.ErrIncorrectRole, "Incorrect role")
 	}
 
@@ -68,7 +68,7 @@ func (r *RolesService) DeleteRole(ctx context.Context, userID, roleID string) er
 		return err
 	}
 
-	if user.IsAdmin != true {
+	if !user.IsAdmin {
 		return errors.Wrap(apperror.ErrIncorrectRole, "Incorrect role")
 	}
 
@@ -91,7 +91,7 @@ func (r *RolesService) SaveUserRole(ctx context.Context, userID, roleID string) 
 		return err
 	}
 
-	if user.IsAdmin != true {
+	if !user.IsAdmin {
 		return errors.Wrap(apperror.ErrIncorrectRole, "Incorrect role")
 	}
 
@@ -114,7 +114,7 @@ func (r *RolesService) DeleteUserRole(ctx context.Context, userID, roleID string
 		return err
 	}
 
-	if user.IsAdmin != true {
+	if !user.IsAdmin {
 		return errors.Wrap(apperror.ErrIncorrectRole, "Incorrect role")
 	}
 

@@ -14,8 +14,8 @@ type Handler struct {
 	services *service.Service
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+func NewHandler(s *service.Service) *Handler {
+	return &Handler{services: s}
 }
 
 func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
@@ -38,11 +38,12 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		{
 			articles := scholar.Group("/articles", h.userIdentity)
 			{
-				articles.Post("/", h.createArticle)      // create an article
-				articles.Get("/", h.getAllArticles)      // get all articles of user
-				articles.Get("/:id", h.getArticleByID)   // get article by id
-				articles.Put("/:id", h.updateArticle)    // update an article
-				articles.Delete("/:id", h.deleteArticle) // delete an article
+				articles.Post("/", h.createArticle)                       // create an article
+				articles.Get("/", h.getAllArticles)                       // get all articles
+				articles.Get("?userID=:userID", h.getAllArticlesByUserID) // get all articles of user
+				articles.Get("/:id", h.getArticleByID)                    // get article by id
+				articles.Put("/:id", h.updateArticle)                     // update an article
+				articles.Delete("/:id", h.deleteArticle)                  // delete an article
 
 				comments := articles.Group("/:id/comments", h.userIdentity)
 				{
@@ -73,8 +74,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		{
 			applicants := codeConnection.Group("/applicants")
 			{
-				applicants.Get("/", h.getAllCards)                 // get all applicants list
-				applicants.Post("/:id/invite", h.createInvitation) // invite applicant by id
+				applicants.Get("/", h.getAllCards) // get all applicants list
 			}
 
 			cards := codeConnection.Group("/cards", h.userIdentity)

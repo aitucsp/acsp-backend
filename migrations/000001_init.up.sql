@@ -81,7 +81,8 @@ CREATE TABLE scholar_article_comment_votes
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-select * from scholar_comments;
+select *
+from scholar_comments;
 
 CREATE TABLE code_connection_cards
 (

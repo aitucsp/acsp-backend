@@ -5,8 +5,10 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"acsp/internal/dto"
+	"acsp/internal/logging"
 	"acsp/internal/model"
 	"acsp/internal/repository"
 )
@@ -36,12 +38,31 @@ func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.Cre
 	return s.repo.Create(ctx, article)
 }
 
-func (s *ArticlesService) GetAll(ctx context.Context, userID string) (*[]model.Article, error) {
-	userId, _ := strconv.Atoi(userID)
+func (s *ArticlesService) GetAll(ctx context.Context) ([]model.Article, error) {
+	articles, err := s.repo.GetAll(ctx)
+	if err != nil {
+		return []model.Article{}, err
+	}
+
+	if articles == nil {
+		return []model.Article{}, nil
+	}
+
+	return articles, nil
+}
+
+func (s *ArticlesService) GetAllByUserID(ctx context.Context, userID string) (*[]model.Article, error) {
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return &[]model.Article{}, errors.Wrap(err, "failed to convert user id to int")
+	}
+
 	return s.repo.GetAllByUserID(ctx, userId)
 }
 
 func (s *ArticlesService) GetByID(ctx context.Context, articleID, userID string) (*model.Article, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.String("articleID", articleID))
+
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
 		return &model.Article{}, err
@@ -52,7 +73,21 @@ func (s *ArticlesService) GetByID(ctx context.Context, articleID, userID string)
 		return &model.Article{}, err
 	}
 
-	return s.repo.GetArticleByIDAndUserID(ctx, articleId, userId)
+	l.Info("Get article by id and user id")
+	article, err := s.repo.GetArticleByIDAndUserID(ctx, articleId, userId)
+	if err != nil {
+		return &model.Article{}, err
+	}
+
+	l.Info("Get comments by article id")
+	comments, err := s.repo.GetCommentsByArticleID(ctx, articleId)
+	if err != nil {
+		return &model.Article{}, err
+	}
+
+	article.Comments = comments
+
+	return article, nil
 }
 
 func (s *ArticlesService) Update(ctx context.Context, articleID string, userID string, articleDto dto.UpdateArticle) error {

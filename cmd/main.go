@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
@@ -29,7 +30,7 @@ import (
 // @version 1.0
 // @description Backend for AITU Corporate Self-Study Portal.
 
-// @host https://squid-app-8kray.ondigitalocean.app
+// @host squid-app-8kray.ondigitalocean.app
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
@@ -101,14 +102,13 @@ func main() {
 	// Initializing database client
 	dbClient, err := db.NewDBClient(ctx, cancel, postgresConfig)
 	if err != nil {
-		appLogger.Error("Error when initializing Postgres Client", zap.Error(err))
+		appLogger.Fatal("Error when initializing Postgres Client", zap.Error(err))
 	}
 
 	// Initializing redis client
 	redisClient, err := db.NewClientRedis(ctx, cancel, redisConfig)
 	if err != nil {
-		appLogger.Error("Error when initializing Redis Client", zap.Error(err))
-		os.Exit(1)
+		appLogger.Fatal("Error when initializing Redis Client", zap.Error(err))
 	}
 
 	// Initializing database engine with database client and redis client
@@ -120,6 +120,12 @@ func main() {
 	// Initializing built-in logger and recover middlewares
 	app.Use(logger.New())
 	app.Use(recover.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowMethods:     "GET, POST, PUT, DELETE",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowCredentials: false,
+	}))
 
 	// Initializing app repository, service and handler
 	appRepository := repository.NewRepository(dbEngine.DB)
@@ -168,7 +174,7 @@ func shutdown(ctx context.Context, app *fiber.App, appLogger *zap.Logger) {
 	ctx, cancel := context.WithTimeout(ctx, constants.ContextTimeoutSeconds*time.Second)
 	defer cancel()
 
-	// Shutdown the server with a timeout of 5 seconds and log the error if any
+	// Shutdown the server with a timeout of 10 seconds and log the error if any
 	if err := app.Shutdown(); err != nil {
 		panic(err)
 	} else {

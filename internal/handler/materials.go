@@ -109,7 +109,7 @@ func (h *Handler) getAllMaterialsByUserID(c *fiber.Ctx) error {
 	})
 }
 
-// GetAll @Summary Get all materials
+// GetAllByUserID @Summary Get all materials
 // @Security ApiKeyAuth
 // @Tags materials
 // @Description Get all materials of all users

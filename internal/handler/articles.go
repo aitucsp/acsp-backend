@@ -68,11 +68,11 @@ func (h *Handler) createArticle(c *fiber.Ctx) error {
 	})
 }
 
-// @Summary Get all articles by user id
+// @Summary Get all articles
 // @Security ApiKeyAuth
 // @Tags articles
-// @Description Get all articles of user
-// @ID get-all-articles-by-user-id
+// @Description Get all articles in the database
+// @ID get-all-articles
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{}
@@ -84,6 +84,39 @@ func (h *Handler) getAllArticles(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all articles... ")
 
+	articles, err := h.services.Articles.GetAll(c.UserContext())
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"errors":   false,
+		"message":  nil,
+		"count":    len(articles),
+		"user_id":  c.GetRespHeader(userCtx, ""),
+		"articles": articles,
+	})
+}
+
+// @Summary Get all articles of user
+// @Security ApiKeyAuth
+// @Tags articles
+// @Description Get all articles of user by user id
+// @ID get-all-articles-by-user-id
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400,404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Failure default {object} map[string]interface{}
+// @Router /api/v1/scholar/articles?userID=:userID [get]
+func (h *Handler) getAllArticlesByUserID(c *fiber.Ctx) error {
+	l := logging.LoggerFromContext(c.UserContext())
+	l.Info("Getting all articles... ")
+
 	userId, err := getUserId(c)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -92,7 +125,7 @@ func (h *Handler) getAllArticles(c *fiber.Ctx) error {
 		})
 	}
 
-	articles, err := h.services.Articles.GetAll(c.UserContext(), userId)
+	articles, err := h.services.Articles.GetAllByUserID(c.UserContext(), userId)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
