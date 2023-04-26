@@ -10,10 +10,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-redis/redis/v9"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/jmoiron/sqlx"
 
 	"go.uber.org/zap"
 
@@ -99,11 +101,23 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), constants.ContextTimeoutSeconds*time.Second)
 	ctx = logging.ContextWithLogger(ctx, appLogger)
 
+	appLogger.Info("Initializing database client")
+
 	// Initializing database client
 	dbClient, err := db.NewDBClient(ctx, cancel, postgresConfig)
 	if err != nil {
 		appLogger.Fatal("Error when initializing Postgres Client", zap.Error(err))
 	}
+	defer func(dbClient *sqlx.DB) {
+		appLogger.Info("Closing database client")
+
+		err := dbClient.Close()
+		if err != nil {
+			appLogger.Fatal("Error when closing Postgres Client", zap.Error(err))
+		}
+	}(dbClient)
+
+	appLogger.Info("Initializing redis client")
 
 	// Initializing redis client
 	redisClient, err := db.NewClientRedis(ctx, cancel, redisConfig)
@@ -111,8 +125,19 @@ func main() {
 		appLogger.Fatal("Error when initializing Redis Client", zap.Error(err))
 	}
 
+	defer func(redisClient *redis.Client) {
+		appLogger.Info("Closing redis client")
+
+		err := redisClient.Close()
+		if err != nil {
+			appLogger.Fatal("Error when closing Redis Client", zap.Error(err))
+		}
+	}(redisClient)
+
 	// Initializing database engine with database client and redis client
 	dbEngine := db.NewDBEngine(dbClient, *redisClient)
+
+	appLogger.Info("Initializing router and middlewares")
 
 	// Initializing fiber app with fiber config and logger
 	app := fiber.New(fiberConfig)
@@ -131,6 +156,8 @@ func main() {
 	appRepository := repository.NewRepository(dbEngine.DB)
 	appService := service.NewService(appRepository, &dbEngine.Cache, *appConfig.Auth)
 	appHandler := handler.NewHandler(appService)
+
+	appLogger.Info("Initializing app routes and handlers")
 
 	// Initializing routes with fiber app
 	app = appHandler.InitRoutesFiber(app)

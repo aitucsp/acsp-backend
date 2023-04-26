@@ -10,6 +10,19 @@ CREATE TABLE users
     roles      VARCHAR[]            DEFAULT ARRAY ['user']
 );
 
+CREATE TABLE user_details
+(
+    id             BIGSERIAL PRIMARY KEY,
+    user_id        BIGINT      NOT NULL,
+    first_name     VARCHAR     NOT NULL,
+    last_name      VARCHAR     NOT NULL,
+    email          VARCHAR     NOT NULL,
+    phone_number   VARCHAR     NOT NULL,
+    specialization VARCHAR     NOT NULL,
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE roles
 (
     id   INT          NOT NULL PRIMARY KEY,

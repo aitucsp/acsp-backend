@@ -51,10 +51,10 @@ func (s *ArticlesService) GetAll(ctx context.Context) ([]model.Article, error) {
 	return articles, nil
 }
 
-func (s *ArticlesService) GetAllByUserID(ctx context.Context, userID string) (*[]model.Article, error) {
+func (s *ArticlesService) GetAllByUserID(ctx context.Context, userID string) ([]model.Article, error) {
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return &[]model.Article{}, errors.Wrap(err, "failed to convert user id to int")
+		return []model.Article{}, errors.Wrap(err, "failed to convert user id to int")
 	}
 
 	return s.repo.GetAllByUserID(ctx, userId)

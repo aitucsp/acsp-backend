@@ -122,7 +122,7 @@ func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleI
 	return &article, nil
 }
 
-func (a *ArticlesDatabase) GetAllByUserID(ctx context.Context, userID int) (*[]model.Article, error) {
+func (a *ArticlesDatabase) GetAllByUserID(ctx context.Context, userID int) ([]model.Article, error) {
 	var articles []model.Article
 	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", constants.ArticlesTable)
 
@@ -131,14 +131,14 @@ func (a *ArticlesDatabase) GetAllByUserID(ctx context.Context, userID int) (*[]m
 		return nil, errors.Wrap(err, "error when executing query")
 	}
 
-	return &articles, nil
+	return articles, nil
 }
 
 func (a *ArticlesDatabase) CreateComment(ctx context.Context, articleID, userID int, comment model.Comment) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", articleID), zap.Int("userID", userID))
 
 	query := fmt.Sprintf("INSERT INTO %s (user_id, article_id, text) VALUES ($1, $2, $3) RETURNING id",
-		constants.CommentsTable)
+		constants.ArticlesCommentsTable)
 
 	res, err := a.db.Exec(query, userID, articleID, comment.Text)
 	if err != nil {
@@ -169,7 +169,7 @@ func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID
 		       u.name AS "user.name",
 		       u.roles AS "user.roles" 
                FROM %s c INNER JOIN %s u ON u.id = c.user_id WHERE article_id = $1`,
-		constants.CommentsTable,
+		constants.ArticlesCommentsTable,
 		constants.UsersTable)
 
 	rows, err := a.db.Queryx(query, articleID)
@@ -216,7 +216,7 @@ func (a *ArticlesDatabase) ReplyToComment(ctx context.Context, articleID, userID
 	)
 
 	query := fmt.Sprintf("INSERT INTO %s (user_id, article_id, parent_id, text) VALUES ($1, $2, $3, $4) RETURNING id",
-		constants.CommentsTable)
+		constants.ArticlesCommentsTable)
 
 	res, err := a.db.Exec(query, userID, articleID, parentCommentID, comment.Text)
 	if err != nil {
@@ -252,7 +252,7 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(
                INNER JOIN %s u ON u.id = c.user_id 
 			   INNER JOIN %s a ON a.id = c.article_id
 			   WHERE c.article_id = $1 AND c.parent_id = $2`,
-		constants.CommentsTable,
+		constants.ArticlesCommentsTable,
 		constants.UsersTable,
 		constants.ArticlesTable)
 
@@ -304,7 +304,7 @@ func (a *ArticlesDatabase) UpvoteCommentByArticleIDAndCommentID(ctx context.Cont
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET upvotes = upvotes + 1 WHERE id = $1 AND article_id = $2 AND user_id = $3;`,
-		constants.CommentsTable)
+		constants.ArticlesCommentsTable)
 
 	res, err := tx.Exec(query, commentID, articleID, userID)
 	if err != nil {
@@ -342,7 +342,7 @@ func (a *ArticlesDatabase) UpvoteCommentByArticleIDAndCommentID(ctx context.Cont
 	querySecond := fmt.Sprintf(`INSERT INTO %s (articleID, comment_id, user_id, vote_type) 
 														VALUES ($1, $2, $3, $4) 
 														RETURNING id`,
-		constants.CommentVotesTable)
+		constants.ArticleCommentVotesTable)
 
 	res, err = tx.Exec(querySecond, articleID, commentID, userID, constants.UpvoteType)
 	if err != nil {
@@ -405,7 +405,7 @@ func (a *ArticlesDatabase) DownvoteCommentByArticleIDAndCommentID(ctx context.Co
 	}
 
 	query := fmt.Sprintf(`UPDATE %s SET upvotes = upvotes - 1 WHERE id = $1 AND article_id = $2 AND user_id = $3;`,
-		constants.CommentsTable)
+		constants.ArticlesCommentsTable)
 
 	res, err := tx.Exec(query, commentID, articleID, userID)
 	if err != nil {
@@ -443,7 +443,7 @@ func (a *ArticlesDatabase) DownvoteCommentByArticleIDAndCommentID(ctx context.Co
 	querySecond := fmt.Sprintf(`INSERT INTO %s (articleID, comment_id, user_id, vote_type) 
 														VALUES ($1, $2, $3, $4) 
 														RETURNING id`,
-		constants.CommentVotesTable)
+		constants.ArticleCommentVotesTable)
 
 	res, err = tx.Exec(querySecond, articleID, commentID, userID, constants.DownvoteType)
 	if err != nil {
@@ -495,7 +495,7 @@ func (a *ArticlesDatabase) GetVotesByArticleIDAndCommentID(ctx context.Context, 
 	var upvote, downvote int
 
 	query := fmt.Sprintf("SELECT upvote, downvote FROM %s WHERE id = $1 AND article_id = $2",
-		constants.CommentsTable)
+		constants.ArticlesCommentsTable)
 
 	err := a.db.QueryRow(query, commentID, articleID).Scan(&upvote, &downvote)
 	if err != nil {
@@ -509,7 +509,7 @@ func (a *ArticlesDatabase) HasUserVotedForComment(ctx context.Context, userID, c
 	var id int
 
 	query := fmt.Sprintf("SELECT id FROM %s WHERE user_id = $1 AND comment_id = $2",
-		constants.CommentVotesTable)
+		constants.ArticleCommentVotesTable)
 
 	err := a.db.QueryRow(query, userID, commentID).Scan(&id)
 	if err != nil {

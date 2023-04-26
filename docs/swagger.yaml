@@ -97,12 +97,10 @@ definitions:
         type: string
       name:
         type: string
-      password:
-        type: string
       updated_at:
         type: string
     type: object
-host: https://squid-app-8kray.ondigitalocean.app
+host: squid-app-8kray.ondigitalocean.app
 info:
   contact: {}
   description: Backend for AITU Corporate Self-Study Portal.
@@ -219,7 +217,7 @@ paths:
       summary: SignUp
       tags:
       - auth
-  /api/v1/code-connection/applicants/:
+  /api/v1/code-connection/applicants:
     get:
       consumes:
       - application/json
@@ -264,6 +262,12 @@ paths:
       - application/json
       description: Get applicant card by id
       operationId: get-applicant-card-by-id
+      parameters:
+      - description: applicant id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -298,51 +302,6 @@ paths:
       tags:
       - cards
   /api/v1/code-connection/cards:
-    post:
-      consumes:
-      - application/json
-      description: Method for creating a card
-      operationId: card-id
-      parameters:
-      - description: card information
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/dto.CreateCard'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: integer
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-        default:
-          description: ""
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create a card
-      tags:
-      - cards
-  /api/v1/code-connection/cards/:
     get:
       consumes:
       - application/json
@@ -381,12 +340,62 @@ paths:
       summary: Get all cards of a user
       tags:
       - cards
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a card
+      operationId: card-id
+      parameters:
+      - description: card information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCard'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a card
+      tags:
+      - cards
   /api/v1/code-connection/cards/:id:
     delete:
       consumes:
       - application/json
       description: Delete a card from database
       operationId: delete-card-by-id
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -416,9 +425,14 @@ paths:
       description: Update data of card
       operationId: update-card-by-id
       parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
       - description: card information
         in: body
-        name: input
+        name: request
         required: true
         schema:
           $ref: '#/definitions/dto.UpdateCard'
@@ -450,62 +464,18 @@ paths:
       summary: Update a card by id
       tags:
       - cards
-  /api/v1/code-connection/cards/:id/invite:
-    post:
-      consumes:
-      - application/json
-      description: Invite a user by card
-      operationId: create-an-invitation
-      parameters:
-      - description: card id
-        in: path
-        name: input
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: SUCCESS
-          schema:
-            type: integer
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-        default:
-          description: ""
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Create an invitation
-      tags:
-      - cards
-  /api/v1/code-connection/invitations/:
+  /api/v1/code-connection/cards/:id/invitations:
     get:
       consumes:
       - application/json
-      description: Invite a user by card
-      operationId: get-invitations
+      description: Get invitations by card id and user id
+      operationId: get-card-invitations
       parameters:
       - description: card id
         in: path
-        name: input
+        name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -538,12 +508,55 @@ paths:
       summary: Get invitations
       tags:
       - cards
+    post:
+      consumes:
+      - application/json
+      description: Invite a user by a card id
+      operationId: create-an-invitation
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create an invitation
+      tags:
+      - cards
   /api/v1/scholar/articles:
     get:
       consumes:
       - application/json
-      description: Get all articles of user
-      operationId: get-all-articles-by-user-id
+      description: Get all articles in the database
+      operationId: get-all-articles
       produces:
       - application/json
       responses:
@@ -574,7 +587,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get all articles by user id
+      summary: Get all articles
       tags:
       - articles
     post:
@@ -586,7 +599,7 @@ paths:
       parameters:
       - description: article information
         in: body
-        name: input
+        name: request
         required: true
         schema:
           $ref: '#/definitions/dto.CreateArticle'
@@ -628,6 +641,12 @@ paths:
       - application/json
       description: Delete an article from database
       operationId: delete-article-by-id
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -656,6 +675,12 @@ paths:
       - application/json
       description: Get articles by id and user id
       operationId: get-article-by-id-and-user-id
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -695,7 +720,12 @@ paths:
       description: Update data of article
       operationId: update-title-by-id
       parameters:
-      - description: project information
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: article information
         in: body
         name: input
         required: true
@@ -735,6 +765,12 @@ paths:
       - application/json
       description: Get all comments of an article
       operationId: get-all-comments-by-article-id
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -774,6 +810,11 @@ paths:
       description: Method for commenting an article by id and user id
       operationId: comment-an-article
       parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
       - description: comment information
         in: body
         name: input
@@ -812,12 +853,73 @@ paths:
       summary: Comment an article
       tags:
       - articles
-  /api/v1/scholar/articles/:id/comments/:comment-id/replies:
+  /api/v1/scholar/articles/:id/comments/:commentID/downvote:
+    post:
+      consumes:
+      - application/json
+      description: Downvote comment of an article by article id and comment id
+      operationId: downvote-comment
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Downvote comment
+      tags:
+      - articles
+  /api/v1/scholar/articles/:id/comments/:commentID/replies:
     get:
       consumes:
       - application/json
       description: Get all comments of an article
       operationId: get-all-replies-of-comment
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -856,6 +958,17 @@ paths:
       - application/json
       description: Reply to comment of an article
       operationId: reply-to-comment-by-article-id-and-comment-id
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -889,12 +1002,163 @@ paths:
       summary: Reply to comment by article id and comment id
       tags:
       - articles
+  /api/v1/scholar/articles/:id/comments/:commentID/upvote:
+    post:
+      consumes:
+      - application/json
+      description: Upvote comment of an article by article id and comment id
+      operationId: upvote-comment
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upvote comment
+      tags:
+      - articles
+  /api/v1/scholar/articles/:id/comments/:commentID/votes:
+    get:
+      consumes:
+      - application/json
+      description: Downvote comment of an article by article id and comment id
+      operationId: get-votes-of-comment
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get vote difference of comment
+      tags:
+      - articles
+  /api/v1/scholar/articles/user:
+    get:
+      consumes:
+      - application/json
+      description: Get all articles of user by user id
+      operationId: get-all-articles-by-user-id
+      parameters:
+      - description: user id
+        in: query
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all articles of user
+      tags:
+      - articles
   /api/v1/scholar/material/:id:
     delete:
       consumes:
       - application/json
       description: Delete a material from database by id
       operationId: delete-material-by-id
+      parameters:
+      - description: material id
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1007,6 +1271,12 @@ paths:
       - application/json
       description: Get materials by id and user id
       operationId: get-material-by-id-and-user-id
+      parameters:
+      - description: material id
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1046,6 +1316,11 @@ paths:
       description: Update data of material by id
       operationId: update-material-by-id
       parameters:
+      - description: material id
+        in: path
+        name: id
+        required: true
+        type: string
       - description: material information
         in: body
         name: input
@@ -1119,7 +1394,7 @@ paths:
       summary: Get all materials by user id
       tags:
       - materials
-  /v1/token/renew:
+  /api/v1/token/renew:
     post:
       consumes:
       - application/json
@@ -1165,6 +1440,49 @@ paths:
       summary: renew access and refresh tokens
       tags:
       - auth
+  /api/v1/users/:id:
+    get:
+      consumes:
+      - application/json
+      description: get user info by id from the system
+      operationId: get-user
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user info by id
+      tags:
+      - users
 securityDefinitions:
   ApiKeyAuth:
     in: header

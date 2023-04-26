@@ -20,7 +20,7 @@ import (
 // @ID create-article
 // @Accept  json
 // @Produce  json
-// @Param input body dto.CreateArticle true "article information"
+// @Param request body dto.CreateArticle true "article information"
 // @Success 200 {integer} integer 1
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -108,20 +108,21 @@ func (h *Handler) getAllArticles(c *fiber.Ctx) error {
 // @ID get-all-articles-by-user-id
 // @Accept  json
 // @Produce  json
+// @Param userID query string true "user id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles?userID=:userID [get]
+// @Router /api/v1/scholar/articles/user [get]
 func (h *Handler) getAllArticlesByUserID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all articles... ")
 
-	userId, err := getUserId(c)
-	if err != nil {
+	userId := c.Query("userID")
+	if userId == "" {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
-			"message": err.Error(),
+			"message": "User id is required",
 		})
 	}
 
@@ -136,7 +137,7 @@ func (h *Handler) getAllArticlesByUserID(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"errors":   false,
 		"message":  nil,
-		"count":    len(*articles),
+		"count":    len(articles),
 		"user_id":  c.GetRespHeader(userCtx, ""),
 		"articles": articles,
 	})
@@ -149,6 +150,7 @@ func (h *Handler) getAllArticlesByUserID(c *fiber.Ctx) error {
 // @ID get-article-by-id-and-user-id
 // @Accept  json
 // @Produce  json
+// @Param id path string true "article id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -197,7 +199,8 @@ func (h *Handler) getArticleByID(c *fiber.Ctx) error {
 // @ID update-title-by-id
 // @Accept  json
 // @Produce  json
-// @Param input body dto.UpdateArticle true "project information"
+// @Param id path string true "article id"
+// @Param input body dto.UpdateArticle true "article information"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -258,6 +261,7 @@ func (h *Handler) updateArticle(c *fiber.Ctx) error {
 // @ID delete-article-by-id
 // @Accept  json
 // @Produce  json
+// @Param id path string true "article id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
@@ -300,6 +304,7 @@ func (h *Handler) deleteArticle(c *fiber.Ctx) error {
 // @ID comment-an-article
 // @Accept  json
 // @Produce  json
+// @Param id path string true "article id"
 // @Param input body dto.CreateComment true "comment information"
 // @Success 200 {integer} integer 1
 // @Failure 400,404 {object} map[string]interface{}
@@ -360,6 +365,7 @@ func (h *Handler) commentArticle(c *fiber.Ctx) error {
 // @ID get-all-comments-by-article-id
 // @Accept  json
 // @Produce  json
+// @Param id path string true "article id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -401,11 +407,13 @@ func (h *Handler) getCommentsByArticleID(c *fiber.Ctx) error {
 // @ID reply-to-comment-by-article-id-and-comment-id
 // @Accept  json
 // @Produce  json
+// @Param id path string true "article id"
+// @Param commentID path string true "comment id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:comment-id/replies [post]
+// @Router /api/v1/scholar/articles/:id/comments/:commentID/replies [post]
 func (h *Handler) replyToCommentByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Replying to comment... ")
@@ -476,11 +484,13 @@ func (h *Handler) replyToCommentByID(c *fiber.Ctx) error {
 // @ID get-all-replies-of-comment
 // @Accept  json
 // @Produce  json
+// @Param id path string true "article id"
+// @Param commentID path string true "comment id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:comment-id/replies [get]
+// @Router /api/v1/scholar/articles/:id/comments/:commentID/replies [get]
 func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Get all replies by comment id... ")
@@ -533,11 +543,13 @@ func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 // @ID upvote-comment
 // @Accept  json
 // @Produce  json
+// @Param id path string true "article id"
+// @Param commentID path string true "comment id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:comment-id/upvote [post]
+// @Router /api/v1/scholar/articles/:id/comments/:commentID/upvote [post]
 func (h *Handler) upvoteCommentByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Up-voting a comment... ")
@@ -588,11 +600,13 @@ func (h *Handler) upvoteCommentByID(c *fiber.Ctx) error {
 // @ID downvote-comment
 // @Accept  json
 // @Produce  json
+// @Param id path string true "article id"
+// @Param commentID path string true "comment id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:comment-id/downvote [post]
+// @Router /api/v1/scholar/articles/:id/comments/:commentID/downvote [post]
 func (h *Handler) downvoteCommentByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Down-voting comment id... ")
@@ -643,11 +657,13 @@ func (h *Handler) downvoteCommentByID(c *fiber.Ctx) error {
 // @ID get-votes-of-comment
 // @Accept  json
 // @Produce  json
+// @Param id path string true "article id"
+// @Param commentID path string true "comment id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:comment-id/votes [get]
+// @Router /api/v1/scholar/articles/:id/comments/:commentID/votes [get]
 func (h *Handler) getVotesByCommentID(ctx *fiber.Ctx) error {
 	l := logging.LoggerFromContext(ctx.UserContext())
 	l.Info("Getting votes of comment... ")

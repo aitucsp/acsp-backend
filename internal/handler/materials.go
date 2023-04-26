@@ -149,6 +149,7 @@ func (h *Handler) getAllMaterials(c *fiber.Ctx) error {
 // @ID get-material-by-id-and-user-id
 // @Accept  json
 // @Produce  json
+// @Param id path string true "material id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -189,6 +190,7 @@ func (h *Handler) getMaterialByID(c *fiber.Ctx) error {
 // @ID update-material-by-id
 // @Accept  json
 // @Produce  json
+// @Param id path string true "material id"
 // @Param input body dto.UpdateMaterial true "material information"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
@@ -250,6 +252,7 @@ func (h *Handler) updateMaterial(c *fiber.Ctx) error {
 // @ID delete-material-by-id
 // @Accept  json
 // @Produce  json
+// @Param id path string true "material id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}

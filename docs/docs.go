@@ -178,7 +178,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/code-connection/applicants/": {
+        "/api/v1/code-connection/applicants": {
             "get": {
                 "security": [
                     {
@@ -255,6 +255,15 @@ const docTemplate = `{
                 ],
                 "summary": "Get applicant card by id",
                 "operationId": "get-applicant-card-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "applicant id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -295,74 +304,6 @@ const docTemplate = `{
             }
         },
         "/api/v1/code-connection/cards": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Method for creating a card",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Create a card",
-                "operationId": "card-id",
-                "parameters": [
-                    {
-                        "description": "card information",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.CreateCard"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/code-connection/cards/": {
             "get": {
                 "security": [
                     {
@@ -418,6 +359,72 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Method for creating a card",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Create a card",
+                "operationId": "card-id",
+                "parameters": [
+                    {
+                        "description": "card information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateCard"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
             }
         },
         "/api/v1/code-connection/cards/:id": {
@@ -441,8 +448,15 @@ const docTemplate = `{
                 "operationId": "update-card-by-id",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "card id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "card information",
-                        "name": "input",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -499,6 +513,15 @@ const docTemplate = `{
                 ],
                 "summary": "Delete a card by id",
                 "operationId": "delete-card-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -524,14 +547,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/code-connection/cards/:id/invite": {
-            "post": {
+        "/api/v1/code-connection/cards/:id/invitations": {
+            "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Invite a user by card",
+                "description": "Get invitations by card id and user id",
                 "consumes": [
                     "application/json"
                 ],
@@ -541,20 +564,20 @@ const docTemplate = `{
                 "tags": [
                     "cards"
                 ],
-                "summary": "Create an invitation",
-                "operationId": "create-an-invitation",
+                "summary": "Get invitations",
+                "operationId": "get-card-invitations",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "card id",
-                        "name": "input",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "SUCCESS",
+                        "description": "OK",
                         "schema": {
                             "type": "integer"
                         }
@@ -588,16 +611,14 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/api/v1/code-connection/invitations/": {
-            "get": {
+            },
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Invite a user by card",
+                "description": "Invite a user by a card id",
                 "consumes": [
                     "application/json"
                 ],
@@ -607,20 +628,20 @@ const docTemplate = `{
                 "tags": [
                     "cards"
                 ],
-                "summary": "Get invitations",
-                "operationId": "get-invitations",
+                "summary": "Create an invitation",
+                "operationId": "create-an-invitation",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "card id",
-                        "name": "input",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "success",
                         "schema": {
                             "type": "integer"
                         }
@@ -663,7 +684,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get all articles of user",
+                "description": "Get all articles in the database",
                 "consumes": [
                     "application/json"
                 ],
@@ -673,8 +694,8 @@ const docTemplate = `{
                 "tags": [
                     "articles"
                 ],
-                "summary": "Get all articles by user id",
-                "operationId": "get-all-articles-by-user-id",
+                "summary": "Get all articles",
+                "operationId": "get-all-articles",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -734,7 +755,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "article information",
-                        "name": "input",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -799,6 +820,15 @@ const docTemplate = `{
                 ],
                 "summary": "Get article by id and user id",
                 "operationId": "get-article-by-id-and-user-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -857,7 +887,14 @@ const docTemplate = `{
                 "operationId": "update-title-by-id",
                 "parameters": [
                     {
-                        "description": "project information",
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "article information",
                         "name": "input",
                         "in": "body",
                         "required": true,
@@ -915,6 +952,15 @@ const docTemplate = `{
                 ],
                 "summary": "Delete an article by id",
                 "operationId": "delete-article-by-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -959,6 +1005,15 @@ const docTemplate = `{
                 ],
                 "summary": "Get all comments by article id",
                 "operationId": "get-all-comments-by-article-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1017,6 +1072,13 @@ const docTemplate = `{
                 "operationId": "comment-an-article",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "comment information",
                         "name": "input",
                         "in": "body",
@@ -1064,7 +1126,81 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/scholar/articles/:id/comments/:comment-id/replies": {
+        "/api/v1/scholar/articles/:id/comments/:commentID/downvote": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Downvote comment of an article by article id and comment id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Downvote comment",
+                "operationId": "downvote-comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "comment id",
+                        "name": "commentID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/scholar/articles/:id/comments/:commentID/replies": {
             "get": {
                 "security": [
                     {
@@ -1083,6 +1219,22 @@ const docTemplate = `{
                 ],
                 "summary": "Get all comments by article id",
                 "operationId": "get-all-replies-of-comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "comment id",
+                        "name": "commentID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1139,6 +1291,237 @@ const docTemplate = `{
                 ],
                 "summary": "Reply to comment by article id and comment id",
                 "operationId": "reply-to-comment-by-article-id-and-comment-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "comment id",
+                        "name": "commentID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/scholar/articles/:id/comments/:commentID/upvote": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Upvote comment of an article by article id and comment id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Upvote comment",
+                "operationId": "upvote-comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "comment id",
+                        "name": "commentID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/scholar/articles/:id/comments/:commentID/votes": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Downvote comment of an article by article id and comment id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Get vote difference of comment",
+                "operationId": "get-votes-of-comment",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "article id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "comment id",
+                        "name": "commentID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/scholar/articles/user": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all articles of user by user id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Get all articles of user",
+                "operationId": "get-all-articles-by-user-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "userID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1197,6 +1580,15 @@ const docTemplate = `{
                 ],
                 "summary": "Delete a material by id",
                 "operationId": "delete-material-by-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "material id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1364,6 +1756,15 @@ const docTemplate = `{
                 ],
                 "summary": "Get material by id and user id",
                 "operationId": "get-material-by-id-and-user-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "material id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1421,6 +1822,13 @@ const docTemplate = `{
                 "summary": "Update a material by id",
                 "operationId": "update-material-by-id",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "material id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "material information",
                         "name": "input",
@@ -1521,7 +1929,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/token/renew": {
+        "/api/v1/token/renew": {
             "post": {
                 "security": [
                     {
@@ -1581,6 +1989,68 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "error\" \"message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/users/:id": {
+            "get": {
+                "description": "get user info by id from the system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get user info by id",
+                "operationId": "get-user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -1736,9 +2206,6 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "password": {
-                    "type": "string"
-                },
                 "updated_at": {
                     "type": "string"
                 }
@@ -1757,7 +2224,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "https://squid-app-8kray.ondigitalocean.app",
+	Host:             "squid-app-8kray.ondigitalocean.app",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "ACSP Backend",

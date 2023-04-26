@@ -33,17 +33,20 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 			auth.Post("/logout", h.userIdentity, h.logout)
 		}
 
+		// Define user routes
+		rest.Get("/users", h.userIdentity, h.getUserInfo)
+
 		// Define user routes with authentication middleware (userIdentity) for all routes
 		scholar := rest.Group("/scholar", h.userIdentity)
 		{
 			articles := scholar.Group("/articles", h.userIdentity)
 			{
-				articles.Post("/", h.createArticle)                       // create an article
-				articles.Get("/", h.getAllArticles)                       // get all articles
-				articles.Get("?userID=:userID", h.getAllArticlesByUserID) // get all articles of user
-				articles.Get("/:id", h.getArticleByID)                    // get article by id
-				articles.Put("/:id", h.updateArticle)                     // update an article
-				articles.Delete("/:id", h.deleteArticle)                  // delete an article
+				articles.Post("/", h.createArticle)             // create an article
+				articles.Get("/", h.getAllArticles)             // get all articles
+				articles.Get("/user", h.getAllArticlesByUserID) // get all articles of user
+				articles.Get("/:id", h.getArticleByID)          // get article by id
+				articles.Put("/:id", h.updateArticle)           // update an article
+				articles.Delete("/:id", h.deleteArticle)        // delete an article
 
 				comments := articles.Group("/:id/comments", h.userIdentity)
 				{

@@ -20,7 +20,7 @@ import (
 // @ID card-id
 // @Accept  json
 // @Produce  json
-// @Param input body dto.CreateCard true "card information"
+// @Param request body dto.CreateCard true "card information"
 // @Success 200 {integer} integer 1
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -75,7 +75,8 @@ func (h *Handler) createCard(c *fiber.Ctx) error {
 // @ID update-card-by-id
 // @Accept  json
 // @Produce  json
-// @Param input body dto.UpdateCard true "card information"
+// @Param id path int true "card id"
+// @Param request body dto.UpdateCard true "card information"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -141,6 +142,7 @@ func (h *Handler) updateCard(c *fiber.Ctx) error {
 // @ID delete-card-by-id
 // @Accept  json
 // @Produce  json
+// @Param id path int true "Card ID"
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
@@ -192,7 +194,7 @@ func (h *Handler) deleteCard(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/ [get]
+// @Router /api/v1/code-connection/cards [get]
 func (h *Handler) getAllCardsByUserID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all cards... ")
@@ -233,7 +235,7 @@ func (h *Handler) getAllCardsByUserID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/applicants/ [get]
+// @Router /api/v1/code-connection/applicants [get]
 func (h *Handler) getAllCards(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all cards... ")
@@ -261,6 +263,7 @@ func (h *Handler) getAllCards(c *fiber.Ctx) error {
 // @ID get-applicant-card-by-id
 // @Accept  json
 // @Produce  json
+// @Param id path int true "applicant id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -306,7 +309,7 @@ func (h *Handler) getCardByID(c *fiber.Ctx) error {
 // @ID create-an-invitation
 // @Accept  json
 // @Produce  json
-// @Param input path string true "Created an invitation"
+// @Param id path int true "card id"
 // @Success 200 {integer} string "success"
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -357,7 +360,7 @@ func (h *Handler) createInvitation(c *fiber.Ctx) error {
 // @ID get-card-invitations
 // @Accept  json
 // @Produce  json
-// @Param input path string true "card id"
+// @Param id path int true "card id"
 // @Success 200 {integer} model.InvitationCard map[string] interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}

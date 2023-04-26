@@ -126,7 +126,7 @@ func (h *Handler) signIn(ctx *fiber.Ctx) error {
 // @Failure 400,401,404 {object} map[string]interface{} "error" "message"
 // @Failure 500 {object} map[string]interface{} "error" "message"
 // @Security ApiKeyAuth
-// @Router /v1/token/renew [post]
+// @Router /api/v1/token/renew [post]
 func (h *Handler) refreshToken(ctx *fiber.Ctx) error {
 	now := time.Now().Unix()
 
