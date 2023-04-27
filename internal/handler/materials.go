@@ -256,7 +256,7 @@ func (h *Handler) updateMaterial(c *fiber.Ctx) error {
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/material/:id [delete]
+// @Router /api/v1/scholar/materials/:id [delete]
 func (h *Handler) deleteMaterial(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Deleting a material")

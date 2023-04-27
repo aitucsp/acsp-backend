@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"os"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/jmoiron/sqlx"
 
 	"acsp/internal/model"
@@ -14,8 +16,10 @@ type Repository struct {
 	Articles
 	Cards
 	Materials
+	S3Bucket
 }
 
+// Authorization interface provides methods for working with users
 type Authorization interface {
 	CreateUser(ctx context.Context, user model.User) error
 	GetUser(ctx context.Context, username, password string) (*model.User, error)
@@ -25,6 +29,7 @@ type Authorization interface {
 	ExistsUserByID(ctx context.Context, id int) (bool, error)
 }
 
+// Roles interface provides methods for working with roles
 type Roles interface {
 	CreateRole(ctx context.Context, name string) error
 	UpdateRole(ctx context.Context, roleID int, newName string) error
@@ -51,6 +56,7 @@ type Articles interface {
 	HasUserVotedForComment(ctx context.Context, userID, commentID int) (bool, error)
 }
 
+// Materials interface provides methods for working with materials.
 type Materials interface {
 	Create(ctx context.Context, material model.Material) error
 	Update(ctx context.Context, material model.Material) error
@@ -60,6 +66,7 @@ type Materials interface {
 	GetAll(ctx context.Context) ([]model.Material, error)
 }
 
+// Cards interface provides methods for working with cards.
 type Cards interface {
 	Create(ctx context.Context, card model.Card) error
 	Update(ctx context.Context, card model.Card) error
@@ -71,12 +78,18 @@ type Cards interface {
 	GetInvitationsByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error)
 }
 
-func NewRepository(db *sqlx.DB) *Repository {
+// S3Bucket interface provides methods for storing and retrieving objects from an S3 bucket.
+type S3Bucket interface {
+	AddObject(bucketName string, objectName string, file *os.File) error
+}
+
+func NewRepository(db *sqlx.DB, sess *session.Session) *Repository {
 	return &Repository{
 		Authorization: NewAuthRepository(db),
 		Roles:         NewRolesRepository(db),
 		Articles:      NewArticlesRepository(db),
 		Cards:         NewCardsRepository(db),
 		Materials:     NewMaterialsRepository(db),
+		S3Bucket:      NewS3BucketRepository(sess),
 	}
 }

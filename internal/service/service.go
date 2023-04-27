@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"os"
 
 	"github.com/go-redis/redis/v9"
 	_ "github.com/golang/mock/gomock"
@@ -21,6 +22,7 @@ type Service struct {
 	Roles
 	Cards
 	Materials
+	S3Bucket
 }
 
 type Authorization interface {
@@ -79,6 +81,10 @@ type Cards interface {
 	GetInvitationsByUserID(ctx context.Context, userID string) ([]model.InvitationCard, error)
 }
 
+type S3Bucket interface {
+	UploadFile(ctx context.Context, bucket, key string, file *os.File) error
+}
+
 func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig) *Service {
 	return &Service{
 		Authorization: NewAuthService(repo.Authorization, repo.Roles, r, c),
@@ -86,5 +92,6 @@ func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfi
 		Roles:         NewRolesService(repo.Roles, repo.Authorization),
 		Cards:         NewCardsService(repo.Cards, repo.Authorization),
 		Materials:     NewMaterialsService(repo.Materials, repo.Authorization),
+		S3Bucket:      NewS3BucketService(repo.S3Bucket),
 	}
 }

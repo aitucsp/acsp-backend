@@ -33,10 +33,19 @@ type (
 		Auth        *AuthConfig
 		Logger      *LoggerConfig
 		Host        *HostConfig
+		Bucket      *S3Config
 	}
 
 	AuthConfig struct {
 		JWT JWTConfig
+	}
+
+	S3Config struct {
+		AccessToken string `json:"S3_ACCESS_TOKEN"`
+		SecretKey   string `json:"S3_SECRET_KEY"`
+		Region      string `json:"S3_REGION"`
+		Bucket      string `json:"S3_BUCKET_NAME"`
+		Endpoint    string `json:"S3_ENDPOINT"`
 	}
 
 	JWTConfig struct {
@@ -128,6 +137,13 @@ func NewBaseConfig(p Provider) (*Config, error) {
 	}
 
 	c.Auth = a
+
+	s, err := newS3BucketConfig(p)
+	if err != nil {
+		return nil, err
+	}
+
+	c.Bucket = s
 
 	return &c, nil
 }
@@ -240,6 +256,43 @@ func newHTTPConfig(p Provider) (*HTTPConfig, error) {
 		ReadTimeout:        getDuration(p, prefix+"_READ_TIMEOUT", constants.FallBackDurationSeconds*time.Second),
 		WriteTimeout:       getDuration(p, prefix+"_WRITE_TIMEOUT", constants.FallBackDurationSeconds*time.Second),
 		MaxHeaderMegabytes: GetInt(p, prefix+"_MAX_HEADER_BYTES", 1),
+	}, nil
+}
+
+func newS3BucketConfig(p Provider) (*S3Config, error) {
+	const prefix = "S3_"
+
+	a := p.Get(prefix+"_ACCESS_TOKEN", "")
+	if a == "" {
+		return nil, fmt.Errorf("%sACCESS_TOKEN is required", prefix)
+	}
+
+	s := p.Get(prefix+"_SECRET_KEY", "")
+	if s == "" {
+		return nil, fmt.Errorf("%sSECRET_KEY is required", prefix)
+	}
+
+	r := p.Get(prefix+"_REGION", "")
+	if r == "" {
+		return nil, fmt.Errorf("%sREGION is required", prefix)
+	}
+
+	b := p.Get(prefix+"_BUCKET_NAME", "")
+	if b == "" {
+		return nil, fmt.Errorf("%sBUCKET_NAME is required", prefix)
+	}
+
+	e := p.Get(prefix+"_ENDPOINT", "")
+	if e == "" {
+		return nil, fmt.Errorf("%sENDPOINT is required", prefix)
+	}
+
+	return &S3Config{
+		AccessToken: a,
+		SecretKey:   s,
+		Region:      r,
+		Bucket:      b,
+		Endpoint:    e,
 	}, nil
 }
 
