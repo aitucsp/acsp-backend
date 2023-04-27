@@ -551,6 +551,51 @@ paths:
       summary: Create an invitation
       tags:
       - cards
+  /api/v1/code-connection/contests/:id:
+    get:
+      consumes:
+      - application/json
+      description: Get contest by id
+      operationId: get-contest-by-id
+      parameters:
+      - description: contest id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get contest by id
+      tags:
+      - contests
   /api/v1/scholar/articles:
     get:
       consumes:
@@ -1147,41 +1192,6 @@ paths:
       summary: Get all articles of user
       tags:
       - articles
-  /api/v1/scholar/material/:id:
-    delete:
-      consumes:
-      - application/json
-      description: Delete a material from database by id
-      operationId: delete-material-by-id
-      parameters:
-      - description: material id
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-        default:
-          description: ""
-          schema:
-            additionalProperties: true
-            type: object
-      security:
-      - ApiKeyAuth: []
-      summary: Delete a material by id
-      tags:
-      - materials
   /api/v1/scholar/materials:
     get:
       consumes:
@@ -1266,6 +1276,40 @@ paths:
       tags:
       - materials
   /api/v1/scholar/materials/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a material from database by id
+      operationId: delete-material-by-id
+      parameters:
+      - description: material id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a material by id
+      tags:
+      - materials
     get:
       consumes:
       - application/json

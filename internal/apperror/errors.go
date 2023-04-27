@@ -15,6 +15,7 @@ const (
 	ErrBadInputBody       = Error("invalid input body")
 	ErrUserIDNotFound     = Error("user id not found")
 	ErrParameterNotFound  = Error("parameter not found")
+	ErrInvalidParameter   = Error("invalid parameter")
 	ErrBadSigningMethod   = Error("invalid signing method")
 	ErrBadClaimsType      = Error("token claims are not of type *tokenClaims")
 	ErrEnvVariableParsing = Error("environment variable not parsed")

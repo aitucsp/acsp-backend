@@ -11,6 +11,7 @@ const (
 	CardsTable               = "code_connection_cards"
 	InvitationsTable         = "code_connection_invitations"
 	InvitationResponsesTable = "code_connection_responses"
+	ContestsTable            = "contests"
 	DatabaseName             = "postgres"
 )
 

@@ -98,6 +98,12 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 			// 	invitations.Post("/decline") // Decline an invitation
 			// }
 		}
+
+		contests := rest.Group("/contests", h.userIdentity)
+		{
+			contests.Get("/", h.getAllContests) // get all contests
+			contests.Get("/:id", h.getContest)  // get contest by id
+		}
 	}
 
 	app.Get("/swagger/*", swagger.HandlerDefault)

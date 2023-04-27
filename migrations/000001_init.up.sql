@@ -129,6 +129,17 @@ CREATE TABLE code_connection_responses
     FOREIGN KEY (invitation_id) REFERENCES code_connection_invitations (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE contests
+(
+    id           BIGSERIAL   NOT NULL PRIMARY KEY,
+    contest_name VARCHAR     NOT NULL,
+    description  VARCHAR     NOT NULL,
+    link         VARCHAR     NOT NULL,
+    start_date   TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    end_date     TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT (now())
+);
+
 INSERT INTO roles (id, name)
 VALUES (1, 'user');
 INSERT INTO roles (id, name)

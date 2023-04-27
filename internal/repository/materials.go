@@ -94,29 +94,29 @@ func (m *MaterialsDatabase) GetByID(ctx context.Context, materialID int) (*model
 }
 
 func (m *MaterialsDatabase) GetAllByUserID(ctx context.Context, userID int) (*[]model.Material, error) {
-	var material []model.Material
+	var materials []model.Material
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1",
 		constants.MaterialsTable)
 
-	err := m.db.Select(&material, query, userID)
+	err := m.db.Select(&materials, query, userID)
 	if err != nil {
 		return nil, errors.Wrap(err, "error when getting the materials")
 	}
 
-	return &material, nil
+	return &materials, nil
 }
 
 func (m *MaterialsDatabase) GetAll(ctx context.Context) ([]model.Material, error) {
-	var material []model.Material
+	var materials []model.Material
 
 	query := fmt.Sprintf("SELECT * FROM %s",
 		constants.MaterialsTable)
 
-	err := m.db.Select(&material, query)
+	err := m.db.Select(&materials, query)
 	if err != nil {
 		return nil, errors.Wrap(err, "error when getting the materials")
 	}
 
-	return material, nil
+	return materials, nil
 }
