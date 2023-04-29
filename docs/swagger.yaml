@@ -559,9 +559,14 @@ paths:
       description: Get invitation by id and card id
       operationId: get-invitation-by-id
       parameters:
-      - description: invitations id
+      - description: card id
         in: path
         name: id
+        required: true
+        type: integer
+      - description: invitation id
+        in: path
+        name: invitationID
         required: true
         type: integer
       produces:
@@ -615,7 +620,8 @@ paths:
         "200":
           description: OK
           schema:
-            type: integer
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:

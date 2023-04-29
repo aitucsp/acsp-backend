@@ -56,7 +56,7 @@ type Articles interface {
 	ReplyToCommentByArticleIDAndCommentID(
 		ctx context.Context, articleID, userID, parentCommentID string, comment dto.ReplyToComment) error
 	GetRepliesByArticleIDAndCommentID(
-		ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error)
+		ctx context.Context, articleID, commentID string) ([]model.Comment, error)
 	UpvoteCommentByArticleIDAndCommentID(userContext context.Context, articleID, commentID, userID string) error
 	DownvoteCommentByArticleIDAndCommentID(userContext context.Context, articleID, commentID, userID string) error
 	GetVotesByArticleIDAndCommentID(userContext context.Context, articleID, commentID string) (int, error)
@@ -65,10 +65,10 @@ type Articles interface {
 type Materials interface {
 	Create(ctx context.Context, userID string, dto dto.CreateMaterial) error
 	GetAll(ctx context.Context) ([]model.Material, error)
-	GetByID(ctx context.Context, materialID string) (*model.Material, error)
+	GetByID(ctx context.Context, materialID string) (model.Material, error)
 	Update(ctx context.Context, materialID, userID string, material dto.UpdateMaterial) error
 	Delete(ctx context.Context, userID, materialID string) error
-	GetByUserID(ctx context.Context, userID string) (*[]model.Material, error)
+	GetAllByUserID(ctx context.Context, userID string) ([]model.Material, error)
 }
 
 type Cards interface {

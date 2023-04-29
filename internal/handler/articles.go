@@ -495,14 +495,6 @@ func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Get all replies by comment id... ")
 
-	userID, err := getUserId(c)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"errors":  true,
-			"message": err.Error(),
-		})
-	}
-
 	articleID := c.Params("id")
 	if articleID == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
@@ -519,7 +511,7 @@ func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 		})
 	}
 
-	comments, err := h.services.Articles.GetRepliesByArticleIDAndCommentID(c.UserContext(), articleID, userID, commentID)
+	comments, err := h.services.Articles.GetRepliesByArticleIDAndCommentID(c.UserContext(), articleID, commentID)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,

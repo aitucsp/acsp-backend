@@ -91,18 +91,13 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 
 				invitations := cards.Group("/:id/invitations", h.userIdentity)
 				{
-					invitations.Get("/", h.getInvitationsByCardID)         // get all invitations of a card
-					invitations.Post("/", h.createInvitation)              // send an invitation to a user
-					invitations.Get("/:invitationID", h.getInvitationByID) // get an invitation by card id and invitation id
+					invitations.Get("/", h.getInvitationsByCardID)                  // get all invitations of a card
+					invitations.Post("/", h.createInvitation)                       // send an invitation to a user
+					invitations.Get("/:invitationID", h.getInvitationByID)          // get an invitation by card id and invitation id
+					invitations.Post("/:invitationID/accept", h.acceptInvitation)   // accept an invitation
+					invitations.Post("/:invitationID/decline", h.declineInvitation) // decline an invitation
 				}
 			}
-
-			// invitations := codeConnection.Group("/invitations")
-			// {
-			// 	// TODO: Accept and decline functionality
-			// 	invitations.Post("/accept")  // Accept an invitation
-			// 	invitations.Post("/decline") // Decline an invitation
-			// }
 		}
 
 		contests := rest.Group("/contests", h.userIdentity)
@@ -112,15 +107,15 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		}
 
 		// Define admin routes
-		// admin := rest.Group("/admin", h.userIdentity)
+		// admin := rest.Group("/admin", h.userIdentity, h.Authorize("admin"))
 		// {
 		// 	admin.Get("/users", h.getAllUsers)       // get all users
 		// 	admin.Get("/users/:id", h.getUserByID)   // get user by id
 		// 	admin.Put("/users/:id", h.updateUser)    // update user by id
 		// 	admin.Delete("/users/:id", h.deleteUser) // delete user by id
-		// 	admin.Post("/admin-panel/contests", h.createContest)
-		// 	admin.Post("/admin-panel/contests/:id", h.updateContest)
-		// 	admin.Delete("/admin-panel/contests/:id", h.deleteContest)
+		// 	admin.Post("/contests", h.createContest)
+		// 	admin.Post("/contests/:id", h.updateContest)
+		// 	admin.Delete("/contests/:id", h.deleteContest)
 		// }
 	}
 

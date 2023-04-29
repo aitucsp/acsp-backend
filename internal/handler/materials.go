@@ -92,7 +92,7 @@ func (h *Handler) getAllMaterialsByUserID(c *fiber.Ctx) error {
 		})
 	}
 
-	materials, err := h.services.Materials.GetByUserID(c.UserContext(), userId)
+	materials, err := h.services.Materials.GetAllByUserID(c.UserContext(), userId)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -103,7 +103,7 @@ func (h *Handler) getAllMaterialsByUserID(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"errors":   false,
 		"message":  nil,
-		"count":    len(*materials),
+		"count":    len(materials),
 		"user_id":  c.GetRespHeader(userCtx, ""),
 		"articles": materials,
 	})

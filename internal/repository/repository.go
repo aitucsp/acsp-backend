@@ -50,7 +50,7 @@ type Articles interface {
 	CreateComment(ctx context.Context, articleID, userID int, comment model.Comment) error
 	GetCommentsByArticleID(ctx context.Context, articleID int) ([]model.Comment, error)
 	ReplyToComment(ctx context.Context, articleID, userID, parentCommentID int, comment model.Comment) error
-	GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) ([]model.Comment, error)
+	GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, parentCommentID int) ([]model.Comment, error)
 	UpvoteCommentByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) error
 	DownvoteCommentByArticleIDAndCommentID(ctx context.Context, articleID, userID, parentCommentID int) error
 	GetVotesByArticleIDAndCommentID(ctx context.Context, articleID, commentID int) (int, error)
@@ -62,8 +62,8 @@ type Materials interface {
 	Create(ctx context.Context, material model.Material) error
 	Update(ctx context.Context, material model.Material) error
 	Delete(ctx context.Context, userID int, materialID int) error
-	GetByID(ctx context.Context, materialID int) (*model.Material, error)
-	GetAllByUserID(ctx context.Context, userID int) (*[]model.Material, error)
+	GetByID(ctx context.Context, materialID int) (model.Material, error)
+	GetAllByUserID(ctx context.Context, userID int) ([]model.Material, error)
 	GetAll(ctx context.Context) ([]model.Material, error)
 }
 

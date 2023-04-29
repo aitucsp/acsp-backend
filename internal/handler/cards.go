@@ -361,7 +361,7 @@ func (h *Handler) createInvitation(c *fiber.Ctx) error {
 // @Accept  json
 // @Produce  json
 // @Param id path int true "card id"
-// @Success 200 {integer} model.InvitationCard map[string] interface{}
+// @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
@@ -401,7 +401,8 @@ func (h *Handler) getInvitations(c *fiber.Ctx) error {
 // @ID get-invitation-by-id
 // @Accept  json
 // @Produce  json
-// @Param id path int true "invitations id"
+// @Param id path int true "card id"
+// @Param invitationID path int true "invitation id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}

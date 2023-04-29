@@ -28,4 +28,7 @@ const (
 	ErrCreatingComment    = Error("error occurred when creating a comment")
 	ErrUpvoteComment      = Error("error occurred when upvoting a comment")
 	ErrDownvoteComment    = Error("error occurred when downvoting a comment")
+	ErrCreatingCard       = Error("error occurred when creating a card")
+	ErrUpdatingCard       = Error("error occurred when updating a card")
+	ErrDeletingCard       = Error("error occurred when deleting a card")
 )

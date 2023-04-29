@@ -19,40 +19,6 @@ type CardsService struct {
 	usersRepo repository.Authorization
 }
 
-func (c *CardsService) GetInvitationsByCardID(ctx context.Context, userID, cardID string) ([]model.InvitationCard, error) {
-	// TODO: check if user is owner of card
-	_, err := strconv.Atoi(userID)
-	if err != nil {
-		return []model.InvitationCard{}, errors.Wrap(err, "error converting user id to int")
-	}
-
-	cardId, err := strconv.Atoi(cardID)
-	if err != nil {
-		return []model.InvitationCard{}, errors.Wrap(err, "error converting card id to int")
-	}
-
-	return c.cardsRepo.GetInvitationsByCardID(ctx, cardId)
-}
-
-func (c *CardsService) GetInvitationByID(ctx context.Context, userID, cardID, invitationID string) (model.InvitationCard, error) {
-	userId, err := strconv.Atoi(userID)
-	if err != nil {
-		return model.InvitationCard{}, errors.Wrap(err, "error converting user id to int")
-	}
-
-	cardId, err := strconv.Atoi(cardID)
-	if err != nil {
-		return model.InvitationCard{}, errors.Wrap(err, "error converting card id to int")
-	}
-
-	invitationId, err := strconv.Atoi(invitationID)
-	if err != nil {
-		return model.InvitationCard{}, errors.Wrap(err, "error converting invitation id to int")
-	}
-
-	return c.cardsRepo.GetInvitationByID(ctx, userId, cardId, invitationId)
-}
-
 func NewCardsService(cardsRepo repository.Cards, usersRepo repository.Authorization) *CardsService {
 	return &CardsService{cardsRepo: cardsRepo, usersRepo: usersRepo}
 }
@@ -216,4 +182,38 @@ func (c *CardsService) GetInvitationsByUserID(ctx context.Context, userID string
 	}
 
 	return cards, nil
+}
+
+func (c *CardsService) GetInvitationsByCardID(ctx context.Context, userID, cardID string) ([]model.InvitationCard, error) {
+	// TODO: check if user is owner of card
+	_, err := strconv.Atoi(userID)
+	if err != nil {
+		return []model.InvitationCard{}, errors.Wrap(err, "error converting user id to int")
+	}
+
+	cardId, err := strconv.Atoi(cardID)
+	if err != nil {
+		return []model.InvitationCard{}, errors.Wrap(err, "error converting card id to int")
+	}
+
+	return c.cardsRepo.GetInvitationsByCardID(ctx, cardId)
+}
+
+func (c *CardsService) GetInvitationByID(ctx context.Context, userID, cardID, invitationID string) (model.InvitationCard, error) {
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return model.InvitationCard{}, errors.Wrap(err, "error converting user id to int")
+	}
+
+	cardId, err := strconv.Atoi(cardID)
+	if err != nil {
+		return model.InvitationCard{}, errors.Wrap(err, "error converting card id to int")
+	}
+
+	invitationId, err := strconv.Atoi(invitationID)
+	if err != nil {
+		return model.InvitationCard{}, errors.Wrap(err, "error converting invitation id to int")
+	}
+
+	return c.cardsRepo.GetInvitationByID(ctx, userId, cardId, invitationId)
 }

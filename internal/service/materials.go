@@ -4,6 +4,8 @@ import (
 	"context"
 	"strconv"
 
+	"github.com/pkg/errors"
+
 	"acsp/internal/dto"
 	"acsp/internal/model"
 	"acsp/internal/repository"
@@ -34,21 +36,12 @@ func (m *MaterialsService) Create(ctx context.Context, userID string, dto dto.Cr
 	return m.repo.Create(ctx, material)
 }
 
-func (m *MaterialsService) GetAll(ctx context.Context) ([]model.Material, error) {
-	return m.repo.GetAll(ctx)
-}
-
-func (m *MaterialsService) GetByID(ctx context.Context, materialID string) (*model.Material, error) {
-	materialId, err := strconv.Atoi(materialID)
+func (m *MaterialsService) Update(ctx context.Context, materialID, userID string, materialDto dto.UpdateMaterial) error {
+	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return &model.Material{}, err
+		return errors.Wrap(err, "error converting user id to int")
 	}
 
-	return m.repo.GetByID(ctx, materialId)
-}
-
-func (m *MaterialsService) Update(ctx context.Context, materialID, userID string, materialDto dto.UpdateMaterial) error {
-	userId, _ := strconv.Atoi(userID)
 	user, err := m.usersRepo.GetByID(ctx, userId)
 	if err != nil {
 		return err
@@ -56,7 +49,7 @@ func (m *MaterialsService) Update(ctx context.Context, materialID, userID string
 
 	materialId, err := strconv.Atoi(materialID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error converting material id to int")
 	}
 
 	material := model.Material{
@@ -70,17 +63,37 @@ func (m *MaterialsService) Update(ctx context.Context, materialID, userID string
 }
 
 func (m *MaterialsService) Delete(ctx context.Context, userID, materialID string) error {
-	userId, _ := strconv.Atoi(userID)
-	projectID, _ := strconv.Atoi(materialID)
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return errors.Wrap(err, "error converting user id to int")
+	}
+
+	projectID, err := strconv.Atoi(materialID)
+	if err != nil {
+		return errors.Wrap(err, "error converting material id to int")
+	}
 
 	return m.repo.Delete(ctx, userId, projectID)
 }
 
-func (m *MaterialsService) GetByUserID(ctx context.Context, userID string) (*[]model.Material, error) {
+func (m *MaterialsService) GetAll(ctx context.Context) ([]model.Material, error) {
+	return m.repo.GetAll(ctx)
+}
+
+func (m *MaterialsService) GetAllByUserID(ctx context.Context, userID string) ([]model.Material, error) {
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return &[]model.Material{}, err
+		return []model.Material{}, err
 	}
 
 	return m.repo.GetAllByUserID(ctx, userId)
+}
+
+func (m *MaterialsService) GetByID(ctx context.Context, materialID string) (model.Material, error) {
+	materialId, err := strconv.Atoi(materialID)
+	if err != nil {
+		return model.Material{}, err
+	}
+
+	return m.repo.GetByID(ctx, materialId)
 }

@@ -186,13 +186,8 @@ func (s *ArticlesService) ReplyToCommentByArticleIDAndCommentID(ctx context.Cont
 	return s.repo.ReplyToComment(ctx, articleId, userId, parentCommentId, replyComment)
 }
 
-func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, userID, commentID string) ([]model.Comment, error) {
+func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, commentID string) ([]model.Comment, error) {
 	articleId, err := strconv.Atoi(articleID)
-	if err != nil {
-		return []model.Comment{}, err
-	}
-
-	userId, err := strconv.Atoi(userID)
 	if err != nil {
 		return []model.Comment{}, err
 	}
@@ -202,7 +197,7 @@ func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context,
 		return []model.Comment{}, err
 	}
 
-	comments, err := s.repo.GetRepliesByArticleIDAndCommentID(ctx, articleId, userId, parentCommentId)
+	comments, err := s.repo.GetRepliesByArticleIDAndCommentID(ctx, articleId, parentCommentId)
 
 	if err != nil {
 		return []model.Comment{}, err

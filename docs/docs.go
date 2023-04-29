@@ -700,8 +700,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "invitations id",
+                        "description": "card id",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "invitation id",
+                        "name": "invitationID",
                         "in": "path",
                         "required": true
                     }
@@ -777,7 +784,8 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "integer"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {

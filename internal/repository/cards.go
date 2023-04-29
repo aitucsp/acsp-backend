@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/lib/pq"
@@ -25,101 +27,209 @@ func NewCardsRepository(db *sqlx.DB) *CardsDatabase {
 	}
 }
 
+// Create creates a new card in the database.
 func (c *CardsDatabase) Create(ctx context.Context, card model.Card) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", card.UserID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
 
 	query := fmt.Sprintf(`INSERT INTO %s (user_id, position, skills, description) 
 								 VALUES ($1, $2, $3, $4) RETURNING id`,
 		constants.CardsTable)
 
-	_, err := c.db.Exec(query, card.UserID, card.Position, pq.Array(card.Skills), card.Description)
+	stmt, err := c.db.PrepareContext(ctx, query)
 	if err != nil {
-		l.Error("Error when creating the card in database", zap.Error(err))
+		l.Error("Error when preparing the query", zap.Error(err))
 
 		return err
+	}
+
+	res, err := stmt.Exec(card.UserID, card.Position, pq.Array(card.Skills), card.Description)
+	if err != nil {
+		l.Error("Error when executing the card creating statement", zap.Error(err))
+
+		return err
+	}
+
+	id, err := res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting the id of the card", zap.Error(err))
+
+		return err
+	}
+
+	if id == 0 {
+		l.Error("Error when getting the id of the card", zap.Error(apperror.ErrCreatingCard))
+
+		return apperror.ErrCreatingCard
 	}
 
 	return nil
 }
 
+// Update updates a card in the database.
 func (c *CardsDatabase) Update(ctx context.Context, card model.Card) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("cardID", card.ID), zap.Int("userID", card.UserID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
 
 	query := fmt.Sprintf(`UPDATE %s SET position = $1, skills = $2, description = $3, updated_at = now() 
 								  WHERE id = $4 AND user_id = $5`,
 		constants.CardsTable)
 
-	_, err := c.db.Exec(query, card.Position, card.Skills, card.Description, card.ID, card.UserID)
+	stmt, err := c.db.PrepareContext(ctx, query)
 	if err != nil {
-		l.Error("Error when updating card in database", zap.Error(err))
+		l.Error("Error when preparing the query", zap.Error(err))
 
 		return err
+	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
+
+	res, err := stmt.Exec(query, card.Position, card.Skills, card.Description, card.ID, card.UserID)
+	if err != nil {
+		l.Error("Error when executing the card updating statement", zap.Error(err))
+
+		return err
+	}
+
+	id, err := res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting the rows affected of result", zap.Error(err))
+
+		return err
+	}
+
+	if id == 0 {
+		l.Error("Error when getting the id of the card", zap.Error(apperror.ErrUpdatingCard))
+
+		return apperror.ErrUpdatingCard
 	}
 
 	return nil
 }
 
+// Delete deletes a card in the database.
 func (c *CardsDatabase) Delete(ctx context.Context, userID int, cardID int) error {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("cardID", cardID), zap.Int("userID", userID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = $1 AND user_id = $2`, constants.CardsTable)
 
-	_, err := c.db.Exec(query, cardID, userID)
+	stmt, err := c.db.PrepareContext(ctx, query)
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
+
+	res, err := stmt.Exec(query, cardID, userID)
 	if err != nil {
 		return err
+	}
+
+	id, err := res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting the rows affected of the result", zap.Error(err))
+
+		return err
+	}
+
+	if id == 0 {
+		l.Error("Error when getting the id of the card", zap.Error(apperror.ErrDeletingCard))
+
+		return apperror.ErrDeletingCard
 	}
 
 	return nil
 }
 
+// GetByID gets a card by id.
 func (c *CardsDatabase) GetByID(ctx context.Context, cardID int) (*model.Card, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("cardID", cardID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
 	var card model.Card
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1", constants.CardsTable)
 
-	row := c.db.QueryRow(query, cardID)
-
-	err := row.Scan(
+	err := c.db.QueryRowContext(ctx, query, cardID).Scan(
 		&card.ID,
 		&card.UserID,
 		&card.Position,
 		&card.Skills,
 		&card.Description,
 		&card.CreatedAt,
-		&card.UpdatedAt,
-	)
-	if err != nil {
-		return nil, err
-	}
+		&card.UpdatedAt)
 
-	return &card, nil
+	switch {
+	case err == sql.ErrNoRows:
+		l.Error("Error when getting card by id", zap.Error(err))
+		return &model.Card{}, errors.Wrap(err, "Error when getting card by id")
+	case err != nil:
+		l.Error("Error when getting card by id", zap.Error(err))
+		return &model.Card{}, errors.Wrap(err, "Error when getting card by id")
+	default:
+		return &card, nil
+	}
 }
 
+// GetAllByUserID gets all cards by user id.
 func (c *CardsDatabase) GetAllByUserID(ctx context.Context, userID int) (*[]model.Card, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("cardID", userID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
 	var cards []model.Card
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", constants.CardsTable)
 
-	err := c.db.Select(&cards, query, userID)
+	err := c.db.SelectContext(ctx, &cards, query, userID)
 	if err != nil {
+		l.Error("Error when getting all cards by user id", zap.Error(err))
+
 		return nil, errors.Wrap(err, "Error when getting all cards by user id")
 	}
 
 	return &cards, nil
 }
 
+// GetAll gets all cards.
 func (c *CardsDatabase) GetAll(ctx context.Context) ([]model.Card, error) {
 	l := logging.LoggerFromContext(ctx)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
 
 	var cards []model.Card
 
 	query := fmt.Sprintf(`SELECT c.*, u.id, u.email, u.name FROM %s c INNER JOIN %s u ON c.user_id = u.id`,
 		constants.CardsTable, constants.UsersTable)
 
-	rows, err := c.db.Query(query)
+	rows, err := c.db.QueryContext(ctx, query)
 	if err != nil {
 		l.Error("Error when querying get all applicants in database", zap.Error(err))
 
 		return nil, err
 	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			l.Error("Error when closing the rows", zap.Error(err))
+		}
+	}(rows)
 
 	for rows.Next() {
 		var card model.Card
@@ -146,13 +256,31 @@ func (c *CardsDatabase) GetAll(ctx context.Context) ([]model.Card, error) {
 	return cards, nil
 }
 
+// CreateInvitation creates an invitation in the database.
 func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, card model.Card) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("inviterID", inviterID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
 
 	query := fmt.Sprintf(`INSERT INTO %s(card_id, inviter_id) VALUES ($1, $2) RETURNING id;`,
 		constants.InvitationsTable)
 
-	res, err := c.db.Exec(query, card.ID, inviterID)
+	stmt, err := c.db.PrepareContext(ctx, query)
+	if err != nil {
+		l.Error("Error when preparing the query", zap.Error(err))
+
+		return err
+	}
+
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
+
+	res, err := stmt.Exec(ctx, card.ID, inviterID)
 	if err != nil {
 		l.Error("Error when creating the card in database", zap.Error(err))
 
@@ -171,8 +299,12 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 	return nil
 }
 
+// GetInvitationsByUserID gets all invitations by user id.
 func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error) {
 	var invitationCards []model.InvitationCard
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
 
 	query := fmt.Sprintf(`SELECT 
 										c.user_id, 
@@ -189,7 +321,13 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 		constants.CardsTable,
 		constants.InvitationsTable)
 
-	rows, err := c.db.Queryx(query, userID)
+	rows, err := c.db.QueryContext(ctx, query, userID)
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			logging.LoggerFromContext(ctx).Error("Error when closing the rows", zap.Error(err))
+		}
+	}(rows)
 
 	for rows.Next() {
 		var card model.Card
@@ -214,8 +352,12 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 	return invitationCards, nil
 }
 
+// GetInvitationsByCardID gets all invitations by card id.
 func (c *CardsDatabase) GetInvitationsByCardID(ctx context.Context, cardID int) ([]model.InvitationCard, error) {
 	var invitationCards []model.InvitationCard
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
 
 	query := fmt.Sprintf(`SELECT 
 										c.user_id, 
@@ -232,7 +374,13 @@ func (c *CardsDatabase) GetInvitationsByCardID(ctx context.Context, cardID int) 
 		constants.CardsTable,
 		constants.InvitationsTable)
 
-	rows, err := c.db.Queryx(query, cardID)
+	rows, err := c.db.QueryContext(ctx, query, cardID)
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			logging.LoggerFromContext(ctx).Error("Error when closing the rows", zap.Error(err))
+		}
+	}(rows)
 
 	for rows.Next() {
 		var card model.Card
@@ -257,8 +405,12 @@ func (c *CardsDatabase) GetInvitationsByCardID(ctx context.Context, cardID int) 
 	return invitationCards, nil
 }
 
+// GetInvitationByID gets an invitation by user id, card id and invitation id.
 func (c *CardsDatabase) GetInvitationByID(ctx context.Context, userID, cardID, invitationID int) (model.InvitationCard, error) {
 	var card model.InvitationCard
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
 
 	query := fmt.Sprintf(
 		`SELECT 
@@ -276,7 +428,7 @@ func (c *CardsDatabase) GetInvitationByID(ctx context.Context, userID, cardID, i
 		constants.CardsTable,
 		constants.InvitationsTable)
 
-	row := c.db.QueryRow(query, userID, cardID, invitationID)
+	row := c.db.QueryRowContext(ctx, query, userID, cardID, invitationID)
 
 	err := row.Scan(
 		&card.Card.ID,

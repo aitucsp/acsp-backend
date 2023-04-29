@@ -9,13 +9,3 @@ type Contest struct {
 	EndDate     string `json:"end_date" db:"end_date" binding:"required"`
 	CreatedAt   string `json:"created_at" db:"created_at"`
 }
-
-/*
-id           BIGSERIAL   NOT NULL PRIMARY KEY,
-    contest_name VARCHAR     NOT NULL,
-    description  VARCHAR     NOT NULL,
-    link         VARCHAR     NOT NULL,
-    start_date   TIMESTAMPTZ NOT NULL DEFAULT (now()),
-    end_date     TIMESTAMPTZ NOT NULL DEFAULT (now()),
-    created_at   TIMESTAMPTZ NOT NULL DEFAULT (now())
-*/

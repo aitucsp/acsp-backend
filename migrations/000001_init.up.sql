@@ -94,9 +94,6 @@ CREATE TABLE scholar_article_comment_votes
         ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-select *
-from scholar_comments;
-
 CREATE TABLE code_connection_cards
 (
     id          BIGSERIAL   NOT NULL PRIMARY KEY,
@@ -120,16 +117,6 @@ CREATE TABLE code_connection_invitations
     FOREIGN KEY (card_id) REFERENCES code_connection_cards (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE code_connection_responses
-(
-    id            BIGSERIAL   NOT NULL PRIMARY KEY,
-    invitation_id INT         NOT NULL,
-    status        VARCHAR     NOT NULL DEFAULT ('NOT ANSWERED'),
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT (now()),
-    updated_at    TIMESTAMPTZ NOT NULL DEFAULT (now()),
-    FOREIGN KEY (invitation_id) REFERENCES code_connection_invitations (id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
 CREATE TABLE contests
 (
     id           BIGSERIAL   NOT NULL PRIMARY KEY,
@@ -146,3 +133,4 @@ VALUES (1, 'user');
 INSERT INTO roles (id, name)
 VALUES (2, 'admin');
 
+INSERT INTO
