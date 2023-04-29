@@ -107,6 +107,7 @@ func main() {
 	s3Session, err := awsS3.NewSessionBuilder().
 		WithAWSConfig(appConfig.Bucket).
 		NewSession()
+
 	// cfg := aws.Config{
 	// 	Region: aws.String("eu-central-2"),
 	// 	Credentials: credentials.NewStaticCredentials(

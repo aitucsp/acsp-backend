@@ -17,6 +17,7 @@ const (
 	ErrParameterNotFound  = Error("parameter not found")
 	ErrInvalidParameter   = Error("invalid parameter")
 	ErrBadSigningMethod   = Error("invalid signing method")
+	ErrRowsAffected       = Error("no rows affected")
 	ErrBadClaimsType      = Error("token claims are not of type *tokenClaims")
 	ErrEnvVariableParsing = Error("environment variable not parsed")
 	ErrIncorrectRole      = Error("does not have access, less permissions")

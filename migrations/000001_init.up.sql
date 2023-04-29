@@ -114,6 +114,7 @@ CREATE TABLE code_connection_invitations
     id         BIGSERIAL   NOT NULL PRIMARY KEY,
     card_id    INT         NOT NULL,
     inviter_id INT         NOT NULL,
+    status     VARCHAR     NOT NULL DEFAULT ('NOT ANSWERED'),
     created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
     FOREIGN KEY (inviter_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (card_id) REFERENCES code_connection_cards (id) ON DELETE CASCADE ON UPDATE CASCADE

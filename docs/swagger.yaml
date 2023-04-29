@@ -468,8 +468,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get invitations by card id and user id
-      operationId: get-card-invitations
+      description: Get all invitations by card id
+      operationId: get-invitations-by-card-id
       parameters:
       - description: card id
         in: path
@@ -482,7 +482,8 @@ paths:
         "200":
           description: OK
           schema:
-            type: integer
+            additionalProperties: true
+            type: object
         "400":
           description: Bad Request
           schema:
@@ -505,7 +506,7 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get invitations
+      summary: Get all invitations by card
       tags:
       - cards
     post:
@@ -551,7 +552,135 @@ paths:
       summary: Create an invitation
       tags:
       - cards
-  /api/v1/code-connection/contests/:id:
+  /api/v1/code-connection/cards/:id/invitations/:invitationID:
+    get:
+      consumes:
+      - application/json
+      description: Get invitation by id and card id
+      operationId: get-invitation-by-id
+      parameters:
+      - description: invitations id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get invitation by id and card id
+      tags:
+      - cards
+  /api/v1/code-connection/cards/invitations:
+    get:
+      consumes:
+      - application/json
+      description: Get invitations of a user's cards
+      operationId: get-card-invitations
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get invitations of user
+      tags:
+      - cards
+  /api/v1/contests:
+    get:
+      consumes:
+      - application/json
+      description: Get all contests
+      operationId: get-all-contests
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all contests
+      tags:
+      - contests
+  /api/v1/contests/:id:
     get:
       consumes:
       - application/json

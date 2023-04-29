@@ -19,15 +19,53 @@ type CardsService struct {
 	usersRepo repository.Authorization
 }
 
+func (c *CardsService) GetInvitationsByCardID(ctx context.Context, userID, cardID string) ([]model.InvitationCard, error) {
+	// TODO: check if user is owner of card
+	_, err := strconv.Atoi(userID)
+	if err != nil {
+		return []model.InvitationCard{}, errors.Wrap(err, "error converting user id to int")
+	}
+
+	cardId, err := strconv.Atoi(cardID)
+	if err != nil {
+		return []model.InvitationCard{}, errors.Wrap(err, "error converting card id to int")
+	}
+
+	return c.cardsRepo.GetInvitationsByCardID(ctx, cardId)
+}
+
+func (c *CardsService) GetInvitationByID(ctx context.Context, userID, cardID, invitationID string) (model.InvitationCard, error) {
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return model.InvitationCard{}, errors.Wrap(err, "error converting user id to int")
+	}
+
+	cardId, err := strconv.Atoi(cardID)
+	if err != nil {
+		return model.InvitationCard{}, errors.Wrap(err, "error converting card id to int")
+	}
+
+	invitationId, err := strconv.Atoi(invitationID)
+	if err != nil {
+		return model.InvitationCard{}, errors.Wrap(err, "error converting invitation id to int")
+	}
+
+	return c.cardsRepo.GetInvitationByID(ctx, userId, cardId, invitationId)
+}
+
 func NewCardsService(cardsRepo repository.Cards, usersRepo repository.Authorization) *CardsService {
 	return &CardsService{cardsRepo: cardsRepo, usersRepo: usersRepo}
 }
 
 func (c *CardsService) Create(ctx context.Context, userID string, dto dto.CreateCard) error {
-	userId, _ := strconv.Atoi(userID)
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return errors.Wrap(err, "error converting user id to int")
+	}
+
 	user, err := c.usersRepo.GetByID(ctx, userId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "user not found in database")
 	}
 
 	card := model.Card{
@@ -134,10 +172,14 @@ func (c *CardsService) GetByID(ctx context.Context, cardID int) (*model.Card, er
 func (c *CardsService) CreateInvitation(ctx context.Context, userID string, cardID int) error {
 	l := logging.LoggerFromContext(ctx)
 
-	userId, _ := strconv.Atoi(userID)
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return errors.Wrap(err, "error when converting string to int")
+	}
+
 	isUserExists, err := c.usersRepo.ExistsUserByID(ctx, userId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "error when finding user in database")
 	}
 
 	if isUserExists {

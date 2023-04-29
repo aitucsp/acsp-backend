@@ -260,7 +260,7 @@ func newHTTPConfig(p Provider) (*HTTPConfig, error) {
 }
 
 func newS3BucketConfig(p Provider) (*S3Config, error) {
-	const prefix = "S3_"
+	const prefix = "S3"
 
 	a := p.Get(prefix+"_ACCESS_TOKEN", "")
 	if a == "" {

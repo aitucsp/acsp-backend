@@ -80,6 +80,8 @@ type Cards interface {
 	GetByID(ctx context.Context, cardID int) (*model.Card, error)
 	CreateInvitation(ctx context.Context, userID string, cardID int) error
 	GetInvitationsByUserID(ctx context.Context, userID string) ([]model.InvitationCard, error)
+	GetInvitationByID(ctx context.Context, userID, cardID, invitationID string) (model.InvitationCard, error)
+	GetInvitationsByCardID(ctx context.Context, userID, cardID string) ([]model.InvitationCard, error)
 }
 
 type Contests interface {

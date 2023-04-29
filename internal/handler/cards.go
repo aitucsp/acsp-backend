@@ -353,10 +353,10 @@ func (h *Handler) createInvitation(c *fiber.Ctx) error {
 	})
 }
 
-// @Summary Get invitations
+// @Summary Get invitations of user
 // @Security ApiKeyAuth
 // @Tags cards
-// @Description Get invitations by card id and user id
+// @Description Get invitations of a user's cards
 // @ID get-card-invitations
 // @Accept  json
 // @Produce  json
@@ -365,7 +365,7 @@ func (h *Handler) createInvitation(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/:id/invitations [get]
+// @Router /api/v1/code-connection/cards/invitations [get]
 func (h *Handler) getInvitations(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all cards... ")
@@ -379,6 +379,109 @@ func (h *Handler) getInvitations(c *fiber.Ctx) error {
 	}
 
 	invitations, err := h.services.Cards.GetInvitationsByUserID(c.UserContext(), userID)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"errors":  false,
+		"message": nil,
+		"count":   len(invitations),
+		"cards":   invitations,
+	})
+}
+
+// @Summary Get invitation by id and card id
+// @Security ApiKeyAuth
+// @Tags cards
+// @Description Get invitation by id and card id
+// @ID get-invitation-by-id
+// @Accept  json
+// @Produce  json
+// @Param id path int true "invitations id"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400,404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Failure default {object} map[string]interface{}
+// @Router /api/v1/code-connection/cards/:id/invitations/:invitationID [get]
+func (h *Handler) getInvitationByID(c *fiber.Ctx) error {
+	log.Println("Creating a card... ")
+
+	userID, err := getUserId(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	cardID := c.Params("id", "")
+	if cardID == "" {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrParameterNotFound,
+		})
+	}
+
+	invitationID := c.Params("invitationID", "")
+	if invitationID == "" {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrParameterNotFound,
+		})
+	}
+
+	invitation, err := h.services.Cards.GetInvitationByID(c.UserContext(), userID, cardID, invitationID)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"errors":  false,
+		"message": nil,
+		"card":    invitation,
+	})
+}
+
+// @Summary Get all invitations by card
+// @Security ApiKeyAuth
+// @Tags cards
+// @Description Get all invitations by card id
+// @ID get-invitations-by-card-id
+// @Accept  json
+// @Produce  json
+// @Param id path int true "card id"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400,404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Failure default {object} map[string]interface{}
+// @Router /api/v1/code-connection/cards/:id/invitations [get]
+func (h *Handler) getInvitationsByCardID(c *fiber.Ctx) error {
+	log.Println("Creating a card... ")
+
+	userID, err := getUserId(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	cardID := c.Params("id", "")
+	if cardID == "" {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrParameterNotFound,
+		})
+	}
+
+	invitations, err := h.services.Cards.GetInvitationsByCardID(c.UserContext(), userID, cardID)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,

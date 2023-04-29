@@ -96,11 +96,11 @@ func (c *CardsDatabase) GetByID(ctx context.Context, cardID int) (*model.Card, e
 func (c *CardsDatabase) GetAllByUserID(ctx context.Context, userID int) (*[]model.Card, error) {
 	var cards []model.Card
 
-	query := fmt.Sprintf("SELECT	 * FROM %s WHERE user_id = $1", constants.CardsTable)
+	query := fmt.Sprintf("SELECT * FROM %s WHERE user_id = $1", constants.CardsTable)
 
 	err := c.db.Select(&cards, query, userID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Error when getting all cards by user id")
 	}
 
 	return &cards, nil
@@ -147,62 +147,25 @@ func (c *CardsDatabase) GetAll(ctx context.Context) ([]model.Card, error) {
 }
 
 func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, card model.Card) error {
-	l := logging.LoggerFromContext(ctx)
+	l := logging.LoggerFromContext(ctx).With(zap.Int("inviterID", inviterID))
 
-	tx, err := c.db.Begin()
-	if err != nil {
-		l.Error("Error when beginning the transaction", zap.Error(err))
-
-		return err
-	}
-
-	query := fmt.Sprintf(`	INSERT INTO %s(card_id, inviter_id) VALUES ($1, $2) RETURNING id;`,
+	query := fmt.Sprintf(`INSERT INTO %s(card_id, inviter_id) VALUES ($1, $2) RETURNING id;`,
 		constants.InvitationsTable)
-	var id int
 
-	err = tx.QueryRow(query, card.ID, inviterID).Scan(&id)
+	res, err := c.db.Exec(query, card.ID, inviterID)
 	if err != nil {
-		l.Error("Error when executing the query", zap.Error(err))
-
-		err := tx.Rollback()
-		if err != nil {
-			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
-		}
+		l.Error("Error when creating the card in database", zap.Error(err))
 
 		return err
 	}
 
-	if id < 1 {
-		err := tx.Rollback()
-		if err != nil {
-			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
-		}
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return errors.Wrap(err, "Error when getting the number of rows affected")
 	}
 
-	querySecond := fmt.Sprintf(`INSERT INTO %s(invitation_id) VALUES ($1) RETURNING id;`,
-		constants.InvitationResponsesTable)
-	var responseID int
-
-	err = tx.QueryRow(querySecond, id).Scan(&responseID)
-	if err != nil {
-		l.Error("Error when executing the query", zap.Error(err))
-
-		err := tx.Rollback()
-		if err != nil {
-			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
-		}
-
-		return err
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		err := tx.Rollback()
-		if err != nil {
-			return errors.Wrap(apperror.ErrRollback, "Error when rolling back")
-		}
-
-		return err
+	if rowsAffected == 0 {
+		return errors.Wrap(apperror.ErrRowsAffected, "Error when creating the invitation")
 	}
 
 	return nil
@@ -211,14 +174,20 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error) {
 	var invitationCards []model.InvitationCard
 
-	query := fmt.Sprintf(`SELECT user_id, skills, position, description, status, created_at, updated_at 
-								 FROM %s c
-								 INNER JOIN %s cr ON c.id = cr.card_id
-								 INNER JOIN %s ci on cr.id = ci.invitation_id
-								 WHERE inviter_id = $1`,
+	query := fmt.Sprintf(`SELECT 
+										c.user_id, 
+										c.skills, 
+										c.position, 
+										c.description, 
+										c.created_at, 
+										c.updated_at,
+										ci.inviter_id,
+										ci.status
+								 FROM %s c 
+							     INNER JOIN %s ci ON ci.card_id = c.id
+								 WHERE c.user_id = $1`,
 		constants.CardsTable,
-		constants.InvitationsTable,
-		constants.InvitationResponsesTable)
+		constants.InvitationsTable)
 
 	rows, err := c.db.Queryx(query, userID)
 
@@ -230,17 +199,99 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 			&card.Skills,
 			&card.Position,
 			&card.Description,
-			&invitationCard.Status,
 			&card.CreatedAt,
-			&card.UpdatedAt)
+			&card.UpdatedAt,
+			&invitationCard.InviterID,
+			&invitationCard.Status)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Error when scanning the card in database")
 		}
 
-		invitationCard.InviterID = card.UserID
 		invitationCard.Card = &card
 		invitationCards = append(invitationCards, invitationCard)
 	}
 
 	return invitationCards, nil
+}
+
+func (c *CardsDatabase) GetInvitationsByCardID(ctx context.Context, cardID int) ([]model.InvitationCard, error) {
+	var invitationCards []model.InvitationCard
+
+	query := fmt.Sprintf(`SELECT 
+										c.user_id, 
+										c.skills, 
+										c.position, 
+										c.description, 
+										c.created_at, 
+										c.updated_at,
+										ci.inviter_id,
+										ci.status
+								 FROM %s c 
+							     INNER JOIN %s ci ON ci.card_id = c.id
+								 WHERE c.id = $1`,
+		constants.CardsTable,
+		constants.InvitationsTable)
+
+	rows, err := c.db.Queryx(query, cardID)
+
+	for rows.Next() {
+		var card model.Card
+		var invitationCard model.InvitationCard
+
+		err = rows.Scan(&card.UserID,
+			&card.Skills,
+			&card.Position,
+			&card.Description,
+			&card.CreatedAt,
+			&card.UpdatedAt,
+			&invitationCard.InviterID,
+			&invitationCard.Status)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error when scanning the card in database")
+		}
+
+		invitationCard.Card = &card
+		invitationCards = append(invitationCards, invitationCard)
+	}
+
+	return invitationCards, nil
+}
+
+func (c *CardsDatabase) GetInvitationByID(ctx context.Context, userID, cardID, invitationID int) (model.InvitationCard, error) {
+	var card model.InvitationCard
+
+	query := fmt.Sprintf(
+		`SELECT 
+						c.id,
+						c.user_id, 
+						c.position, 
+						c.skills, 
+						c.description, 
+						c.created_at, 
+						c.updated_at, 
+						ci.inviter_id, 
+						ci.status
+					FROM %s c INNER JOIN %s ci ON c.id = ci.card_id 
+						WHERE user_id = $1 AND c.id = $2 AND ci.id = $3`,
+		constants.CardsTable,
+		constants.InvitationsTable)
+
+	row := c.db.QueryRow(query, userID, cardID, invitationID)
+
+	err := row.Scan(
+		&card.Card.ID,
+		&card.Card.UserID,
+		&card.Card.Position,
+		&card.Card.Skills,
+		&card.Card.Description,
+		&card.Card.CreatedAt,
+		&card.Card.UpdatedAt,
+		&card.InviterID,
+		&card.Status,
+	)
+	if err != nil {
+		return model.InvitationCard{}, err
+	}
+
+	return card, nil
 }

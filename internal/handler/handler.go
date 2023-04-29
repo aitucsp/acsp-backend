@@ -82,13 +82,19 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 
 			cards := codeConnection.Group("/cards", h.userIdentity)
 			{
-				cards.Get("/", h.getAllCardsByUserID)              // get all cards of user
-				cards.Post("/", h.createCard)                      // create a card
-				cards.Get("/:id", h.getCardByID)                   // get an information of card by id
-				cards.Put("/:id", h.updateCard)                    // update card information by id
-				cards.Delete("/:id", h.deleteCard)                 // delete card by id
-				cards.Get("/:id/invitations", h.getInvitations)    // get all invitations of a user
-				cards.Post("/:id/invitations", h.createInvitation) // send an invitation to a user
+				cards.Get("/", h.getAllCardsByUserID)       // get all cards of user
+				cards.Post("/", h.createCard)               // create a card
+				cards.Get("/:id", h.getCardByID)            // get an information of card by id
+				cards.Put("/:id", h.updateCard)             // update card information by id
+				cards.Delete("/:id", h.deleteCard)          // delete card by id
+				cards.Get("/invitations", h.getInvitations) // get all invitations of a user
+
+				invitations := cards.Group("/:id/invitations", h.userIdentity)
+				{
+					invitations.Get("/", h.getInvitationsByCardID)         // get all invitations of a card
+					invitations.Post("/", h.createInvitation)              // send an invitation to a user
+					invitations.Get("/:invitationID", h.getInvitationByID) // get an invitation by card id and invitation id
+				}
 			}
 
 			// invitations := codeConnection.Group("/invitations")
@@ -104,6 +110,18 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 			contests.Get("/", h.getAllContests) // get all contests
 			contests.Get("/:id", h.getContest)  // get contest by id
 		}
+
+		// Define admin routes
+		// admin := rest.Group("/admin", h.userIdentity)
+		// {
+		// 	admin.Get("/users", h.getAllUsers)       // get all users
+		// 	admin.Get("/users/:id", h.getUserByID)   // get user by id
+		// 	admin.Put("/users/:id", h.updateUser)    // update user by id
+		// 	admin.Delete("/users/:id", h.deleteUser) // delete user by id
+		// 	admin.Post("/admin-panel/contests", h.createContest)
+		// 	admin.Post("/admin-panel/contests/:id", h.updateContest)
+		// 	admin.Delete("/admin-panel/contests/:id", h.deleteContest)
+		// }
 	}
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
