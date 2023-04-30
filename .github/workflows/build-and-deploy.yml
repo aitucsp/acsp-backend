@@ -41,9 +41,11 @@ jobs:
 
       - name: Generate Swagger Documentation
         run: |
-            go mod tidy
+            echo ${go get GOPATH}
+            echo ${GOPATH}
+            echo $PATH
             export PATH=$PATH:${GOPATH}/bin
-            go install github.com/swaggo/swag/cmd/swag
+            go get -u github.com/swaggo/swag/cmd/swag
             swag init -g cmd/main.go
 
       - name: Build container image

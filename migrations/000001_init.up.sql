@@ -7,7 +7,8 @@ CREATE TABLE users
     created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
     is_admin   BOOL        NOT NULL DEFAULT FALSE,
-    roles      VARCHAR[]            DEFAULT ARRAY ['user']
+    roles      VARCHAR[]            DEFAULT ARRAY ['user'],
+    image_url VARCHAR    NOT NULL DEFAULT '/default'
 );
 
 CREATE TABLE user_details
@@ -132,5 +133,3 @@ INSERT INTO roles (id, name)
 VALUES (1, 'user');
 INSERT INTO roles (id, name)
 VALUES (2, 'admin');
-
-INSERT INTO
