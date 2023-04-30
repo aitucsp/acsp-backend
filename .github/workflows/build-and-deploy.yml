@@ -41,9 +41,8 @@ jobs:
 
       - name: Generate Swagger Documentation
         run: |
-            export PATH=$PATH:${HOME}/go/bin
-            go get -u github.com/swaggo/swag/cmd/swag
-            swag init -g cmd/main.go
+            go install github.com/swaggo/swag/cmd/swag@latest
+            /home/runner/go/bin/swag init -g cmd/main.go
 
       - name: Build container image
         run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
