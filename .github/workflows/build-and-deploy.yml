@@ -41,6 +41,7 @@ jobs:
 
       - name: Generate Swagger Documentation
         run: |
+            go mod tidy
             export PATH=$PATH:${GOPATH}/bin
             go install github.com/swaggo/swag/cmd/swag
             swag init -g cmd/main.go
