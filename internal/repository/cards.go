@@ -264,7 +264,7 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 	defer cancel()
 
 	query := fmt.Sprintf(`INSERT INTO %s(card_id, inviter_id) VALUES ($1, $2) RETURNING id;`,
-		constants.InvitationsTable)
+		constants.CardInvitationsTable)
 
 	stmt, err := c.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -319,7 +319,7 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 							     INNER JOIN %s ci ON ci.card_id = c.id
 								 WHERE c.user_id = $1`,
 		constants.CardsTable,
-		constants.InvitationsTable)
+		constants.CardInvitationsTable)
 
 	rows, err := c.db.QueryContext(ctx, query, userID)
 	defer func(rows *sql.Rows) {
@@ -372,7 +372,7 @@ func (c *CardsDatabase) GetInvitationsByCardID(ctx context.Context, cardID int) 
 							     INNER JOIN %s ci ON ci.card_id = c.id
 								 WHERE c.id = $1`,
 		constants.CardsTable,
-		constants.InvitationsTable)
+		constants.CardInvitationsTable)
 
 	rows, err := c.db.QueryContext(ctx, query, cardID)
 	defer func(rows *sql.Rows) {
@@ -426,7 +426,7 @@ func (c *CardsDatabase) GetInvitationByID(ctx context.Context, userID, cardID, i
 					FROM %s c INNER JOIN %s ci ON c.id = ci.card_id 
 						WHERE user_id = $1 AND c.id = $2 AND ci.id = $3`,
 		constants.CardsTable,
-		constants.InvitationsTable)
+		constants.CardInvitationsTable)
 
 	row := c.db.QueryRowContext(ctx, query, userID, cardID, invitationID)
 
@@ -446,4 +446,108 @@ func (c *CardsDatabase) GetInvitationByID(ctx context.Context, userID, cardID, i
 	}
 
 	return card, nil
+}
+
+// AcceptCardInvitation accepts a card invitation.
+func (c *CardsDatabase) AcceptCardInvitation(ctx context.Context, userID, cardID, invitationID int) error {
+	l := logging.LoggerFromContext(ctx).With(
+		zap.Int("userID", userID),
+		zap.Int("cardID", cardID),
+		zap.Int("invitationID", invitationID),
+	)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	query := fmt.Sprintf(`UPDATE %s ci SET ci.status = $1, ci.updated_at = now()
+								  FROM %s c
+								  WHERE c.user_id = $2 AND c.id = $3 AND ci.id = $4`,
+		constants.CardInvitationsTable, constants.CardsTable)
+
+	stmt, err := c.db.PrepareContext(ctx, query)
+	if err != nil {
+		l.Error("Error when preparing the query", zap.Error(err))
+
+		return err
+	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
+
+	res, err := stmt.Exec(constants.AcceptedStatus, userID, cardID, invitationID)
+	if err != nil {
+		l.Error("Error when executing the card updating statement", zap.Error(err))
+
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting the rows affected of result", zap.Error(err))
+
+		return err
+	}
+
+	if rows == 0 {
+		l.Error("No rows affected", zap.Error(apperror.ErrAnsweringCard))
+
+		return apperror.ErrAnsweringCard
+	}
+
+	return nil
+}
+
+// DeclineCardInvitation rejects a card invitation.
+func (c *CardsDatabase) DeclineCardInvitation(ctx context.Context, userID, cardID, invitationID int) error {
+	l := logging.LoggerFromContext(ctx).With(
+		zap.Int("userID", userID),
+		zap.Int("cardID", cardID),
+		zap.Int("invitationID", invitationID),
+	)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	query := fmt.Sprintf(`UPDATE %s ci SET ci.status = $1, ci.updated_at = now()
+								  FROM %s c
+								  WHERE c.user_id = $2 AND c.id = $3 AND ci.id = $4`,
+		constants.CardInvitationsTable, constants.CardsTable)
+
+	stmt, err := c.db.PrepareContext(ctx, query)
+	if err != nil {
+		l.Error("Error when preparing the query", zap.Error(err))
+
+		return err
+	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
+
+	res, err := stmt.Exec(constants.DeclinedStatus, userID, cardID, invitationID)
+	if err != nil {
+		l.Error("Error when executing the card invitation declining query", zap.Error(err))
+
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting the rows affected of result", zap.Error(err))
+
+		return err
+	}
+
+	if rows == 0 {
+		l.Error("No rows affected", zap.Error(apperror.ErrAnsweringCard))
+
+		return apperror.ErrAnsweringCard
+	}
+
+	return nil
 }

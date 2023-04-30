@@ -602,6 +602,106 @@ paths:
       summary: Get invitation by id and card id
       tags:
       - cards
+  /api/v1/code-connection/cards/:id/invitations/:invitationID/accept:
+    post:
+      consumes:
+      - application/json
+      description: Accept invitation by invitation id and card id
+      operationId: accept-invitation-by-id-and-card-id
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: invitation id
+        in: path
+        name: invitationID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Accept invitation by invitation id and card id
+      tags:
+      - cards
+  /api/v1/code-connection/cards/:id/invitations/:invitationID/decline:
+    post:
+      consumes:
+      - application/json
+      description: Decline invitation by invitation id and card id
+      operationId: decline-invitation-by-id-and-card-id
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: invitation id
+        in: path
+        name: invitationID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Decline invitation by invitation id and card id
+      tags:
+      - cards
   /api/v1/code-connection/cards/invitations:
     get:
       consumes:

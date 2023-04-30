@@ -16,7 +16,7 @@ import (
 	"acsp/internal/model"
 	"acsp/internal/repository"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type accessTokenClaims struct {

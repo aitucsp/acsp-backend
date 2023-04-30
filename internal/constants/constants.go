@@ -9,8 +9,7 @@ const (
 	ArticlesCommentsTable    = "scholar_article_comments"
 	ArticleCommentVotesTable = "scholar_article_comment_votes"
 	CardsTable               = "code_connection_cards"
-	InvitationsTable         = "code_connection_invitations"
-	InvitationResponsesTable = "code_connection_responses"
+	CardInvitationsTable     = "code_connection_invitations"
 	ContestsTable            = "contests"
 	DatabaseName             = "postgres"
 )
@@ -23,4 +22,9 @@ const (
 	DefaultUserRoleID       = 1 // ID of 'user' role
 	UpvoteType              = 1
 	DownvoteType            = -1
+)
+
+const (
+	AcceptedStatus = "ACCEPTED"
+	DeclinedStatus = "DECLINED"
 )

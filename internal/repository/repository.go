@@ -79,6 +79,8 @@ type Cards interface {
 	GetInvitationsByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error)
 	GetInvitationByID(ctx context.Context, userID, cardID, invitationID int) (model.InvitationCard, error)
 	GetInvitationsByCardID(ctx context.Context, cardID int) ([]model.InvitationCard, error)
+	AcceptCardInvitation(ctx context.Context, userID, cardID, invitationID int) error
+	DeclineCardInvitation(ctx context.Context, userID, cardID, invitationID int) error
 }
 
 type Contests interface {

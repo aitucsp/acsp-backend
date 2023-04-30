@@ -51,7 +51,11 @@ func (c *CardsService) Create(ctx context.Context, userID string, dto dto.Create
 }
 
 func (c *CardsService) Update(ctx context.Context, userID string, cardID int, dto dto.UpdateCard) error {
-	userId, _ := strconv.Atoi(userID)
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return errors.Wrap(err, "error converting user id to int")
+	}
+
 	user, err := c.usersRepo.GetByID(ctx, userId)
 	if err != nil {
 		return err
@@ -74,7 +78,10 @@ func (c *CardsService) Update(ctx context.Context, userID string, cardID int, dt
 }
 
 func (c *CardsService) Delete(ctx context.Context, userID string, cardID int) error {
-	id, _ := strconv.Atoi(userID)
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		return errors.Wrap(err, "error converting user id to int")
+	}
 
 	isUserExists, err := c.usersRepo.ExistsUserByID(ctx, id)
 	if err != nil {
@@ -94,7 +101,10 @@ func (c *CardsService) Delete(ctx context.Context, userID string, cardID int) er
 }
 
 func (c *CardsService) GetAllByUserID(ctx context.Context, userID string) (*[]model.Card, error) {
-	id, _ := strconv.Atoi(userID)
+	id, err := strconv.Atoi(userID)
+	if err != nil {
+		return nil, errors.Wrap(err, "error converting user id to int")
+	}
 
 	isUserExists, err := c.usersRepo.ExistsUserByID(ctx, id)
 	if err != nil {
@@ -216,4 +226,42 @@ func (c *CardsService) GetInvitationByID(ctx context.Context, userID, cardID, in
 	}
 
 	return c.cardsRepo.GetInvitationByID(ctx, userId, cardId, invitationId)
+}
+
+func (c *CardsService) AcceptInvitation(ctx context.Context, userID, cardID, invitationID string) error {
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return errors.Wrap(err, "error converting user id to int")
+	}
+
+	cardId, err := strconv.Atoi(cardID)
+	if err != nil {
+		return errors.Wrap(err, "error converting card id to int")
+	}
+
+	invitationId, err := strconv.Atoi(invitationID)
+	if err != nil {
+		return errors.Wrap(err, "error converting invitation id to int")
+	}
+
+	return c.cardsRepo.AcceptCardInvitation(ctx, userId, cardId, invitationId)
+}
+
+func (c *CardsService) DeclineInvitation(ctx context.Context, userID, cardID, invitationID string) error {
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return errors.Wrap(err, "error converting user id to int")
+	}
+
+	cardId, err := strconv.Atoi(cardID)
+	if err != nil {
+		return errors.Wrap(err, "error converting card id to int")
+	}
+
+	invitationId, err := strconv.Atoi(invitationID)
+	if err != nil {
+		return errors.Wrap(err, "error converting invitation id to int")
+	}
+
+	return c.cardsRepo.DeclineCardInvitation(ctx, userId, cardId, invitationId)
 }

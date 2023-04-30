@@ -31,4 +31,5 @@ const (
 	ErrCreatingCard       = Error("error occurred when creating a card")
 	ErrUpdatingCard       = Error("error occurred when updating a card")
 	ErrDeletingCard       = Error("error occurred when deleting a card")
+	ErrAnsweringCard      = Error("error occurred when answering a card")
 )
