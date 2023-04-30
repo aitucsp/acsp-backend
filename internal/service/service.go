@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"os"
+	"mime/multipart"
 
 	"github.com/go-redis/redis/v9"
 	_ "github.com/golang/mock/gomock"
@@ -18,6 +18,7 @@ import (
 
 type Service struct {
 	Authorization
+	Users
 	Articles
 	Roles
 	Cards
@@ -33,6 +34,13 @@ type Authorization interface {
 	ParseToken(token string) (string, error)
 	SaveRefreshToken(ctx context.Context, userID string, details *TokenDetails) error
 	DeleteRefreshToken(ctx context.Context, userID string) error
+}
+
+type Users interface {
+	CreateUser(ctx context.Context, dto dto.CreateUser) error
+	// UpdateUserImageURL GetUserByID(ctx context.Context, userID string) (model.User, error)
+	UpdateUserImageURL(ctx context.Context, userID string) error
+	// UpdateUser(ctx context.Context, dto dto.UpdateUser) error
 }
 
 type Roles interface {
@@ -92,17 +100,18 @@ type Contests interface {
 }
 
 type S3Bucket interface {
-	UploadFile(ctx context.Context, bucket, key string, file *os.File) error
+	UploadFile(ctx context.Context, key string, file *multipart.FileHeader) error
 }
 
 func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig) *Service {
 	return &Service{
 		Authorization: NewAuthService(repo.Authorization, repo.Roles, r, c),
+		Users:         NewUsersService(repo.Authorization),
 		Articles:      NewArticlesService(repo.Articles, repo.Authorization),
 		Roles:         NewRolesService(repo.Roles, repo.Authorization),
 		Cards:         NewCardsService(repo.Cards, repo.Authorization),
 		Materials:     NewMaterialsService(repo.Materials, repo.Authorization),
 		Contests:      NewContestsService(repo.Contests),
-		S3Bucket:      NewS3BucketService(repo.S3Bucket),
+		S3Bucket:      NewS3BucketService(repo.S3Bucket, "acsp-bucket"),
 	}
 }

@@ -39,6 +39,8 @@ func (b *SessionBuilder) NewSession() (*session.Session, error) {
 			""),
 	)
 
+	c = c.WithEndpoint(b.awsConfig.Endpoint)
+
 	s, err := session.NewSession(c, aws.NewConfig().WithRegion(b.awsConfig.Region))
 	if err != nil {
 		return nil, err

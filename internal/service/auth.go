@@ -88,7 +88,10 @@ func (s *AuthService) CreateUser(ctx context.Context, userDto dto.CreateUser) er
 }
 
 func (s *AuthService) GetUserByID(ctx context.Context, userID string) (model.User, error) {
-	userId, _ := strconv.Atoi(userID)
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return model.User{}, err
+	}
 
 	user, err := s.repo.GetByID(ctx, userId)
 	if err != nil {

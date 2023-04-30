@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"os"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/jmoiron/sqlx"
@@ -28,6 +27,8 @@ type Authorization interface {
 	GetByEmail(ctx context.Context, email string) (*model.User, error)
 	GetAll(ctx context.Context) (*[]model.User, error)
 	ExistsUserByID(ctx context.Context, id int) (bool, error)
+	ExistsUserByEmail(ctx context.Context, email string) (bool, error)
+	UpdateImageURL(ctx context.Context, userID int) error
 }
 
 // Roles interface provides methods for working with roles
@@ -90,7 +91,7 @@ type Contests interface {
 
 // S3Bucket interface provides methods for storing and retrieving objects from an S3 bucket.
 type S3Bucket interface {
-	AddObject(bucketName string, objectName string, file *os.File) error
+	PutObject(bucketName string, objectName string, fileBytes []byte) error
 }
 
 func NewRepository(db *sqlx.DB, sess *session.Session) *Repository {

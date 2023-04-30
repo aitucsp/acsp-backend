@@ -2,7 +2,10 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"strconv"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
@@ -125,7 +128,18 @@ func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*mo
 func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", id))
 	var user model.User
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE id=$1`, constants.UsersTable)
+	query := fmt.Sprintf(`SELECT 
+									u.id,
+									u.email,
+									u.name,
+									u.password,
+									u.created_at,
+									u.updated_at,
+									u.is_admin,
+									ARRAY_AGG(r.name) AS roles,
+									u.image_url
+								FROM %s u WHERE id=$1`,
+		constants.UsersTable)
 
 	err := r.db.
 		QueryRow(query, id).
@@ -136,7 +150,9 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.IsAdmin,
-			&user.Roles)
+			&user.Roles,
+			&user.ImageURL,
+		)
 	if err != nil {
 		l.Error("Error getting user by id from database", zap.Error(err))
 
@@ -149,7 +165,18 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.User, error) {
 	var user model.User
 
-	query := fmt.Sprintf(`SELECT * FROM %s WHERE email=$1`, constants.UsersTable)
+	query := fmt.Sprintf(`SELECT 
+									u.id,
+									u.email,
+									u.name,	
+									u.password,	
+									u.created_at,	
+									u.updated_at,
+									u.is_admin,
+									ARRAY_AGG(r.name) AS roles,
+									u.image_url
+								FROM %s u WHERE email=$1`,
+		constants.UsersTable)
 	row := r.db.QueryRow(query, email)
 
 	err := row.Scan(&user.ID,
@@ -158,7 +185,9 @@ func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.Use
 		&user.Password,
 		&user.CreatedAt,
 		&user.UpdatedAt,
-		&user.Roles)
+		&user.IsAdmin,
+		&user.Roles,
+		&user.ImageURL)
 	if err != nil {
 		return nil, errors.Wrap(apperror.ErrEmailNotFound, "email not found")
 	}
@@ -200,4 +229,64 @@ func (r *AuthPostgres) ExistsUserByID(ctx context.Context, id int) (bool, error)
 	}
 
 	return isExists, nil
+}
+
+func (r *AuthPostgres) ExistsUserByEmail(ctx context.Context, email string) (bool, error) {
+	l := logging.LoggerFromContext(ctx)
+
+	var isExists bool
+
+	query := fmt.Sprintf(`SELECT EXISTS(SELECT 1 FROM %s WHERE email=$1)`, constants.UsersTable)
+
+	row := r.db.QueryRow(query, email)
+
+	err := row.Scan(&isExists)
+	if err != nil {
+		l.Error("Error when finding user in database", zap.Error(err))
+
+		return false, err
+	}
+
+	return isExists, nil
+}
+
+func (r *AuthPostgres) UpdateImageURL(ctx context.Context, userID int) error {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", userID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	query := fmt.Sprintf(`UPDATE %s SET image_url = $1, updated_at = now() WHERE id = $2`,
+		constants.UsersTable)
+
+	stmt, err := r.db.PrepareContext(ctx, query)
+	if err != nil {
+		l.Error("Error when preparing the query", zap.Error(err))
+
+		return err
+	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
+
+	res, err := stmt.Exec("/"+strconv.Itoa(userID), userID)
+	if err != nil {
+		l.Error("Error when update the user's image url in database", zap.Error(err))
+
+		return errors.Wrap(err, "error when executing query")
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return errors.Wrap(err, "error when get rows affected")
+	}
+
+	if rows == 0 {
+		return errors.Wrap(apperror.ErrWhenUpdatingImageURL, "error when updating a user image url")
+	}
+
+	return nil
 }

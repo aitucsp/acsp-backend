@@ -34,7 +34,11 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		}
 
 		// Define user routes
-		rest.Get("/users", h.userIdentity, h.getUserInfo)
+		users := rest.Group("/users", h.userIdentity)
+		{
+			users.Get("/", h.getUserInfo)
+			users.Post("/image", h.uploadUserImage)
+		}
 
 		// Define user routes with authentication middleware (userIdentity) for all routes
 		scholar := rest.Group("/scholar", h.userIdentity)

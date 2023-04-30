@@ -14,4 +14,5 @@ type User struct {
 	UpdatedAt string         `json:"updated_at,omitempty" db:"updated_at"`
 	IsAdmin   bool           `json:"-" db:"is_admin"`
 	Roles     pq.StringArray `json:"-" db:"roles"`
+	ImageURL  string         `json:"image_url" db:"image_url"`
 }

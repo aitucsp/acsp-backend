@@ -98,73 +98,15 @@ func main() {
 		appLogger.Fatal("Error occurred when initializing database config: ", zap.Error(err))
 	}
 
-	// Initialize S3 Wasabi bucket
-	// s3Cfg, err := awsConfig.LoadDefaultConfig(context.Background())
-	// if err != nil {
-	// 	appLogger.Fatal("Error occurred when initializing S3 config: ", zap.Error(err))
-	// }
 	appLogger.Info("Initializing S3 configuration")
 	s3Session, err := awsS3.NewSessionBuilder().
 		WithAWSConfig(appConfig.Bucket).
 		NewSession()
+	if err != nil {
+		appLogger.Fatal("Error occurred when initializing S3 session: ", zap.Error(err))
+	}
 
-	// cfg := aws.Config{
-	// 	Region: aws.String("eu-central-2"),
-	// 	Credentials: credentials.NewStaticCredentials(
-	// 		"3V7EQMDA1DCT1IHTTRZ9",
-	// 		"GAQyVDS3hcKA5ueufQEQK20ibDuh2eNHkaMzVGLL",
-	// 		"",
-	// 	),
-	// 	Endpoint: aws.String("https://s3.eu-central-2.wasabisys.com"),
-	// }
 	appLogger.Info("Creating new session")
-	// sess, err := session.NewSession(&cfg)
-	// if err != nil {
-	// 	appLogger.Fatal("Error occurred when initializing S3 session: ", zap.Error(err))
-	// }
-	// user, err := user.Current()
-	// if err != nil {
-	// 	appLogger.Fatal("Error occurred when getting current user: ", zap.Error(err))
-	// }
-	//
-	// homedir := user.HomeDir
-	// desk := homedir + "\\Desktop\\me.jpg"
-	// f, err := os.Open(desk)
-	// if err != nil {
-	// 	appLogger.Fatal("Error occurred when opening file: ", zap.Error(err))
-	// }
-	//
-	// svc := s3.New(sess)
-	//
-	// _, err = svc.PutObject(&s3.PutObjectInput{
-	// 	Bucket: aws.String("acsp-bucket"),
-	// 	Key:    aws.String("test"),
-	// 	Body:   f,
-	// 	ACL:    aws.String("public-read"),
-	// })
-	// if err != nil {
-	// 	appLogger.Fatal("Error occurred when uploading file to S3: ", zap.Error(err))
-	// }
-	// toSave, err := svc.GetObject(&s3.GetObjectInput{
-	// 	Bucket: aws.String("acsp-bucket"),
-	// 	Key:    aws.String("test"),
-	// })
-	//
-	// dst, err := os.Create(desk)
-	// // save toSave file in desktop directory
-	// _, err = io.Copy(dst, toSave.Body)
-	// if err != nil {
-	// 	appLogger.Fatal("Error occurred when creating file: ", zap.Error(err))
-	// }
-	// defer func(dst *os.File) {
-	// 	err := dst.Close()
-	// 	if err != nil {
-	// 		appLogger.Fatal("Error occurred when closing file: ", zap.Error(err))
-	// 	}
-	// }(dst)
-
-	// client := s3.NewFromConfig(s3Cfg)
-	// uploader := manager.NewUploader(client)
 
 	// Initializing context with timeout and logger for graceful shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), constants.ContextTimeoutSeconds*time.Second)
