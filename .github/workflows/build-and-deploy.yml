@@ -41,7 +41,6 @@ jobs:
 
       - name: Generate Swagger Documentation
         run: |
-            echo ${go get GOPATH}
             echo ${GOPATH}
             echo $PATH
             export PATH=$PATH:${GOPATH}/bin
