@@ -34,6 +34,9 @@ jobs:
         run: |
           echo "${{ secrets.ENV_FILE }}" > base.env
 
+      - name: Generate Swagger Documentation
+        run: swag init -g cmd/main.go
+
       - name: Build container image
         run: docker build -t $(echo $REGISTRY)/$(echo $IMAGE_NAME):$(echo $GITHUB_SHA | head -c7) .
 
