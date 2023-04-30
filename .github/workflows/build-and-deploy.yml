@@ -41,8 +41,7 @@ jobs:
 
       - name: Generate Swagger Documentation
         run: |
-            mkdir $GOPATH/bin
-            export PATH=$PATH:${GOPATH}/bin
+            export PATH=$PATH:$(go env GOPATH)/bin
             go get -u github.com/swaggo/swag/cmd/swag
             swag init -g cmd/main.go
 
