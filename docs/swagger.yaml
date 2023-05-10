@@ -42,6 +42,19 @@ definitions:
     - description
     - topic
     type: object
+  dto.CreateUser:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
   dto.UpdateArticle:
     properties:
       description:
@@ -86,21 +99,6 @@ definitions:
     required:
     - email
     - password
-    type: object
-  model.User:
-    properties:
-      created_at:
-        type: string
-      email:
-        type: string
-      id:
-        type: string
-      image_url:
-        type: string
-      name:
-        type: string
-      updated_at:
-        type: string
     type: object
 host: squid-app-8kray.ondigitalocean.app
 info:
@@ -188,7 +186,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/model.User'
+          $ref: '#/definitions/dto.CreateUser'
       produces:
       - application/json
       responses:
@@ -749,6 +747,52 @@ paths:
       summary: Get invitations of user
       tags:
       - cards
+  /api/v1/coding-lab/projects:
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a project for a user by id in the database
+        by user id
+      operationId: create-project
+      parameters:
+      - description: project information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateArticle'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a project
+      tags:
+      - projects
   /api/v1/contests:
     get:
       consumes:

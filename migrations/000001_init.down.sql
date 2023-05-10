@@ -1,8 +1,10 @@
-DROP TABLE code_connection_responses;
+DROP TABLE freelance_project_requests;
+DROP TABLE freelance_projects;
+DROP TABLE contests;
 DROP TABLE code_connection_invitations;
 DROP TABLE code_connection_cards;
 DROP TABLE scholar_article_comment_votes;
-DROP TABLE scholar_comments;
+DROP TABLE scholar_article_comments;
 DROP TABLE scholar_materials;
 DROP TABLE scholar_articles;
 DROP TABLE user_roles;

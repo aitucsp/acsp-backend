@@ -16,6 +16,7 @@ type Repository struct {
 	Cards
 	Materials
 	Contests
+	Projects
 	S3Bucket
 }
 
@@ -89,6 +90,14 @@ type Contests interface {
 	GetAll(ctx context.Context) ([]model.Contest, error)
 }
 
+type Projects interface {
+	Create(ctx context.Context, project model.Project) error
+	Update(ctx context.Context, project model.Project) error
+	Delete(ctx context.Context, projectID int) error
+	GetAll(ctx context.Context) ([]model.Project, error)
+	GetByID(ctx context.Context, projectID int) (model.Project, error)
+}
+
 // S3Bucket interface provides methods for storing and retrieving objects from an S3 bucket.
 type S3Bucket interface {
 	PutObject(bucketName string, objectName string, fileBytes []byte) error
@@ -102,6 +111,7 @@ func NewRepository(db *sqlx.DB, sess *session.Session) *Repository {
 		Cards:         NewCardsRepository(db),
 		Materials:     NewMaterialsRepository(db),
 		Contests:      NewContestsRepository(db),
+		Projects:      NewProjectsRepository(db),
 		S3Bucket:      NewS3BucketRepository(sess),
 	}
 }

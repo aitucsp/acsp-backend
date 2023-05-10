@@ -24,6 +24,7 @@ type Service struct {
 	Cards
 	Materials
 	Contests
+	Projects
 	S3Bucket
 }
 
@@ -99,6 +100,14 @@ type Contests interface {
 	GetAll(ctx context.Context) ([]model.Contest, error)
 }
 
+type Projects interface {
+	Create(ctx context.Context, project dto.CreateProject) error
+	Update(ctx context.Context, project dto.UpdateProject) error
+	Delete(ctx context.Context, projectID int) error
+	GetAll(ctx context.Context) ([]model.Project, error)
+	GetByID(ctx context.Context, projectID int) (model.Project, error)
+}
+
 type S3Bucket interface {
 	UploadFile(ctx context.Context, key string, file *multipart.FileHeader) error
 }
@@ -111,6 +120,7 @@ func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfi
 		Roles:         NewRolesService(repo.Roles, repo.Authorization),
 		Cards:         NewCardsService(repo.Cards, repo.Authorization),
 		Materials:     NewMaterialsService(repo.Materials, repo.Authorization),
+		Projects:      NewProjectsService(repo.Projects),
 		Contests:      NewContestsService(repo.Contests),
 		S3Bucket:      NewS3BucketService(repo.S3Bucket, bucketName),
 	}

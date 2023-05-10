@@ -8,7 +8,7 @@ CREATE TABLE users
     updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
     is_admin   BOOL        NOT NULL DEFAULT FALSE,
     roles      VARCHAR[]            DEFAULT ARRAY ['user'],
-    image_url VARCHAR    NOT NULL DEFAULT '/default'
+    image_url  VARCHAR     NOT NULL DEFAULT '/default'
 );
 
 CREATE TABLE user_details
@@ -129,6 +129,52 @@ CREATE TABLE contests
     created_at   TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
 
+-- CREATE TABLE freelance_projects
+-- (
+--     id           BIGSERIAL   NOT NULL PRIMARY KEY,
+--     company_name INT         NOT NULL,
+--     title        VARCHAR     NOT NULL,
+--     description  VARCHAR     NOT NULL,
+--     image_url    VARCHAR     NOT NULL,
+--     budget       VARCHAR     NOT NULL,
+--     created_at   TIMESTAMPTZ NOT NULL DEFAULT (now()),
+--     updated_at   TIMESTAMPTZ NOT NULL DEFAULT (now())
+-- );
+--
+-- CREATE TABLE freelance_project_requests
+-- (
+--     id         BIGSERIAL   NOT NULL PRIMARY KEY,
+--     project_id INT         NOT NULL,
+--     user_id    INT         NOT NULL,
+--     status     VARCHAR     NOT NULL DEFAULT ('PENDING'),
+--     feedback VARCHAR     NOT NULL DEFAULT (''),
+--     created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
+--     updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
+--     FOREIGN KEY (project_id) REFERENCES freelance_projects (id) ON DELETE CASCADE ON UPDATE CASCADE,
+--     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
+-- );
+
+CREATE TABLE coding_lab_projects
+(
+    id             BIGSERIAL   NOT NULL PRIMARY KEY,
+    title          VARCHAR     NOT NULL,
+    description    VARCHAR     NOT NULL,
+    image_url      VARCHAR     NOT NULL DEFAULT (''),
+    reference_list VARCHAR     NOT NULL,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    updated_at     TIMESTAMPTZ NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE coding_lab_project_modules
+(
+    id         BIGSERIAL   NOT NULL PRIMARY KEY,
+    project_id INT         NOT NULL,
+    title      VARCHAR     NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    FOREIGN KEY (project_id) REFERENCES coding_lab_projects (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
 
 INSERT INTO roles (id, name)
 VALUES (1, 'user');

@@ -19,7 +19,7 @@ import (
 // @ID sign-up
 // @Accept  json
 // @Produce  json
-// @Param input body model.User true "account info"
+// @Param input body dto.CreateUser true "account info"
 // @Success 200 {integer} string "message"
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}

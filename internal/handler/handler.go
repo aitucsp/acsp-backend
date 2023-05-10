@@ -106,8 +106,28 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 
 		contests := rest.Group("/contests", h.userIdentity)
 		{
+			// contests.Post("/", h.Authorize("admin"), h.createContest) // create a contest
 			contests.Get("/", h.getAllContests) // get all contests
 			contests.Get("/:id", h.getContest)  // get contest by id
+		}
+
+		codingLab := rest.Group("/coding-lab", h.userIdentity)
+		{
+			projects := codingLab.Group("/projects")
+			{
+				projects.Post("/", h.Authorize("admin"), h.createProject) // create a project
+				// projects.Put("/", h.Authorize("admin"), h.updateProject)       // update a project
+				// projects.Delete("/:id", h.Authorize("admin"), h.deleteProject) // delete a project
+				// projects.Get("/:id", h.getProjectByID)                         // get project by id
+				// projects.Get("/", h.getAllProjects)                            // get all projects
+
+				// modules := projects.Group("/:id/modules")
+				// {
+				// 	modules.Post("/", h.Authorize("admin"), h.createModule)      // create a module
+				// 	modules.Put("/", h.Authorize("admin"), h.updateModule)       // update a module
+				// 	modules.Delete("/:id", h.Authorize("admin"), h.deleteModule) // delete a module
+				// }
+			}
 		}
 
 		// Define admin routes
