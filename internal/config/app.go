@@ -44,7 +44,7 @@ type (
 		AccessToken string `json:"S3_ACCESS_TOKEN"`
 		SecretKey   string `json:"S3_SECRET_KEY"`
 		Region      string `json:"S3_REGION"`
-		Bucket      string `json:"S3_BUCKET_NAME"`
+		BucketName  string `json:"S3_BUCKET_NAME"`
 		Endpoint    string `json:"S3_ENDPOINT"`
 	}
 
@@ -291,7 +291,7 @@ func newS3BucketConfig(p Provider) (*S3Config, error) {
 		AccessToken: a,
 		SecretKey:   s,
 		Region:      r,
-		Bucket:      b,
+		BucketName:  b,
 		Endpoint:    e,
 	}, nil
 }

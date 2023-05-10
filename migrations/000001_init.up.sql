@@ -129,6 +129,7 @@ CREATE TABLE contests
     created_at   TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
 
+
 INSERT INTO roles (id, name)
 VALUES (1, 'user');
 INSERT INTO roles (id, name)

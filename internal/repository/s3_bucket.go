@@ -2,6 +2,7 @@ package repository
 
 import (
 	"bytes"
+	"net/http"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -24,10 +25,11 @@ func (r *S3Repository) PutObject(bucketName string, objectName string, fileBytes
 	svc := s3.New(r.sess)
 
 	_, err := svc.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(objectName),
-		ACL:    aws.String("public-read"),
-		Body:   bytes.NewReader(fileBytes),
+		Bucket:      aws.String(bucketName),
+		Key:         aws.String("user-avatars/" + objectName),
+		ACL:         aws.String("public-read"),
+		Body:        bytes.NewReader(fileBytes),
+		ContentType: aws.String(http.DetectContentType(fileBytes)),
 	})
 	if err != nil {
 		return errors.Wrap(err, "Error occurred when uploading file to S3")

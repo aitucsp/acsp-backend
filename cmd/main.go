@@ -165,7 +165,7 @@ func main() {
 
 	// Initializing app repository, service and handler
 	appRepository := repository.NewRepository(dbEngine.DB, s3Session)
-	appService := service.NewService(appRepository, &dbEngine.Cache, *appConfig.Auth)
+	appService := service.NewService(appRepository, &dbEngine.Cache, *appConfig.Auth, appConfig.Bucket.BucketName)
 	appHandler := handler.NewHandler(appService)
 
 	appLogger.Info("Initializing app routes and handlers")

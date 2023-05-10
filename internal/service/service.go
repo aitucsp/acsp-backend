@@ -103,7 +103,7 @@ type S3Bucket interface {
 	UploadFile(ctx context.Context, key string, file *multipart.FileHeader) error
 }
 
-func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig) *Service {
+func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig, bucketName string) *Service {
 	return &Service{
 		Authorization: NewAuthService(repo.Authorization, repo.Roles, r, c),
 		Users:         NewUsersService(repo.Authorization),
@@ -112,6 +112,6 @@ func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfi
 		Cards:         NewCardsService(repo.Cards, repo.Authorization),
 		Materials:     NewMaterialsService(repo.Materials, repo.Authorization),
 		Contests:      NewContestsService(repo.Contests),
-		S3Bucket:      NewS3BucketService(repo.S3Bucket, "acsp-bucket"),
+		S3Bucket:      NewS3BucketService(repo.S3Bucket, bucketName),
 	}
 }
