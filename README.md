@@ -1,10 +1,10 @@
-# The corporate portal for self-study
+# Development of a corporate self-study portal
 
 # This project which contains 4 sections:
-- Project-Based Learning
-- Discussion Forum
-- Articles
-- Contests and chat
+- Project-Based Learning (projects, courses)
+- Search for teammates
+- Materials and Articles
+- Contests
 
 ## Technological stack:
 - Go
@@ -22,6 +22,7 @@
 - golang-jwt (for auth via jwt)
 - go-playground/validator (validating struct fields)
 - mock (mocking different layers)
+- AWS SDK (s3 bucket)
 
 ## How to configure
 1. Set up your own `.env` file (`example.env` will be given for example)
