@@ -115,18 +115,20 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		{
 			projects := codingLab.Group("/projects")
 			{
-				projects.Post("/", h.Authorize("admin"), h.createProject) // create a project
-				// projects.Put("/", h.Authorize("admin"), h.updateProject)       // update a project
-				// projects.Delete("/:id", h.Authorize("admin"), h.deleteProject) // delete a project
-				// projects.Get("/:id", h.getProjectByID)                         // get project by id
-				// projects.Get("/", h.getAllProjects)                            // get all projects
+				projects.Post("/", h.Authorize("admin"), h.createProject)      // create a project
+				projects.Put("/", h.Authorize("admin"), h.updateProject)       // update a project
+				projects.Delete("/:id", h.Authorize("admin"), h.deleteProject) // delete a project
+				projects.Get("/:id", h.getProjectByID)                         // get project by id
+				projects.Get("/", h.getAllProjects)                            // get all projects
 
-				// modules := projects.Group("/:id/modules")
-				// {
-				// 	modules.Post("/", h.Authorize("admin"), h.createModule)      // create a module
-				// 	modules.Put("/", h.Authorize("admin"), h.updateModule)       // update a module
-				// 	modules.Delete("/:id", h.Authorize("admin"), h.deleteModule) // delete a module
-				// }
+				modules := projects.Group("/:id/modules")
+				{
+					modules.Post("/", h.Authorize("admin"), h.createProjectModule)      // create a module
+					modules.Put("/:id", h.Authorize("admin"), h.updateProjectModule)    // update a module
+					modules.Delete("/:id", h.Authorize("admin"), h.deleteProjectModule) // delete a module
+					modules.Get("/:id", h.getProjectModuleByID)                         // get module by id
+					modules.Get("/", h.getAllProjectModules)                            // get all modules
+				}
 			}
 		}
 

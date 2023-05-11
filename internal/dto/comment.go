@@ -1,12 +1,9 @@
 package dto
 
-import "acsp/internal/model"
-
 // UpdateComment DTO for Updating Comment
 type UpdateComment struct {
-	Topic       string     `json:"topic" binding:"required" validate:"required"`
-	Description string     `json:"description" binding:"required" validate:"required"`
-	Author      model.User `json:"-"`
+	Topic       string `json:"topic" binding:"required" validate:"required"`
+	Description string `json:"description" binding:"required" validate:"required"`
 }
 
 // CreateComment DTO for Commenting Article

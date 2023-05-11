@@ -25,6 +25,7 @@ type Service struct {
 	Materials
 	Contests
 	Projects
+	ProjectModules
 	S3Bucket
 }
 
@@ -108,20 +109,29 @@ type Projects interface {
 	GetByID(ctx context.Context, projectID int) (model.Project, error)
 }
 
+type ProjectModules interface {
+	Create(ctx context.Context, projectID int, module dto.CreateProjectModule) error
+	Update(ctx context.Context, projectID, moduleID int, module dto.UpdateProjectModule) error
+	Delete(ctx context.Context, projectID, moduleID int) error
+	GetAll(ctx context.Context, projectID int) ([]model.ProjectModule, error)
+	GetByID(ctx context.Context, moduleID int) (model.ProjectModule, error)
+}
+
 type S3Bucket interface {
 	UploadFile(ctx context.Context, key string, file *multipart.FileHeader) error
 }
 
 func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig, bucketName string) *Service {
 	return &Service{
-		Authorization: NewAuthService(repo.Authorization, repo.Roles, r, c),
-		Users:         NewUsersService(repo.Authorization),
-		Articles:      NewArticlesService(repo.Articles, repo.Authorization),
-		Roles:         NewRolesService(repo.Roles, repo.Authorization),
-		Cards:         NewCardsService(repo.Cards, repo.Authorization),
-		Materials:     NewMaterialsService(repo.Materials, repo.Authorization),
-		Projects:      NewProjectsService(repo.Projects),
-		Contests:      NewContestsService(repo.Contests),
-		S3Bucket:      NewS3BucketService(repo.S3Bucket, bucketName),
+		Authorization:  NewAuthService(repo.Authorization, repo.Roles, r, c),
+		Users:          NewUsersService(repo.Authorization),
+		Articles:       NewArticlesService(repo.Articles, repo.Authorization),
+		Roles:          NewRolesService(repo.Roles, repo.Authorization),
+		Cards:          NewCardsService(repo.Cards, repo.Authorization),
+		Materials:      NewMaterialsService(repo.Materials, repo.Authorization),
+		Projects:       NewProjectsService(repo.Projects),
+		ProjectModules: NewProjectModulesService(repo.ProjectModules),
+		Contests:       NewContestsService(repo.Contests),
+		S3Bucket:       NewS3BucketService(repo.S3Bucket, bucketName),
 	}
 }

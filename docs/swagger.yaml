@@ -42,6 +42,13 @@ definitions:
     - description
     - topic
     type: object
+  dto.CreateProjectModule:
+    properties:
+      title:
+        type: string
+    required:
+    - title
+    type: object
   dto.CreateUser:
     properties:
       email:
@@ -89,6 +96,22 @@ definitions:
     required:
     - description
     - topic
+    type: object
+  dto.UpdateProject:
+    properties:
+      description:
+        type: string
+      language:
+        type: string
+      title:
+        type: string
+    type: object
+  dto.UpdateProjectModule:
+    properties:
+      title:
+        type: string
+    required:
+    - title
     type: object
   handler.signInInput:
     properties:
@@ -748,6 +771,44 @@ paths:
       tags:
       - cards
   /api/v1/coding-lab/projects:
+    get:
+      consumes:
+      - application/json
+      description: Get all projects
+      operationId: get-all-projects
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all projects
+      tags:
+      - projects
     post:
       consumes:
       - application/json
@@ -765,7 +826,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: message
           schema:
             type: integer
         "400":
@@ -791,6 +852,348 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Create a project
+      tags:
+      - projects
+  /api/v1/coding-lab/projects/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a project by id
+      operationId: delete-project-by-id
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a project by id
+      tags:
+      - projects
+    get:
+      consumes:
+      - application/json
+      description: Get a project by id
+      operationId: get-project-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a project by id
+      tags:
+      - projects
+    put:
+      consumes:
+      - application/json
+      description: Update data of project
+      operationId: update-project-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: card information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a project by id
+      tags:
+      - projects
+  /api/v1/coding-lab/projects/:id/modules:
+    get:
+      consumes:
+      - application/json
+      description: Get all project modules
+      operationId: get-all-project-modules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all project modules
+      tags:
+      - projects
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a module of a project
+      operationId: create-project-module
+      parameters:
+      - description: module information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProjectModule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a module for a project
+      tags:
+      - projects
+  /api/v1/coding-lab/projects/:id/modules/:moduleID:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a project module by id
+      operationId: delete-project-module-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project module deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a project module by id
+      tags:
+      - projects
+    get:
+      consumes:
+      - application/json
+      description: Get a project module by id
+      operationId: get-project-module-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a project module by id
+      tags:
+      - projects
+    put:
+      consumes:
+      - application/json
+      description: Update data of a project module
+      operationId: update-project-module-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: card information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProjectModule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a project module by id
       tags:
       - projects
   /api/v1/contests:

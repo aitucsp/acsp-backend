@@ -21,7 +21,11 @@ func NewMaterialsService(repo repository.Materials, usersRepo repository.Authori
 }
 
 func (m *MaterialsService) Create(ctx context.Context, userID string, dto dto.CreateMaterial) error {
-	userId, _ := strconv.Atoi(userID)
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return errors.Wrap(err, "error converting user id to int")
+	}
+
 	user, err := m.usersRepo.GetByID(ctx, userId)
 	if err != nil {
 		return err

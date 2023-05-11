@@ -71,7 +71,7 @@ func (p *ProjectsDatabase) Update(ctx context.Context, project model.Project) er
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf(`UPDATE %s SET title = $1, description = $2, reference_list = $3 updated_at = now() 
+	query := fmt.Sprintf(`UPDATE %s SET title = $1, description = $2, reference_list = $3, updated_at = now() 
 											WHERE id = $4`,
 		constants.CodingLabProjectsTable)
 
