@@ -45,6 +45,8 @@ func (h *Handler) createArticle(c *fiber.Ctx) error {
 		})
 	}
 
+	input.Image, _ = c.FormFile("file")
+
 	validate := validator.New()
 	err = validate.Struct(input)
 	if err != nil {

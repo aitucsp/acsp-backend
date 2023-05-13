@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/jmoiron/sqlx"
@@ -18,6 +19,7 @@ type Repository struct {
 	Contests
 	Projects
 	ProjectModules
+	Transactional
 	S3Bucket
 }
 
@@ -44,8 +46,9 @@ type Roles interface {
 }
 
 type Articles interface {
-	Create(ctx context.Context, article model.Article) error
+	Create(ctx context.Context, tx *sqlx.Tx, article *model.Article) error
 	Update(ctx context.Context, article model.Article) error
+	UpdateImageURL(ctx context.Context, tx *sqlx.Tx, articleID int) error
 	Delete(ctx context.Context, userID int, articleID int) error
 	GetAll(ctx context.Context) ([]model.Article, error)
 	GetAllByUserID(ctx context.Context, userID int) ([]model.Article, error)
@@ -112,6 +115,12 @@ type S3Bucket interface {
 	PutObject(bucketName string, objectName string, fileBytes []byte) error
 }
 
+type Transactional interface {
+	Begin(ctx context.Context, o *sql.TxOptions) (*sqlx.Tx, error)
+	Commit(ctx context.Context, tx *sqlx.Tx) error
+	Rollback(ctx context.Context, tx *sqlx.Tx) error
+}
+
 func NewRepository(db *sqlx.DB, sess *session.Session) *Repository {
 	return &Repository{
 		Authorization:  NewAuthRepository(db),
@@ -123,5 +132,6 @@ func NewRepository(db *sqlx.DB, sess *session.Session) *Repository {
 		Projects:       NewProjectsRepository(db),
 		ProjectModules: NewProjectModulesRepository(db),
 		S3Bucket:       NewS3BucketRepository(sess),
+		Transactional:  NewTransactionManager(db),
 	}
 }

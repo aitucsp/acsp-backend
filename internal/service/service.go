@@ -26,7 +26,7 @@ type Service struct {
 	Contests
 	Projects
 	ProjectModules
-	S3Bucket
+	S3BucketService S3Bucket
 }
 
 type Authorization interface {
@@ -122,16 +122,19 @@ type S3Bucket interface {
 }
 
 func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig, bucketName string) *Service {
-	return &Service{
-		Authorization:  NewAuthService(repo.Authorization, repo.Roles, r, c),
-		Users:          NewUsersService(repo.Authorization),
-		Articles:       NewArticlesService(repo.Articles, repo.Authorization),
-		Roles:          NewRolesService(repo.Roles, repo.Authorization),
-		Cards:          NewCardsService(repo.Cards, repo.Authorization),
-		Materials:      NewMaterialsService(repo.Materials, repo.Authorization),
-		Projects:       NewProjectsService(repo.Projects),
-		ProjectModules: NewProjectModulesService(repo.ProjectModules),
-		Contests:       NewContestsService(repo.Contests),
-		S3Bucket:       NewS3BucketService(repo.S3Bucket, bucketName),
+	service := &Service{
+		Authorization:   NewAuthService(repo.Authorization, repo.Roles, r, c),
+		S3BucketService: NewS3BucketService(repo.S3Bucket, bucketName),
+		Users:           NewUsersService(repo.Authorization),
+		Roles:           NewRolesService(repo.Roles, repo.Authorization),
+		Cards:           NewCardsService(repo.Cards, repo.Authorization),
+		Materials:       NewMaterialsService(repo.Materials, repo.Authorization),
+		Projects:        NewProjectsService(repo.Projects),
+		ProjectModules:  NewProjectModulesService(repo.ProjectModules),
+		Contests:        NewContestsService(repo.Contests),
 	}
+
+	service.Articles = NewArticlesService(repo.Articles, repo.Authorization, service.S3BucketService, repo.Transactional)
+
+	return service
 }

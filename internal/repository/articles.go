@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -26,7 +27,7 @@ func NewArticlesRepository(db *sqlx.DB) *ArticlesDatabase {
 	}
 }
 
-func (a *ArticlesDatabase) Create(ctx context.Context, article model.Article) error {
+func (a *ArticlesDatabase) Create(ctx context.Context, tx *sqlx.Tx, article *model.Article) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", article.ID))
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
@@ -35,7 +36,7 @@ func (a *ArticlesDatabase) Create(ctx context.Context, article model.Article) er
 	query := fmt.Sprintf(`INSERT INTO %s (user_id, topic, description) VALUES ($1, $2, $3) RETURNING id`,
 		constants.ArticlesTable)
 
-	stmt, err := a.db.PrepareContext(ctx, query)
+	stmt, err := tx.PrepareContext(ctx, query)
 	if err != nil {
 		l.Error("Error when preparing the query", zap.Error(err))
 
@@ -48,20 +49,21 @@ func (a *ArticlesDatabase) Create(ctx context.Context, article model.Article) er
 		}
 	}(stmt)
 
-	res, err := stmt.Exec(article.Author.ID, article.Topic, article.Description)
+	err = stmt.QueryRow(article.Author.ID, article.Topic, article.Description).Scan(&article.ID)
 	if err != nil {
 		l.Error("error when creating the article in database", zap.Error(err))
 
 		return errors.Wrap(err, "error when executing query")
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
-	r, err := res.RowsAffected()
-	if err != nil {
-		return errors.Wrap(err, "error when get rows affected")
-	}
-
-	if r == 0 {
-		return errors.Wrap(apperror.ErrCreatingArticle, "error when creating an article in database")
+	if article.ID == 0 {
+		return errors.Wrap(apperror.ErrCreatingArticle, "error when creating the article in database")
 	}
 
 	return nil
@@ -108,6 +110,48 @@ func (a *ArticlesDatabase) Update(ctx context.Context, article model.Article) er
 	return nil
 }
 
+// UpdateImageURL updates the image url of the article
+func (a *ArticlesDatabase) UpdateImageURL(ctx context.Context, tx *sqlx.Tx, articleID int) error {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", articleID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	query := fmt.Sprintf("UPDATE %s SET image_url = $1, updated_at = now() WHERE id = $2",
+		constants.ArticlesTable)
+
+	stmt, err := tx.PrepareContext(ctx, query)
+	if err != nil {
+		l.Error("Error when preparing the query", zap.Error(err))
+
+		return err
+	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
+
+	res, err := stmt.Exec("/"+strconv.Itoa(articleID), articleID)
+	if err != nil {
+		l.Error("Error when update the article in database", zap.Error(err))
+
+		return errors.Wrap(err, "error when executing query")
+	}
+
+	r, err := res.RowsAffected()
+	if err != nil {
+		return errors.Wrap(err, "error when get rows affected")
+	}
+
+	if r == 0 {
+		return errors.Wrap(apperror.ErrUpdatingArticle, "no rows affected")
+	}
+
+	return nil
+}
+
 func (a *ArticlesDatabase) Delete(ctx context.Context, userID int, articleID int) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", articleID), zap.Int("userID", userID))
 
@@ -149,15 +193,28 @@ func (a *ArticlesDatabase) Delete(ctx context.Context, userID int, articleID int
 }
 
 func (a *ArticlesDatabase) GetAll(ctx context.Context) ([]model.Article, error) {
+	l := logging.LoggerFromContext(ctx)
+
 	var articles []model.Article
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf("SELECT * FROM %s", constants.ArticlesTable)
+	query := fmt.Sprintf(`SELECT a.id,
+								a.user_id,
+								a.topic,
+								a.description,
+								a.upvote,
+								a.downvote,
+								a.created_at,
+								a.updated_at,
+								a.image_url
+								FROM %s a`, constants.ArticlesTable)
 
 	err := a.db.SelectContext(ctx, &articles, query)
 	if err != nil {
+		l.Error("Error when get all articles", zap.Error(err))
+
 		return nil, errors.Wrap(err, "error when executing query")
 	}
 

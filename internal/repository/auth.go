@@ -66,11 +66,10 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
 	}
 
 	querySecond := fmt.Sprintf(`INSERT INTO %s (user_id, role_id) 
-										VALUES ($1, $2) RETURNING id`, constants.UserRolesTable)
-	var userRoleID int
+										VALUES ($1, $2)`, constants.UserRolesTable)
 
 	// Create a role for the user
-	err = tx.QueryRow(querySecond, userID, constants.DefaultUserRoleID).Scan(&userRoleID)
+	res, err := tx.Exec(querySecond, userID, constants.DefaultUserRoleID)
 	if err != nil {
 		l.Error("Error when executing the query", zap.Error(err))
 
@@ -82,6 +81,30 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
 
 		// Return the error
 		return errors.Wrap(err, "Error when executing the query")
+	}
+
+	affected, err := res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting the affected rows", zap.Error(err))
+
+		// Rollback the transaction if the affected rows is less than 1
+		err := tx.Rollback()
+		if err != nil {
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back the transaction")
+		}
+
+		// Return the error
+		return errors.Wrap(err, "Error when getting the affected rows")
+	}
+
+	// Rollback the transaction if the affected rows is less than 1
+	if affected < 1 {
+		err := tx.Rollback()
+		if err != nil {
+			return errors.Wrap(apperror.ErrRollback, "Error when rolling back the transaction")
+		}
+
+		return errors.Wrap(apperror.ErrNoAffectedRows, "Error when creating user")
 	}
 
 	// Commit the transaction
@@ -136,7 +159,7 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 									u.created_at,
 									u.updated_at,
 									u.is_admin,
-									ARRAY_AGG(r.name) AS roles,
+									u.roles AS roles,
 									u.image_url
 								FROM %s u WHERE id=$1`,
 		constants.UsersTable)

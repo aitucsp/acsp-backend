@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"acsp/internal/constants"
 	"acsp/internal/dto"
 	"acsp/internal/logging"
 	"acsp/internal/model"
@@ -16,16 +17,33 @@ import (
 type ArticlesService struct {
 	repo      repository.Articles
 	usersRepo repository.Authorization
+	txManager repository.Transactional
+	s3Bucket  S3Bucket
 }
 
-func NewArticlesService(repo repository.Articles, usersRepo repository.Authorization) *ArticlesService {
-	return &ArticlesService{repo: repo, usersRepo: usersRepo}
+func NewArticlesService(r repository.Articles, a repository.Authorization, s S3Bucket, t repository.Transactional) *ArticlesService {
+	return &ArticlesService{
+		repo:      r,
+		usersRepo: a,
+		s3Bucket:  s,
+		txManager: t,
+	}
 }
 
 func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.CreateArticle) error {
-	userId, _ := strconv.Atoi(userID)
+	l := logging.LoggerFromContext(ctx).With(zap.String("topic", dto.Topic))
+
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		l.Error("Error occurred when converting string to int", zap.Error(err))
+
+		return errors.Wrap(err, "Error occurred when converting string to int")
+	}
+
 	user, err := s.usersRepo.GetByID(ctx, userId)
 	if err != nil {
+		l.Error("Error occurred when getting user by id", zap.Error(err))
+
 		return err
 	}
 
@@ -35,7 +53,53 @@ func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.Cre
 		Author:      user,
 	}
 
-	return s.repo.Create(ctx, article)
+	tx, err := s.txManager.Begin(ctx, nil)
+	if err != nil {
+		l.Error("Error occurred when starting transaction", zap.Error(err))
+
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			l.Error("Error occurred when rolling back transaction", zap.Error(err))
+
+			err = s.txManager.Rollback(ctx, tx)
+			return
+		}
+
+		err = s.txManager.Commit(ctx, tx)
+		if err != nil {
+			l.Error("Error occurred when committing transaction", zap.Error(err))
+
+			return
+		}
+	}()
+
+	err = s.repo.Create(ctx, tx, &article)
+	if err != nil {
+		l.Error("Error occurred when creating article", zap.Error(err))
+
+		return errors.Wrap(err, "Error occurred when creating article")
+	}
+
+	if dto.Image != nil {
+		err = s.s3Bucket.UploadFile(ctx, constants.ArticlesImagesFolder+"/"+strconv.Itoa(article.ID), dto.Image)
+		if err != nil {
+			l.Info("Error occurred when uploading file to s3 bucket", zap.Error(err))
+
+			return err
+		}
+
+		err = s.repo.UpdateImageURL(ctx, tx, article.ID)
+		if err != nil {
+			l.Info("Error occurred when updating image URL", zap.Error(err))
+
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *ArticlesService) GetAll(ctx context.Context) ([]model.Article, error) {
@@ -47,6 +111,8 @@ func (s *ArticlesService) GetAll(ctx context.Context) ([]model.Article, error) {
 	if articles == nil {
 		return []model.Article{}, nil
 	}
+
+	articles = s.getFullURLForArticles(articles)
 
 	return articles, nil
 }
@@ -279,4 +345,16 @@ func (s *ArticlesService) GetVotesByArticleIDAndCommentID(userContext context.Co
 	}
 
 	return s.repo.GetVotesByArticleIDAndCommentID(userContext, articleId, commentId)
+}
+
+// Create function which gets a slice of articles and changes every article's image_url to a full url
+func (s *ArticlesService) getFullURLForArticles(articles []model.Article) []model.Article {
+	for i := range articles {
+		articles[i].ImageURL = constants.BucketName + "." +
+			constants.EndPoint + "/" +
+			constants.ArticlesImagesFolder +
+			articles[i].ImageURL
+	}
+
+	return articles
 }

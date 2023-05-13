@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"mime/multipart"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -34,5 +35,15 @@ func (s *S3BucketService) UploadFile(ctx context.Context, key string, file *mult
 		return errors.Wrap(err, "Error occurred when reading file")
 	}
 
-	return s.repo.PutObject(s.bucket, key, fileBytes)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// Put the object into the bucket
+	err = s.repo.PutObject(s.bucket, key, fileBytes)
+	if err != nil {
+		cancel()
+		return err
+	}
+
+	return nil
 }

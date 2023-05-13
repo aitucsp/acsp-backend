@@ -43,7 +43,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		// Define user routes with authentication middleware (userIdentity) for all routes
 		scholar := rest.Group("/scholar", h.userIdentity)
 		{
-			articles := scholar.Group("/articles", h.userIdentity)
+			articles := scholar.Group("/articles")
 			{
 				articles.Post("/", h.createArticle)             // create an article
 				articles.Get("/", h.getAllArticles)             // get all articles
@@ -52,7 +52,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 				articles.Put("/:id", h.updateArticle)           // update an article
 				articles.Delete("/:id", h.deleteArticle)        // delete an article
 
-				comments := articles.Group("/:id/comments", h.userIdentity)
+				comments := articles.Group("/:id/comments")
 				{
 					comments.Post("/", h.commentArticle)                         // comment an article
 					comments.Get("/", h.getCommentsByArticleID)                  // get all comments by article id
@@ -65,7 +65,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 
 			}
 
-			materials := scholar.Group("/materials", h.userIdentity)
+			materials := scholar.Group("/materials")
 			{
 				materials.Post("/", h.createMaterial)                // create a material
 				materials.Get("/", h.getAllMaterials)                // get all materials
@@ -84,7 +84,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 				applicants.Get("/", h.getAllCards) // get all applicants list
 			}
 
-			cards := codeConnection.Group("/cards", h.userIdentity)
+			cards := codeConnection.Group("/cards")
 			{
 				cards.Get("/", h.getAllCardsByUserID)       // get all cards of user
 				cards.Post("/", h.createCard)               // create a card
@@ -93,7 +93,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 				cards.Delete("/:id", h.deleteCard)          // delete card by id
 				cards.Get("/invitations", h.getInvitations) // get all invitations of a user
 
-				invitations := cards.Group("/:id/invitations", h.userIdentity)
+				invitations := cards.Group("/:id/invitations")
 				{
 					invitations.Get("/", h.getInvitationsByCardID)                  // get all invitations of a card
 					invitations.Post("/", h.createInvitation)                       // send an invitation to a user

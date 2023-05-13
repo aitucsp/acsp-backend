@@ -51,6 +51,12 @@ CREATE TABLE scholar_articles
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
 
+ALTER TABLE scholar_articles ADD COLUMN image_url VARCHAR NOT NULL DEFAULT '/articles/default';
+ALTER TABLE scholar_articles ALTER COLUMN image_url SET DEFAULT '/default';
+-- change default value of image_url in scholar_articles to /default
+
+
+select * from scholar_articles;
 CREATE TABLE scholar_materials
 (
     id          BIGSERIAL PRIMARY KEY,
@@ -180,3 +186,4 @@ INSERT INTO roles (id, name)
 VALUES (1, 'user');
 INSERT INTO roles (id, name)
 VALUES (2, 'admin');
+

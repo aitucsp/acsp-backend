@@ -16,6 +16,13 @@ const (
 	DatabaseName                 = "postgres"
 )
 
+const (
+	BucketName           = "acsp-avatars"
+	EndPoint             = "object.pscloud.io"
+	UsersAvatarsFolder   = "/user-avatars"
+	ArticlesImagesFolder = "articles"
+)
+
 type VoteType int
 
 const (

@@ -143,6 +143,8 @@ func (p *ProjectModulesDatabase) Delete(ctx context.Context, projectID, moduleID
 }
 
 func (p *ProjectModulesDatabase) GetAllByProjectID(ctx context.Context, projectID int) ([]model.ProjectModule, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("projectID", projectID))
+
 	var modules []model.ProjectModule
 
 	query := fmt.Sprintf("SELECT * FROM %s WHERE project_id = $1",
@@ -150,6 +152,8 @@ func (p *ProjectModulesDatabase) GetAllByProjectID(ctx context.Context, projectI
 
 	err := p.db.Select(&modules, query, projectID)
 	if err != nil {
+		l.Error("Error when getting the project's modules", zap.Error(err))
+
 		return nil, errors.Wrap(err, "error when getting the projects")
 	}
 

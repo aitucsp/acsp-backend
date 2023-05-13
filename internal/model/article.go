@@ -7,6 +7,7 @@ type Article struct {
 	Description string    `json:"description" db:"description" binding:"required"`
 	Upvote      int       `json:"upvote" db:"upvote"`
 	Downvote    int       `json:"downvote" db:"downvote"`
+	ImageURL    string    `json:"image_url" db:"image_url"`
 	CreatedAt   string    `json:"created_at" db:"created_at"`
 	UpdatedAt   string    `json:"updated_at" db:"updated_at"`
 	Comments    []Comment `json:"comments"`

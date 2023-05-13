@@ -77,7 +77,7 @@ func (h *Handler) uploadUserImage(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.services.S3Bucket.UploadFile(c.UserContext(), userID, file)
+	err = h.services.S3BucketService.UploadFile(c.UserContext(), userID, file)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,

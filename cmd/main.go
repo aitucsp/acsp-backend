@@ -155,7 +155,10 @@ func main() {
 
 	// Initializing built-in logger and recover middlewares
 	app.Use(logger.New())
-	app.Use(recover.New())
+	app.Use(recover.New(
+		recover.Config{
+			EnableStackTrace: true,
+		}))
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "*",
 		AllowMethods:     "GET, POST, PUT, DELETE",

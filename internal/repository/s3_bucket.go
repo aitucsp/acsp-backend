@@ -26,7 +26,7 @@ func (r *S3Repository) PutObject(bucketName string, objectName string, fileBytes
 
 	_, err := svc.PutObject(&s3.PutObjectInput{
 		Bucket:      aws.String(bucketName),
-		Key:         aws.String("user-avatars/" + objectName),
+		Key:         aws.String(objectName),
 		ACL:         aws.String("public-read"),
 		Body:        bytes.NewReader(fileBytes),
 		ContentType: aws.String(http.DetectContentType(fileBytes)),

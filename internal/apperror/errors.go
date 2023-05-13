@@ -33,4 +33,5 @@ const (
 	ErrDeletingCard         = Error("error occurred when deleting a card")
 	ErrAnsweringCard        = Error("error occurred when answering a card")
 	ErrWhenUpdatingImageURL = Error("error occurred when updating image url")
+	ErrNoAffectedRows       = Error("no affected rows")
 )
