@@ -12,13 +12,12 @@ import (
 // @ID get-user
 // @Accept  json
 // @Produce  json
-// @Param id path int true "user id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/users/:id [get]
-func (h *Handler) getUserInfo(c *fiber.Ctx) error {
+// @Router /api/v1/users/profile [get]
+func (h *Handler) getUserProfile(c *fiber.Ctx) error {
 	userId, err := getUserId(c)
 	if userId == "" {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{

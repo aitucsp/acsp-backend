@@ -36,7 +36,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		// Define user routes
 		users := rest.Group("/users", h.userIdentity)
 		{
-			users.Get("/", h.getUserInfo)
+			users.Get("/profile", h.getUserProfile)
 			users.Post("/image", h.uploadUserImage)
 		}
 

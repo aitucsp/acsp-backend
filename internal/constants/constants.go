@@ -19,7 +19,7 @@ const (
 const (
 	BucketName           = "acsp-avatars"
 	EndPoint             = "object.pscloud.io"
-	UsersAvatarsFolder   = "/user-avatars"
+	UsersAvatarsFolder   = "user-avatars"
 	ArticlesImagesFolder = "articles"
 )
 

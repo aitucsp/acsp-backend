@@ -35,6 +35,5 @@ func (c *ContestsService) GetByID(ctx context.Context, contestID string) (model.
 }
 
 func (c *ContestsService) GetAll(ctx context.Context) ([]model.Contest, error) {
-	// TODO implement me
-	panic("implement me")
+	return c.repo.GetAll(ctx)
 }

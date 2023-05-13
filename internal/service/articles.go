@@ -118,40 +118,55 @@ func (s *ArticlesService) GetAll(ctx context.Context) ([]model.Article, error) {
 }
 
 func (s *ArticlesService) GetAllByUserID(ctx context.Context, userID string) ([]model.Article, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.String("userID", userID))
+
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
 		return []model.Article{}, errors.Wrap(err, "failed to convert user id to int")
 	}
 
-	return s.repo.GetAllByUserID(ctx, userId)
+	articles, err := s.repo.GetAllByUserID(ctx, userId)
+	if err != nil {
+		l.Error("Error occurred when getting all articles by user id", zap.Error(err))
+		return []model.Article{}, err
+	}
+
+	if articles == nil {
+		return []model.Article{}, nil
+	}
+
+	articles = s.getFullURLForArticles(articles)
+
+	return articles, nil
 }
 
-func (s *ArticlesService) GetByID(ctx context.Context, articleID, userID string) (*model.Article, error) {
+func (s *ArticlesService) GetByID(ctx context.Context, articleID, userID string) (model.Article, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.String("articleID", articleID))
 
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return &model.Article{}, err
+		return model.Article{}, err
 	}
 
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return &model.Article{}, err
+		return model.Article{}, err
 	}
 
 	l.Info("Get article by id and user id")
 	article, err := s.repo.GetArticleByIDAndUserID(ctx, articleId, userId)
 	if err != nil {
-		return &model.Article{}, err
+		return model.Article{}, err
 	}
 
 	l.Info("Get comments by article id")
-	comments, err := s.repo.GetCommentsByArticleID(ctx, articleId)
+	c, err := s.repo.GetCommentsByArticleID(ctx, articleId)
 	if err != nil {
-		return &model.Article{}, err
+		return model.Article{}, err
 	}
 
-	article.Comments = comments
+	article.Comments = c
+	article = s.getFullURLForArticle(article)
 
 	return article, nil
 }
@@ -236,11 +251,6 @@ func (s *ArticlesService) ReplyToCommentByArticleIDAndCommentID(ctx context.Cont
 	if err != nil {
 		return err
 	}
-
-	// convertedCommentID := sql.NullInt64{
-	// 	Int64: int64(parentCommentId),
-	// 	Valid: true,
-	// }
 
 	replyComment := model.Comment{
 		UserID:    userId,
@@ -347,7 +357,7 @@ func (s *ArticlesService) GetVotesByArticleIDAndCommentID(userContext context.Co
 	return s.repo.GetVotesByArticleIDAndCommentID(userContext, articleId, commentId)
 }
 
-// Create function which gets a slice of articles and changes every article's image_url to a full url
+// getFullURLForArticles function gets a slice of articles and changes every article's image_url to a full url
 func (s *ArticlesService) getFullURLForArticles(articles []model.Article) []model.Article {
 	for i := range articles {
 		articles[i].ImageURL = constants.BucketName + "." +
@@ -357,4 +367,14 @@ func (s *ArticlesService) getFullURLForArticles(articles []model.Article) []mode
 	}
 
 	return articles
+}
+
+// getFullURLForArticle function gets an article and changes its image_url to a full url
+func (s *ArticlesService) getFullURLForArticle(article model.Article) model.Article {
+	article.ImageURL = constants.BucketName + "." +
+		constants.EndPoint + "/" +
+		constants.ArticlesImagesFolder +
+		article.ImageURL
+
+	return article
 }

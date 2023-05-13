@@ -75,7 +75,7 @@ func (a *ArticlesDatabase) Update(ctx context.Context, article model.Article) er
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf("UPDATE %s SET topic = $1, description = $2, updated_at = now() WHERE id = $3 AND user_id = $4",
+	query := fmt.Sprintf(`UPDATE %s SET topic = $1, description = $2, updated_at = now() WHERE id = $3 AND user_id = $4`,
 		constants.ArticlesTable)
 
 	stmt, err := a.db.PrepareContext(ctx, query)
@@ -117,7 +117,7 @@ func (a *ArticlesDatabase) UpdateImageURL(ctx context.Context, tx *sqlx.Tx, arti
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf("UPDATE %s SET image_url = $1, updated_at = now() WHERE id = $2",
+	query := fmt.Sprintf(`UPDATE %s SET image_url = $1, updated_at = now() WHERE id = $2`,
 		constants.ArticlesTable)
 
 	stmt, err := tx.PrepareContext(ctx, query)
@@ -221,7 +221,7 @@ func (a *ArticlesDatabase) GetAll(ctx context.Context) ([]model.Article, error) 
 	return articles, nil
 }
 
-func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleID, userID int) (*model.Article, error) {
+func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleID, userID int) (model.Article, error) {
 	var article model.Article
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
@@ -232,13 +232,14 @@ func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleI
 
 	err := a.db.GetContext(ctx, &article, query, articleID, userID)
 	if err != nil {
-		return nil, errors.Wrap(err, "error when get article by id and user id")
+		return model.Article{}, errors.Wrap(err, "error when get article by id and user id")
 	}
 
-	return &article, nil
+	return article, nil
 }
 
 func (a *ArticlesDatabase) GetAllByUserID(ctx context.Context, userID int) ([]model.Article, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", userID))
 	var articles []model.Article
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
@@ -248,6 +249,8 @@ func (a *ArticlesDatabase) GetAllByUserID(ctx context.Context, userID int) ([]mo
 
 	err := a.db.SelectContext(ctx, &articles, query, userID)
 	if err != nil {
+		l.Error("Error when get all articles by user id", zap.Error(err))
+
 		return nil, errors.Wrap(err, "error when executing query")
 	}
 
@@ -291,7 +294,6 @@ func (a *ArticlesDatabase) CreateComment(ctx context.Context, articleID, userID 
 
 func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID int) ([]model.Comment, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("articleID", articleID))
-	l.Info("Get comments by article id")
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
@@ -314,6 +316,8 @@ func (a *ArticlesDatabase) GetCommentsByArticleID(ctx context.Context, articleID
 
 	rows, err := stmt.QueryContext(ctx, articleID)
 	if err != nil {
+		l.Error("Error when executing query", zap.Error(err))
+
 		return []model.Comment{}, errors.Wrap(err, "error when executing query")
 	}
 
