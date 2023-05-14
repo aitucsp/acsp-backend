@@ -3045,68 +3045,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/users/:id": {
-            "get": {
-                "description": "get user info by id from the system",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "users"
-                ],
-                "summary": "Get user info by id",
-                "operationId": "get-user",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "user id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/users/image": {
             "post": {
                 "description": "upload user image to the system",
@@ -3168,23 +3106,64 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/api/v1/users/profile": {
+            "get": {
+                "description": "get user info by id from the system",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Get user info by id",
+                "operationId": "get-user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
         "dto.CreateArticle": {
-            "type": "object",
-            "required": [
-                "description",
-                "topic"
-            ],
-            "properties": {
-                "description": {
-                    "type": "string"
-                },
-                "topic": {
-                    "type": "string"
-                }
-            }
+            "type": "object"
         },
         "dto.CreateCard": {
             "type": "object",
@@ -3322,7 +3301,7 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "language": {
+                "reference_list": {
                     "type": "string"
                 },
                 "title": {

@@ -1,14 +1,6 @@
 basePath: /
 definitions:
   dto.CreateArticle:
-    properties:
-      description:
-        type: string
-      topic:
-        type: string
-    required:
-    - description
-    - topic
     type: object
   dto.CreateCard:
     properties:
@@ -101,7 +93,7 @@ definitions:
     properties:
       description:
         type: string
-      language:
+      reference_list:
         type: string
       title:
         type: string
@@ -2168,49 +2160,6 @@ paths:
       summary: renew access and refresh tokens
       tags:
       - auth
-  /api/v1/users/:id:
-    get:
-      consumes:
-      - application/json
-      description: get user info by id from the system
-      operationId: get-user
-      parameters:
-      - description: user id
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties: true
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties: true
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties: true
-            type: object
-        default:
-          description: ""
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Get user info by id
-      tags:
-      - users
   /api/v1/users/image:
     post:
       consumes:
@@ -2252,6 +2201,43 @@ paths:
             additionalProperties: true
             type: object
       summary: Upload user image
+      tags:
+      - users
+  /api/v1/users/profile:
+    get:
+      consumes:
+      - application/json
+      description: get user info by id from the system
+      operationId: get-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get user info by id
       tags:
       - users
 securityDefinitions:

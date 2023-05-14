@@ -47,6 +47,9 @@ shell:
 test:
 	docker exec -it $(CONTAINER_NAME) /bin/bash -c "cd /app && python -m unittest discover -s tests -p '*_test.py'"
 
+generate:
+	swag init -g cmd/main.go
+	docker-compose up
 push:
 	docker tag $(IMAGE_NAME) registry.digitalocean.com/$(REGISTRY_NAME)/$(IMAGE_NAME)
 	docker push registry.digitalocean.com/$(REGISTRY_NAME)/$(IMAGE_NAME)

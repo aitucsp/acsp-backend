@@ -111,6 +111,7 @@ func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password str
 	user, err := s.repo.GetUser(ctx, email, password)
 	if err != nil {
 		l.Warn("Error when getting a user", zap.Error(err))
+
 		return &TokenDetails{}, err
 	}
 
