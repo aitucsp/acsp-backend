@@ -371,6 +371,12 @@ func (a *ArticlesDatabase) ReplyToComment(ctx context.Context, articleID, userID
 
 		return err
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	res, err := stmt.ExecContext(ctx, query, userID, articleID, parentCommentID, comment.Text)
 	if err != nil {
@@ -399,10 +405,21 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf(`SELECT c.*, u.id as "user.user_id",
-		       u.email AS "user.email",
-		       u.name AS "user.name",
-		       u.roles AS "user.roles" 
+	query := fmt.Sprintf(
+		`SELECT 
+					c.id, 
+					c.user_id, 
+					c.article_id,
+					c.parent_id, 
+					c.text, 
+					c.upvote, 
+					c.downvote,
+					c.created_at, 
+					c.updated_at,
+					u.id as "user.user_id",
+					u.email AS "user.email",
+					u.name AS "user.name",
+					u.roles AS "user.roles" 
                FROM %s c 
                INNER JOIN %s u ON u.id = c.user_id 
 			   INNER JOIN %s a ON a.id = c.article_id
@@ -415,11 +432,23 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(
 	if err != nil {
 		return []model.Comment{}, errors.Wrap(err, "error when preparing the query")
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			logging.LoggerFromContext(ctx).Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	rows, err := stmt.QueryContext(ctx, articleID, parentCommentID)
 	if err != nil {
 		return nil, errors.Wrap(err, "error when executing query")
 	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			logging.LoggerFromContext(ctx).Error("Error when closing the rows", zap.Error(err))
+		}
+	}(rows)
 
 	for rows.Next() {
 		var comment model.Comment
@@ -431,6 +460,8 @@ func (a *ArticlesDatabase) GetRepliesByArticleIDAndCommentID(
 			&comment.ArticleID,
 			&parentID,
 			&comment.Text,
+			&comment.Upvotes,
+			&comment.Downvotes,
 			&comment.CreatedAt,
 			&comment.UpdatedAt,
 			&user.ID,

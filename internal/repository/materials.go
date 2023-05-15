@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -39,6 +40,12 @@ func (m *MaterialsDatabase) Create(ctx context.Context, material model.Material)
 
 		return errors.Wrap(err, "error when preparing the query")
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	res, err := stmt.ExecContext(ctx, material.Author.ID, material.Topic, material.Description)
 	if err != nil {
@@ -78,6 +85,12 @@ func (m *MaterialsDatabase) Update(ctx context.Context, material model.Material)
 
 		return errors.Wrap(err, "error when preparing the query")
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	res, err := stmt.ExecContext(ctx, query, material.Topic, material.Description, material.ID, material.Author.ID)
 	if err != nil {
@@ -114,6 +127,12 @@ func (m *MaterialsDatabase) Delete(ctx context.Context, userID int, materialID i
 	if err != nil {
 		return errors.Wrap(err, "error when preparing the query")
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	res, err := stmt.ExecContext(ctx, query, materialID, userID)
 	if err != nil {

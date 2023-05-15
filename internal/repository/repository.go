@@ -95,7 +95,7 @@ type Contests interface {
 }
 
 type Projects interface {
-	Create(ctx context.Context, project model.Project) error
+	Create(ctx context.Context, disciplineID int, project model.Project) error
 	Update(ctx context.Context, project model.Project) error
 	Delete(ctx context.Context, projectID int) error
 	GetAll(ctx context.Context) ([]model.Project, error)

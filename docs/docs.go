@@ -3216,9 +3216,16 @@ const docTemplate = `{
         "dto.CreateProjectModule": {
             "type": "object",
             "required": [
+                "description",
                 "title"
             ],
             "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "reference_url": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 }
@@ -3301,20 +3308,30 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "reference_list": {
+                "level": {
                     "type": "string"
                 },
                 "title": {
                     "type": "string"
+                },
+                "work_hours": {
+                    "type": "integer"
                 }
             }
         },
         "dto.UpdateProjectModule": {
             "type": "object",
             "required": [
+                "description",
                 "title"
             ],
             "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "reference_url": {
+                    "type": "string"
+                },
                 "title": {
                     "type": "string"
                 }

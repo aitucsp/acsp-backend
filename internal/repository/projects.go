@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -25,14 +26,15 @@ func NewProjectsRepository(db *sqlx.DB) *ProjectsDatabase {
 	}
 }
 
-func (p *ProjectsDatabase) Create(ctx context.Context, project model.Project) error {
+func (p *ProjectsDatabase) Create(ctx context.Context, disciplineID int, project model.Project) error {
 	l := logging.LoggerFromContext(ctx).With(zap.String("projectTitle", project.Title))
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf(`INSERT INTO %s (title, description, reference_list) 
-								 VALUES ($1, $2, $3) RETURNING id`,
+	query := fmt.Sprintf(`INSERT INTO %s 
+								(discipline_id, title, description, level, image_url, work_hours)
+								 VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
 		constants.CodingLabProjectsTable)
 
 	stmt, err := p.db.PrepareContext(ctx, query)
@@ -41,8 +43,21 @@ func (p *ProjectsDatabase) Create(ctx context.Context, project model.Project) er
 
 		return err
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
-	res, err := stmt.Exec(project.Title, project.Description, project.ReferenceList)
+	res, err := stmt.Exec(
+		disciplineID,
+		project.Title,
+		project.Description,
+		project.Level,
+		project.ImageURL,
+		project.WorkHours,
+	)
 	if err != nil {
 		l.Error("Error when executing the project creating statement", zap.Error(err))
 
@@ -71,8 +86,8 @@ func (p *ProjectsDatabase) Update(ctx context.Context, project model.Project) er
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf(`UPDATE %s SET title = $1, description = $2, reference_list = $3, updated_at = now() 
-											WHERE id = $4`,
+	query := fmt.Sprintf(`UPDATE %s SET title = $1, description = $2, level = $3, work_hours = $4, updated_at = now() 
+											WHERE id = $5`,
 		constants.CodingLabProjectsTable)
 
 	stmt, err := p.db.PrepareContext(ctx, query)
@@ -81,8 +96,20 @@ func (p *ProjectsDatabase) Update(ctx context.Context, project model.Project) er
 
 		return errors.Wrap(err, "error when preparing the query")
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
-	res, err := stmt.ExecContext(ctx, query, project.Title, project.Description, project.ReferenceList, project.ID)
+	res, err := stmt.ExecContext(ctx, query,
+		project.Title,
+		project.Description,
+		project.Level,
+		project.WorkHours,
+		project.ID,
+	)
 	if err != nil {
 		l.Error("Error when update the project in database", zap.Error(err))
 
@@ -117,6 +144,12 @@ func (p *ProjectsDatabase) Delete(ctx context.Context, projectID int) error {
 	if err != nil {
 		return errors.Wrap(err, "error when preparing the query")
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	res, err := stmt.ExecContext(ctx, query, projectID)
 	if err != nil {

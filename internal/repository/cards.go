@@ -44,6 +44,12 @@ func (c *CardsDatabase) Create(ctx context.Context, card model.Card) error {
 
 		return err
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	res, err := stmt.Exec(card.UserID, card.Position, pq.Array(card.Skills), card.Description)
 	if err != nil {

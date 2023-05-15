@@ -36,9 +36,14 @@ definitions:
     type: object
   dto.CreateProjectModule:
     properties:
+      description:
+        type: string
+      reference_url:
+        type: string
       title:
         type: string
     required:
+    - description
     - title
     type: object
   dto.CreateUser:
@@ -93,16 +98,23 @@ definitions:
     properties:
       description:
         type: string
-      reference_list:
+      level:
         type: string
       title:
         type: string
+      work_hours:
+        type: integer
     type: object
   dto.UpdateProjectModule:
     properties:
+      description:
+        type: string
+      reference_url:
+        type: string
       title:
         type: string
     required:
+    - description
     - title
     type: object
   handler.signInInput:

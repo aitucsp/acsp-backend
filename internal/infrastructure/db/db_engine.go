@@ -41,6 +41,11 @@ func NewDBClient(ctx context.Context, cancel context.CancelFunc, c *PostgresConf
 		return nil, errors.Wrap(err, "Error when opening the database connection")
 	}
 
+	db.SetConnMaxIdleTime(time.Minute * 2)
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxIdleConns(20)
+	db.SetMaxOpenConns(35)
+
 	ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 

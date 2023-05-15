@@ -1,5 +1,7 @@
-DROP TABLE freelance_project_requests;
-DROP TABLE freelance_projects;
+DROP TABLE coding_lab_project_enrollments;
+DROP TABLE coding_lab_project_modules;
+DROP TABLE coding_lab_projects;
+DROP TABLE coding_lab_disciplines;
 DROP TABLE contests;
 DROP TABLE code_connection_invitations;
 DROP TABLE code_connection_cards;

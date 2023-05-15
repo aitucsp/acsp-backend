@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -44,6 +45,12 @@ func (p *ProjectModulesDatabase) Create(ctx context.Context, module model.Projec
 
 		return err
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	res, err := stmt.Exec(module.ProjectID, module.Title)
 	if err != nil {
@@ -84,6 +91,12 @@ func (p *ProjectModulesDatabase) Update(ctx context.Context, module model.Projec
 
 		return errors.Wrap(err, "error when preparing the query")
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	res, err := stmt.ExecContext(ctx, query, module.Title, module.ID)
 	if err != nil {
@@ -120,6 +133,12 @@ func (p *ProjectModulesDatabase) Delete(ctx context.Context, projectID, moduleID
 	if err != nil {
 		return errors.Wrap(err, "error when preparing the query")
 	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
 
 	res, err := stmt.ExecContext(ctx, query, moduleID, projectID)
 	if err != nil {

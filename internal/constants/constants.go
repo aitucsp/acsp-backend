@@ -17,10 +17,14 @@ const (
 )
 
 const (
-	BucketName           = "acsp-avatars"
-	EndPoint             = "object.pscloud.io"
-	UsersAvatarsFolder   = "user-avatars"
-	ArticlesImagesFolder = "articles"
+	BucketName                  = "acsp-avatars"
+	EndPoint                    = "object.pscloud.io"
+	UsersAvatarsFolder          = "user-avatars"
+	ArticlesImagesFolder        = "articles"
+	MaterialsImagesFolder       = "materials"
+	ProjectsImagesFolder        = "projects"
+	ProjectsModulesImagesFolder = "projects-modules"
+	DisciplinesImagesFolder     = "disciplines"
 )
 
 type VoteType int

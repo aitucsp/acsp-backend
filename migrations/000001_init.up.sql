@@ -51,12 +51,13 @@ CREATE TABLE scholar_articles
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
 
-ALTER TABLE scholar_articles ADD COLUMN image_url VARCHAR NOT NULL DEFAULT '/articles/default';
-ALTER TABLE scholar_articles ALTER COLUMN image_url SET DEFAULT '/default';
+ALTER TABLE scholar_articles
+    ALTER COLUMN image_url SET DEFAULT '/default';
 -- change default value of image_url in scholar_articles to /default
 
 
-select * from scholar_articles;
+select *
+from scholar_articles;
 CREATE TABLE scholar_materials
 (
     id          BIGSERIAL PRIMARY KEY,
@@ -160,26 +161,55 @@ CREATE TABLE contests
 --     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 -- );
 
+CREATE TABLE coding_lab_disciplines
+(
+    id          BIGSERIAL   NOT NULL PRIMARY KEY,
+    title       VARCHAR     NOT NULL,
+    description VARCHAR     NOT NULL,
+    image_url   VARCHAR     NOT NULL DEFAULT ('/default'),
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT (now())
+);
+
 CREATE TABLE coding_lab_projects
 (
-    id             BIGSERIAL   NOT NULL PRIMARY KEY,
-    title          VARCHAR     NOT NULL,
-    description    VARCHAR     NOT NULL,
-    image_url      VARCHAR     NOT NULL DEFAULT (''),
-    reference_list VARCHAR     NOT NULL,
-    created_at     TIMESTAMPTZ NOT NULL DEFAULT (now()),
-    updated_at     TIMESTAMPTZ NOT NULL DEFAULT (now())
+    id            BIGSERIAL   NOT NULL PRIMARY KEY,
+    discipline_id INT         NOT NULL,
+    title         VARCHAR     NOT NULL,
+    description   VARCHAR     NOT NULL,
+    level         VARCHAR     NOT NULL,
+    image_url     VARCHAR     NOT NULL DEFAULT ('/default'),
+    work_hours    INT         NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    FOREIGN KEY (discipline_id) REFERENCES coding_lab_disciplines (id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE coding_lab_project_modules
 (
-    id         BIGSERIAL   NOT NULL PRIMARY KEY,
-    project_id INT         NOT NULL,
-    title      VARCHAR     NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    id            BIGSERIAL   NOT NULL PRIMARY KEY,
+    project_id    INT         NOT NULL,
+    title         VARCHAR     NOT NULL,
+    description   VARCHAR     NOT NULL,
+    reference_url VARCHAR     NOT NULL,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT (now()),
     FOREIGN KEY (project_id) REFERENCES coding_lab_projects (id)
         ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE coding_lab_project_enrollments
+(
+    id         BIGSERIAL   NOT NULL PRIMARY KEY,
+    project_id INT         NOT NULL,
+    user_id    INT         NOT NULL,
+    status     VARCHAR     NOT NULL DEFAULT ('PENDING'),
+    feedback   VARCHAR     NOT NULL DEFAULT (''),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    FOREIGN KEY (project_id) REFERENCES coding_lab_projects (id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 INSERT INTO roles (id, name)
