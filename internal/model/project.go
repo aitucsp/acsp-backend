@@ -10,6 +10,7 @@ type Project struct {
 	WorkHours    int             `json:"work_hours" db:"work_hours"`
 	CreatedAt    string          `json:"created_at" db:"created_at"`
 	UpdatedAt    string          `json:"updated_at" db:"updated_at"`
+	Discipline   *Discipline     `json:"discipline" db:"-"`
 	Modules      []ProjectModule `json:"modules"`
 }
 

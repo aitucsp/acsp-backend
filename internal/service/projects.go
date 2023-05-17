@@ -45,16 +45,19 @@ func (p *ProjectsService) Create(ctx context.Context, disciplineID int, input dt
 	return nil
 }
 
-func (p *ProjectsService) Update(ctx context.Context, input dto.UpdateProject) error {
+func (p *ProjectsService) Update(ctx context.Context, disciplineID, projectID int, input dto.UpdateProject) error {
 	l := logging.LoggerFromContext(ctx).With(
-		zap.String("projectTitle", input.Title),
+		zap.Int("disciplineID", disciplineID),
+		zap.Int("projectID", projectID),
 	)
 
 	project := model.Project{
-		Title:       input.Title,
-		Description: input.Description,
-		Level:       input.Level,
-		WorkHours:   input.WorkHours,
+		ID:           projectID,
+		DisciplineID: disciplineID,
+		Title:        input.Title,
+		Description:  input.Description,
+		Level:        input.Level,
+		WorkHours:    input.WorkHours,
 	}
 
 	err := p.repo.Update(ctx, project)
@@ -67,7 +70,7 @@ func (p *ProjectsService) Update(ctx context.Context, input dto.UpdateProject) e
 	return nil
 }
 
-func (p *ProjectsService) Delete(ctx context.Context, projectID int) error {
+func (p *ProjectsService) Delete(ctx context.Context, disciplineID, projectID int) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("projectID", projectID))
 
 	err := p.repo.Delete(ctx, projectID)
@@ -93,7 +96,7 @@ func (p *ProjectsService) GetAll(ctx context.Context) ([]model.Project, error) {
 	return projects, nil
 }
 
-func (p *ProjectsService) GetByID(ctx context.Context, projectID int) (model.Project, error) {
+func (p *ProjectsService) GetByID(ctx context.Context, disciplineID, projectID int) (model.Project, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("projectID", projectID))
 
 	project, err := p.repo.GetByID(ctx, projectID)
@@ -115,5 +118,19 @@ func (p *ProjectsService) GetByID(ctx context.Context, projectID int) (model.Pro
 	} else {
 		project.Modules = m
 	}
+
 	return project, nil
+}
+
+func (p *ProjectsService) GetAllByDisciplineID(ctx context.Context, disciplineID int) ([]model.Project, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("disciplineID", disciplineID))
+
+	projects, err := p.repo.GetAllByDisciplineID(ctx, disciplineID)
+	if err != nil {
+		l.Error("Error when getting all projects by discipline ID", zap.Error(err))
+
+		return nil, errors.Wrap(err, "error when getting all projects by discipline ID")
+	}
+
+	return projects, nil
 }

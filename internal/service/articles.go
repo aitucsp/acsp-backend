@@ -140,13 +140,8 @@ func (s *ArticlesService) GetAllByUserID(ctx context.Context, userID string) ([]
 	return articles, nil
 }
 
-func (s *ArticlesService) GetByID(ctx context.Context, articleID, userID string) (model.Article, error) {
+func (s *ArticlesService) GetByID(ctx context.Context, articleID string) (model.Article, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.String("articleID", articleID))
-
-	userId, err := strconv.Atoi(userID)
-	if err != nil {
-		return model.Article{}, err
-	}
 
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
@@ -154,14 +149,18 @@ func (s *ArticlesService) GetByID(ctx context.Context, articleID, userID string)
 	}
 
 	l.Info("Get article by id and user id")
-	article, err := s.repo.GetArticleByIDAndUserID(ctx, articleId, userId)
+	article, err := s.repo.GetArticleByID(ctx, articleId)
 	if err != nil {
+		l.Error("Error occurred when getting article by id and user id", zap.Error(err))
+
 		return model.Article{}, err
 	}
 
 	l.Info("Get comments by article id")
 	c, err := s.repo.GetCommentsByArticleID(ctx, articleId)
 	if err != nil {
+		l.Error("Error occurred when getting comments by article id", zap.Error(err))
+
 		return model.Article{}, err
 	}
 

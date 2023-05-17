@@ -24,6 +24,16 @@ definitions:
     required:
     - text
     type: object
+  dto.CreateDiscipline:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
   dto.CreateMaterial:
     properties:
       description:
@@ -33,6 +43,17 @@ definitions:
     required:
     - description
     - topic
+    type: object
+  dto.CreateProject:
+    properties:
+      description:
+        type: string
+      level:
+        type: string
+      title:
+        type: string
+      work_hours:
+        type: integer
     type: object
   dto.CreateProjectModule:
     properties:
@@ -83,6 +104,16 @@ definitions:
     - description
     - position
     - skills
+    type: object
+  dto.UpdateDiscipline:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
     type: object
   dto.UpdateMaterial:
     properties:
@@ -774,12 +805,51 @@ paths:
       summary: Get invitations of user
       tags:
       - cards
-  /api/v1/coding-lab/projects:
+  /api/v1/coding-lab/discipline/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a discipline by id
+      operationId: delete-discipline-by-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Discipline deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a discipline by id
+      tags:
+      - disciplines
     get:
       consumes:
       - application/json
-      description: Get all projects
-      operationId: get-all-projects
+      description: Get a discipline by id
+      operationId: get-discipline-by-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -810,7 +880,174 @@ paths:
             type: object
       security:
       - ApiKeyAuth: []
-      summary: Get all projects
+      summary: Get a discipline by id
+      tags:
+      - disciplines
+  /api/v1/coding-lab/disciplines:
+    get:
+      consumes:
+      - application/json
+      description: Get all disciplines
+      operationId: get-all-disciplines
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all disciplines
+      tags:
+      - disciplines
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a discipline
+      operationId: create-discipline
+      parameters:
+      - description: discipline information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateDiscipline'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a discipline
+      tags:
+      - projects
+  /api/v1/coding-lab/disciplines/:id:
+    put:
+      consumes:
+      - application/json
+      description: Update data of a discipline by id
+      operationId: update-discipline-by-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: discipline information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateDiscipline'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Discipline updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a discipline by id
+      tags:
+      - disciplines
+  /api/v1/coding-lab/disciplines/:id/projects:
+    get:
+      consumes:
+      - application/json
+      description: Get all projects of discipline
+      operationId: get-all-projects-by-discipline-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all projects by discipline id
       tags:
       - projects
     post:
@@ -825,7 +1062,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.CreateArticle'
+          $ref: '#/definitions/dto.CreateProject'
       produces:
       - application/json
       responses:
@@ -858,16 +1095,21 @@ paths:
       summary: Create a project
       tags:
       - projects
-  /api/v1/coding-lab/projects/:id:
+  /api/v1/coding-lab/disciplines/:id/projects/:projectID:
     delete:
       consumes:
       - application/json
       description: Delete a project by id
       operationId: delete-project-by-id
       parameters:
-      - description: Project ID
+      - description: discipline id
         in: path
         name: id
+        required: true
+        type: integer
+      - description: project id
+        in: path
+        name: projectID
         required: true
         type: integer
       produces:
@@ -898,9 +1140,14 @@ paths:
       description: Get a project by id
       operationId: get-project-by-id
       parameters:
-      - description: project id
+      - description: discipline id
         in: path
         name: id
+        required: true
+        type: integer
+      - description: project id
+        in: path
+        name: projectID
         required: true
         type: integer
       produces:
@@ -942,12 +1189,17 @@ paths:
       description: Update data of project
       operationId: update-project-by-id
       parameters:
-      - description: project id
+      - description: discipline id
         in: path
         name: id
         required: true
         type: integer
-      - description: card information
+      - description: project id
+        in: path
+        name: projectID
+        required: true
+        type: integer
+      - description: project information
         in: body
         name: request
         required: true

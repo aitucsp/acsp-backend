@@ -24,6 +24,7 @@ type Service struct {
 	Cards
 	Materials
 	Contests
+	Disciplines
 	Projects
 	ProjectModules
 	S3BucketService S3Bucket
@@ -58,7 +59,7 @@ type Articles interface {
 	Create(ctx context.Context, userID string, dto dto.CreateArticle) error
 	GetAll(ctx context.Context) ([]model.Article, error)
 	GetAllByUserID(ctx context.Context, userID string) ([]model.Article, error)
-	GetByID(ctx context.Context, articleID, userID string) (model.Article, error)
+	GetByID(ctx context.Context, articleID string) (model.Article, error)
 	Update(ctx context.Context, articleID, userID string, article dto.UpdateArticle) error
 	Delete(ctx context.Context, userID, projectId string) error
 	CommentByID(ctx context.Context, articleID, userID string, comment dto.CreateComment) error
@@ -101,12 +102,21 @@ type Contests interface {
 	GetAll(ctx context.Context) ([]model.Contest, error)
 }
 
+type Disciplines interface {
+	Create(ctx context.Context, discipline dto.CreateDiscipline) error
+	Update(ctx context.Context, disciplineID int, discipline dto.UpdateDiscipline) error
+	Delete(ctx context.Context, disciplineID int) error
+	GetAll(ctx context.Context) ([]model.Discipline, error)
+	GetByID(ctx context.Context, disciplineID int) (model.Discipline, error)
+}
+
 type Projects interface {
 	Create(ctx context.Context, disciplineID int, project dto.CreateProject) error
-	Update(ctx context.Context, project dto.UpdateProject) error
-	Delete(ctx context.Context, projectID int) error
+	Update(ctx context.Context, disciplineID, projectID int, project dto.UpdateProject) error
+	Delete(ctx context.Context, disciplineID, projectID int) error
 	GetAll(ctx context.Context) ([]model.Project, error)
-	GetByID(ctx context.Context, projectID int) (model.Project, error)
+	GetByID(ctx context.Context, disciplineID, projectID int) (model.Project, error)
+	GetAllByDisciplineID(ctx context.Context, disciplineID int) ([]model.Project, error)
 }
 
 type ProjectModules interface {
@@ -129,6 +139,7 @@ func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfi
 		Roles:           NewRolesService(repo.Roles, repo.Authorization),
 		Cards:           NewCardsService(repo.Cards, repo.Authorization),
 		Materials:       NewMaterialsService(repo.Materials, repo.Authorization),
+		Disciplines:     NewDisciplinesService(repo.Disciplines, repo.Projects),
 		Projects:        NewProjectsService(repo.Projects, repo.ProjectModules),
 		ProjectModules:  NewProjectModulesService(repo.ProjectModules),
 		Contests:        NewContestsService(repo.Contests),

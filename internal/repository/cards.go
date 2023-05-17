@@ -98,7 +98,7 @@ func (c *CardsDatabase) Update(ctx context.Context, card model.Card) error {
 		}
 	}(stmt)
 
-	res, err := stmt.Exec(query, card.Position, card.Skills, card.Description, card.ID, card.UserID)
+	res, err := stmt.Exec(card.Position, card.Skills, card.Description, card.ID, card.UserID)
 	if err != nil {
 		l.Error("Error when executing the card updating statement", zap.Error(err))
 
@@ -138,7 +138,7 @@ func (c *CardsDatabase) Delete(ctx context.Context, userID int, cardID int) erro
 		}
 	}(stmt)
 
-	res, err := stmt.Exec(query, cardID, userID)
+	res, err := stmt.Exec(cardID, userID)
 	if err != nil {
 		return err
 	}
@@ -286,7 +286,7 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 		}
 	}(stmt)
 
-	res, err := stmt.Exec(ctx, card.ID, inviterID)
+	res, err := stmt.Exec(card.ID, inviterID)
 	if err != nil {
 		l.Error("Error when creating the card in database", zap.Error(err))
 
@@ -307,6 +307,8 @@ func (c *CardsDatabase) CreateInvitation(ctx context.Context, inviterID int, car
 
 // GetInvitationsByUserID gets all invitations by user id.
 func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", userID))
+
 	var invitationCards []model.InvitationCard
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
@@ -331,6 +333,8 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
+			l.Error("Error when closing the rows", zap.Error(err))
+
 			logging.LoggerFromContext(ctx).Error("Error when closing the rows", zap.Error(err))
 		}
 	}(rows)
@@ -348,6 +352,8 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 			&invitationCard.InviterID,
 			&invitationCard.Status)
 		if err != nil {
+			l.Error("Error when scanning the card in database", zap.Error(err))
+
 			return nil, errors.Wrap(err, "Error when scanning the card in database")
 		}
 

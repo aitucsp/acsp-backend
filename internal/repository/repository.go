@@ -17,6 +17,7 @@ type Repository struct {
 	Cards
 	Materials
 	Contests
+	Disciplines
 	Projects
 	ProjectModules
 	Transactional
@@ -52,6 +53,7 @@ type Articles interface {
 	Delete(ctx context.Context, userID int, articleID int) error
 	GetAll(ctx context.Context) ([]model.Article, error)
 	GetAllByUserID(ctx context.Context, userID int) ([]model.Article, error)
+	GetArticleByID(ctx context.Context, articleID int) (model.Article, error)
 	GetArticleByIDAndUserID(ctx context.Context, articleID, userID int) (model.Article, error)
 	CreateComment(ctx context.Context, articleID, userID int, comment model.Comment) error
 	GetCommentsByArticleID(ctx context.Context, articleID int) ([]model.Comment, error)
@@ -94,12 +96,21 @@ type Contests interface {
 	GetAll(ctx context.Context) ([]model.Contest, error)
 }
 
+type Disciplines interface {
+	Create(ctx context.Context, discipline model.Discipline) error
+	Update(ctx context.Context, discipline model.Discipline) error
+	Delete(ctx context.Context, disciplineID int) error
+	GetByID(ctx context.Context, disciplineID int) (model.Discipline, error)
+	GetAll(ctx context.Context) ([]model.Discipline, error)
+}
+
 type Projects interface {
 	Create(ctx context.Context, disciplineID int, project model.Project) error
 	Update(ctx context.Context, project model.Project) error
 	Delete(ctx context.Context, projectID int) error
 	GetAll(ctx context.Context) ([]model.Project, error)
 	GetByID(ctx context.Context, projectID int) (model.Project, error)
+	GetAllByDisciplineID(ctx context.Context, disciplineID int) ([]model.Project, error)
 }
 
 type ProjectModules interface {
@@ -129,6 +140,7 @@ func NewRepository(db *sqlx.DB, sess *session.Session) *Repository {
 		Cards:          NewCardsRepository(db),
 		Materials:      NewMaterialsRepository(db),
 		Contests:       NewContestsRepository(db),
+		Disciplines:    NewDisciplinesRepository(db),
 		Projects:       NewProjectsRepository(db),
 		ProjectModules: NewProjectModulesRepository(db),
 		S3Bucket:       NewS3BucketRepository(sess),

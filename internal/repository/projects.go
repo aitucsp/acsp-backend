@@ -87,7 +87,7 @@ func (p *ProjectsDatabase) Update(ctx context.Context, project model.Project) er
 	defer cancel()
 
 	query := fmt.Sprintf(`UPDATE %s SET title = $1, description = $2, level = $3, work_hours = $4, updated_at = now() 
-											WHERE id = $5`,
+											WHERE id = $5 AND discipline_id = $6`,
 		constants.CodingLabProjectsTable)
 
 	stmt, err := p.db.PrepareContext(ctx, query)
@@ -109,6 +109,7 @@ func (p *ProjectsDatabase) Update(ctx context.Context, project model.Project) er
 		project.Level,
 		project.WorkHours,
 		project.ID,
+		project.DisciplineID,
 	)
 	if err != nil {
 		l.Error("Error when update the project in database", zap.Error(err))
@@ -205,4 +206,25 @@ func (p *ProjectsDatabase) GetByID(ctx context.Context, projectID int) (model.Pr
 	}
 
 	return project, nil
+}
+
+func (p *ProjectsDatabase) GetAllByDisciplineID(ctx context.Context, disciplineID int) ([]model.Project, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("disciplineID", disciplineID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	var projects []model.Project
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE discipline_id = $1",
+		constants.CodingLabProjectsTable)
+
+	err := p.db.SelectContext(ctx, &projects, query, disciplineID)
+	if err != nil {
+		l.Error("Error when getting the projects", zap.Error(err))
+
+		return nil, errors.Wrap(err, "error when executing the query")
+	}
+
+	return projects, nil
 }

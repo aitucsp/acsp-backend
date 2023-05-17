@@ -221,6 +221,27 @@ func (a *ArticlesDatabase) GetAll(ctx context.Context) ([]model.Article, error) 
 	return articles, nil
 }
 
+func (a *ArticlesDatabase) GetArticleByID(ctx context.Context, articleID int) (model.Article, error) {
+	var article model.Article
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE id = $1",
+		constants.ArticlesTable)
+
+	err := a.db.GetContext(ctx, &article, query, articleID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return model.Article{}, nil
+		}
+
+		return model.Article{}, errors.Wrap(err, "error when get article by id")
+	}
+
+	return article, nil
+}
+
 func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleID, userID int) (model.Article, error) {
 	var article model.Article
 
@@ -232,6 +253,10 @@ func (a *ArticlesDatabase) GetArticleByIDAndUserID(ctx context.Context, articleI
 
 	err := a.db.GetContext(ctx, &article, query, articleID, userID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return model.Article{}, nil
+		}
+
 		return model.Article{}, errors.Wrap(err, "error when get article by id and user id")
 	}
 
@@ -378,7 +403,7 @@ func (a *ArticlesDatabase) ReplyToComment(ctx context.Context, articleID, userID
 		}
 	}(stmt)
 
-	res, err := stmt.ExecContext(ctx, query, userID, articleID, parentCommentID, comment.Text)
+	res, err := stmt.Exec(query, userID, articleID, parentCommentID, comment.Text)
 	if err != nil {
 		l.Error("Error when executing the query", zap.Error(err))
 

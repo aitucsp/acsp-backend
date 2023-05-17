@@ -20,24 +20,30 @@ import (
 // @ID create-project
 // @Accept  json
 // @Produce  json
-// @Param request body dto.CreateArticle true "project information"
+// @Param request body dto.CreateProject true "project information"
 // @Success 200 {integer} map[string]interface{} "message"
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects [post]
+// @Router /api/v1/coding-lab/disciplines/:id/projects [post]
 func (h *Handler) createProject(c *fiber.Ctx) error {
 	log.Println("Creating a project... ")
 
-	userId, err := getUserId(c)
-	if err != nil {
+	// get discipline id
+	disciplineID, err := c.ParamsInt("id", -1)
+	if disciplineID == -1 {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
-			"message": err.Error(),
+			"message": apperror.ErrParameterNotFound,
+		})
+	} else if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrBadInputBody,
 		})
 	}
 
-	input := dto.CreateArticle{}
+	input := dto.CreateProject{}
 	if err := c.BodyParser(&input); err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -54,7 +60,7 @@ func (h *Handler) createProject(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.services.Articles.Create(c.UserContext(), userId, input)
+	err = h.services.Projects.Create(c.UserContext(), disciplineID, input)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -64,7 +70,7 @@ func (h *Handler) createProject(c *fiber.Ctx) error {
 
 	return c.Status(200).JSON(fiber.Map{
 		"errors":  false,
-		"message": "Created article",
+		"message": "Created project of discipline",
 	})
 }
 
@@ -75,21 +81,35 @@ func (h *Handler) createProject(c *fiber.Ctx) error {
 // @ID update-project-by-id
 // @Accept  json
 // @Produce  json
-// @Param id path int true "project id"
-// @Param request body dto.UpdateProject true "card information"
+// @Param id path int true "discipline id"
+// @Param projectID path int true "project id"
+// @Param request body dto.UpdateProject true "project information"
 // @Success 200 {object} string "Project updated"
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects/:id [put]
+// @Router /api/v1/coding-lab/disciplines/:id/projects/:projectID [put]
 func (h *Handler) updateProject(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Updating a project... ")
 
 	var input dto.UpdateProject
 
-	cardID, err := c.ParamsInt("id", -1)
-	if cardID == -1 {
+	disciplineID, err := c.ParamsInt("id", -1)
+	if disciplineID == -1 {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrParameterNotFound,
+		})
+	} else if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	projectID, err := c.ParamsInt("projectID", -1)
+	if projectID == -1 {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
 			"message": apperror.ErrParameterNotFound,
@@ -116,7 +136,7 @@ func (h *Handler) updateProject(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.services.Projects.Update(c.UserContext(), input)
+	err = h.services.Projects.Update(c.UserContext(), disciplineID, projectID, input)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"errors":  true,
@@ -124,7 +144,7 @@ func (h *Handler) updateProject(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(http.StatusOK).JSON(fiber.Map{"message": "Project updated"})
+	return c.Status(http.StatusOK).JSON(fiber.Map{"message": "Project of discipline updated"})
 }
 
 // @Summary Delete a project by id
@@ -134,17 +154,18 @@ func (h *Handler) updateProject(c *fiber.Ctx) error {
 // @ID delete-project-by-id
 // @Accept  json
 // @Produce  json
-// @Param id path int true "Project ID"
+// @Param id path int true "discipline id"
+// @Param projectID path int true "project id"
 // @Success 200 {object} string "Project deleted"
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects/:id [delete]
+// @Router /api/v1/coding-lab/disciplines/:id/projects/:projectID [delete]
 func (h *Handler) deleteProject(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Deleting a project")
 
-	id, err := c.ParamsInt("id", -1)
-	if id == -1 {
+	disciplineID, err := c.ParamsInt("id", -1)
+	if disciplineID == -1 {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
 			"errors":  true,
 			"message": apperror.ErrParameterNotFound,
@@ -156,7 +177,20 @@ func (h *Handler) deleteProject(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.services.Projects.Delete(c.UserContext(), id)
+	projectID, err := c.ParamsInt("projectID", -1)
+	if projectID == -1 {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrParameterNotFound,
+		})
+	} else if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	err = h.services.Projects.Delete(c.UserContext(), disciplineID, projectID)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -174,17 +208,31 @@ func (h *Handler) deleteProject(c *fiber.Ctx) error {
 // @ID get-project-by-id
 // @Accept  json
 // @Produce  json
-// @Param id path int true "project id"
+// @Param id path int true "discipline id"
+// @Param projectID path int true "project id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects/:id [get]
+// @Router /api/v1/coding-lab/disciplines/:id/projects/:projectID [get]
 func (h *Handler) getProjectByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting project by id... ")
 
-	projectID, err := c.ParamsInt("id", -1)
+	disciplineID, err := c.ParamsInt("id", -1)
+	if disciplineID == -1 {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrParameterNotFound,
+		})
+	} else if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	projectID, err := c.ParamsInt("projectID", -1)
 	if projectID == -1 {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -197,7 +245,7 @@ func (h *Handler) getProjectByID(c *fiber.Ctx) error {
 		})
 	}
 
-	project, err := h.services.Projects.GetByID(c.UserContext(), projectID)
+	project, err := h.services.Projects.GetByID(c.UserContext(), disciplineID, projectID)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -213,23 +261,36 @@ func (h *Handler) getProjectByID(c *fiber.Ctx) error {
 	})
 }
 
-// @Summary Get all projects
+// @Summary Get all projects by discipline id
 // @Security ApiKeyAuth
 // @Tags projects
-// @Description Get all projects
-// @ID get-all-projects
+// @Description Get all projects of discipline
+// @ID get-all-projects-by-discipline-id
 // @Accept  json
 // @Produce  json
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects [get]
-func (h *Handler) getAllProjects(c *fiber.Ctx) error {
+// @Router /api/v1/coding-lab/disciplines/:id/projects [get]
+func (h *Handler) getAllProjectsByDisciplineID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
-	l.Info("Getting all projects... ")
+	l.Info("Getting all projects by discipline... ")
 
-	projects, err := h.services.Projects.GetAll(c.UserContext())
+	disciplineID, err := c.ParamsInt("id", -1)
+	if disciplineID == -1 {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": apperror.ErrParameterNotFound,
+		})
+	} else if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	projects, err := h.services.GetAllByDisciplineID(c.UserContext(), disciplineID)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,

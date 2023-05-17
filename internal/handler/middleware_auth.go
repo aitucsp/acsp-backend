@@ -6,8 +6,10 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"acsp/internal/apperror"
+	"acsp/internal/logging"
 )
 
 const (
@@ -16,6 +18,8 @@ const (
 )
 
 func (h *Handler) userIdentity(c *fiber.Ctx) error {
+	l := logging.LoggerFromContext(c.UserContext())
+
 	header := c.Get(authorizationHeader)
 
 	if header == "" {
@@ -45,6 +49,8 @@ func (h *Handler) userIdentity(c *fiber.Ctx) error {
 	// Parse the token and get the user id
 	userId, err := h.services.Authorization.ParseToken(headerParts[1])
 	if err != nil {
+		l.Error("Error when parsing token", zap.Error(err))
+
 		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
 			"message": "token parsing error",
 		})

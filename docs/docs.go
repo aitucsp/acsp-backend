@@ -967,14 +967,187 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/coding-lab/projects": {
+        "/api/v1/coding-lab/discipline/:id": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Get all projects",
+                "description": "Get a discipline by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "disciplines"
+                ],
+                "summary": "Get a discipline by id",
+                "operationId": "get-discipline-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "discipline id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Delete a discipline by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "disciplines"
+                ],
+                "summary": "Delete a discipline by id",
+                "operationId": "delete-discipline-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "discipline id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Discipline deleted",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/coding-lab/disciplines": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all disciplines",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "disciplines"
+                ],
+                "summary": "Get all disciplines",
+                "operationId": "get-all-disciplines",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Method for creating a discipline",
                 "consumes": [
                     "application/json"
                 ],
@@ -984,8 +1157,144 @@ const docTemplate = `{
                 "tags": [
                     "projects"
                 ],
-                "summary": "Get all projects",
-                "operationId": "get-all-projects",
+                "summary": "Create a discipline",
+                "operationId": "create-discipline",
+                "parameters": [
+                    {
+                        "description": "discipline information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateDiscipline"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "message",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/coding-lab/disciplines/:id": {
+            "put": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Update data of a discipline by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "disciplines"
+                ],
+                "summary": "Update a discipline by id",
+                "operationId": "update-discipline-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "discipline id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "discipline information",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateDiscipline"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Discipline updated",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/coding-lab/disciplines/:id/projects": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all projects of discipline",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "projects"
+                ],
+                "summary": "Get all projects by discipline id",
+                "operationId": "get-all-projects-by-discipline-id",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1049,7 +1358,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateArticle"
+                            "$ref": "#/definitions/dto.CreateProject"
                         }
                     }
                 ],
@@ -1091,7 +1400,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/coding-lab/projects/:id": {
+        "/api/v1/coding-lab/disciplines/:id/projects/:projectID": {
             "get": {
                 "security": [
                     {
@@ -1113,8 +1422,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "project id",
+                        "description": "discipline id",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "project id",
+                        "name": "projectID",
                         "in": "path",
                         "required": true
                     }
@@ -1178,13 +1494,20 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "project id",
+                        "description": "discipline id",
                         "name": "id",
                         "in": "path",
                         "required": true
                     },
                     {
-                        "description": "card information",
+                        "type": "integer",
+                        "description": "project id",
+                        "name": "projectID",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "project information",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -1244,8 +1567,15 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Project ID",
+                        "description": "discipline id",
                         "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "project id",
+                        "name": "projectID",
                         "in": "path",
                         "required": true
                     }
@@ -3198,6 +3528,21 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CreateDiscipline": {
+            "type": "object",
+            "required": [
+                "description",
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateMaterial": {
             "type": "object",
             "required": [
@@ -3210,6 +3555,23 @@ const docTemplate = `{
                 },
                 "topic": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.CreateProject": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "level": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "work_hours": {
+                    "type": "integer"
                 }
             }
         },
@@ -3284,6 +3646,21 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "dto.UpdateDiscipline": {
+            "type": "object",
+            "required": [
+                "description",
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },

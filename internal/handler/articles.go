@@ -162,14 +162,6 @@ func (h *Handler) getArticleByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting article by id... ")
 
-	userId, err := getUserId(c)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"errors":  true,
-			"message": err.Error(),
-		})
-	}
-
 	articleID := c.Params("id", "")
 	if articleID == "" {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -178,7 +170,7 @@ func (h *Handler) getArticleByID(c *fiber.Ctx) error {
 		})
 	}
 
-	article, err := h.services.Articles.GetByID(c.UserContext(), articleID, userId)
+	article, err := h.services.Articles.GetByID(c.UserContext(), articleID)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,

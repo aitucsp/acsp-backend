@@ -56,8 +56,6 @@ func TestAuthMongo_CreateUser(t *testing.T) {
 					Password: "password",
 				}
 				collection.FindOne(ctx, user)
-				/*mock.ExpectQuery("INSERT INTO users").
-				WithArgs("Test", "test", "password").WillReturnRows(rows)*/
 			},
 			input: model.User{
 				Email:    "Test",

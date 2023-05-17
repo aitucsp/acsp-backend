@@ -86,12 +86,12 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 
 			cards := codeConnection.Group("/cards")
 			{
+				cards.Get("/invitations", h.getInvitations) // get all invitations of a user
 				cards.Get("/", h.getAllCardsByUserID)       // get all cards of user
 				cards.Post("/", h.createCard)               // create a card
 				cards.Get("/:id", h.getCardByID)            // get an information of card by id
 				cards.Put("/:id", h.updateCard)             // update card information by id
 				cards.Delete("/:id", h.deleteCard)          // delete card by id
-				cards.Get("/invitations", h.getInvitations) // get all invitations of a user
 
 				invitations := cards.Group("/:id/invitations")
 				{
@@ -113,21 +113,30 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 
 		codingLab := rest.Group("/coding-lab", h.userIdentity)
 		{
-			projects := codingLab.Group("/projects")
+			disciplines := codingLab.Group("/disciplines")
 			{
-				projects.Post("/", h.Authorize("admin"), h.createProject)      // create a project
-				projects.Put("/", h.Authorize("admin"), h.updateProject)       // update a project
-				projects.Delete("/:id", h.Authorize("admin"), h.deleteProject) // delete a project
-				projects.Get("/:id", h.getProjectByID)                         // get project by id
-				projects.Get("/", h.getAllProjects)                            // get all projects
+				disciplines.Post("/", h.Authorize("admin"), h.createDiscipline)   // create a discipline
+				disciplines.Put("/", h.Authorize("admin"), h.updateDiscipline)    // update a discipline
+				disciplines.Delete("/", h.Authorize("admin"), h.deleteDiscipline) // delete a discipline
+				disciplines.Get("/", h.getAllDisciplines)                         // get all disciplines
+				disciplines.Get("/:id", h.getDisciplineByID)                      // get discipline by id
 
-				modules := projects.Group("/:id/modules")
+				projects := disciplines.Group("/:id/projects")
 				{
-					modules.Post("/", h.Authorize("admin"), h.createProjectModule)      // create a module
-					modules.Put("/:id", h.Authorize("admin"), h.updateProjectModule)    // update a module
-					modules.Delete("/:id", h.Authorize("admin"), h.deleteProjectModule) // delete a module
-					modules.Get("/:id", h.getProjectModuleByID)                         // get module by id
-					modules.Get("/", h.getAllProjectModules)                            // get all modules
+					projects.Post("/", h.Authorize("admin"), h.createProject)             // create a project
+					projects.Put("/", h.Authorize("admin"), h.updateProject)              // update a project
+					projects.Delete("/:projectID", h.Authorize("admin"), h.deleteProject) // delete a project
+					projects.Get("/:projectID", h.getProjectByID)                         // get project by id
+					projects.Get("/", h.getAllProjectsByDisciplineID)                     // get all projects
+
+					modules := projects.Group("/:id/modules")
+					{
+						modules.Post("/", h.Authorize("admin"), h.createProjectModule)      // create a module
+						modules.Put("/:id", h.Authorize("admin"), h.updateProjectModule)    // update a module
+						modules.Delete("/:id", h.Authorize("admin"), h.deleteProjectModule) // delete a module
+						modules.Get("/:id", h.getProjectModuleByID)                         // get module by id
+						modules.Get("/", h.getAllProjectModules)                            // get all modules
+					}
 				}
 			}
 		}

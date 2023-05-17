@@ -11,6 +11,7 @@ import (
 
 	"acsp/internal/apperror"
 	"acsp/internal/config"
+	"acsp/internal/constants"
 	"acsp/internal/dto"
 	"acsp/internal/logging"
 	"acsp/internal/model"
@@ -97,6 +98,8 @@ func (s *AuthService) GetUserByID(ctx context.Context, userID string) (model.Use
 	if err != nil {
 		return model.User{}, err
 	}
+
+	user = s.getFullURLForUser(user)
 
 	return *user, nil
 }
@@ -223,4 +226,14 @@ func generatePasswordHash(password string) (string, error) {
 
 	// Return the hash as a string
 	return string(bytes), nil
+}
+
+// getFullURLForUser function gets a user and changes its image_url to a full url
+func (s *AuthService) getFullURLForUser(user *model.User) *model.User {
+	user.ImageURL = constants.BucketName + "." +
+		constants.EndPoint + "/" +
+		constants.UsersAvatarsFolder +
+		user.ImageURL
+
+	return user
 }

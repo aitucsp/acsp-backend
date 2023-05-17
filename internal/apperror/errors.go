@@ -34,4 +34,5 @@ const (
 	ErrAnsweringCard        = Error("error occurred when answering a card")
 	ErrWhenUpdatingImageURL = Error("error occurred when updating image url")
 	ErrNoAffectedRows       = Error("no affected rows")
+	ErrCreatingDiscipline   = Error("error occurred when creating a discipline")
 )
