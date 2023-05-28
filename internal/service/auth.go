@@ -40,13 +40,13 @@ type TokenDetails struct {
 }
 
 type AuthService struct {
-	repo        repository.Authorization
+	repo        repository.Users
 	roles       repository.Roles
 	redisClient *redis.Client
 	authConfig  config.AuthConfig
 }
 
-func NewAuthService(repo repository.Authorization, rolesRepo repository.Roles, r *redis.Client, a config.AuthConfig) *AuthService {
+func NewAuthService(repo repository.Users, rolesRepo repository.Roles, r *redis.Client, a config.AuthConfig) *AuthService {
 	return &AuthService{
 		repo:        repo,
 		roles:       rolesRepo,
@@ -99,9 +99,9 @@ func (s *AuthService) GetUserByID(ctx context.Context, userID string) (model.Use
 		return model.User{}, err
 	}
 
-	user = s.getFullURLForUser(user)
+	user = s.getFullURLForUser(&user)
 
-	return *user, nil
+	return user, nil
 }
 
 func (s *AuthService) GenerateTokenPair(ctx context.Context, email, password string) (*TokenDetails, error) {
@@ -229,11 +229,11 @@ func generatePasswordHash(password string) (string, error) {
 }
 
 // getFullURLForUser function gets a user and changes its image_url to a full url
-func (s *AuthService) getFullURLForUser(user *model.User) *model.User {
+func (s *AuthService) getFullURLForUser(user *model.User) model.User {
 	user.ImageURL = constants.BucketName + "." +
 		constants.EndPoint + "/" +
 		constants.UsersAvatarsFolder +
 		user.ImageURL
 
-	return user
+	return *user
 }

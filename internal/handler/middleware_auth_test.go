@@ -29,7 +29,7 @@ func TestHandler_userIdentity(t *testing.T) {
 	}{
 		{
 			name:        "Ok",
-			headerName:  "Authorization",
+			headerName:  "Users",
 			headerValue: "Bearer token",
 			token:       "token",
 			mockBehavior: func(r *mockService.MockAuthorization, token string) {
@@ -49,7 +49,7 @@ func TestHandler_userIdentity(t *testing.T) {
 		},
 		{
 			name:                 "Invalid Header Value",
-			headerName:           "Authorization",
+			headerName:           "Users",
 			headerValue:          "Bearer token",
 			token:                "token",
 			mockBehavior:         func(r *mockService.MockAuthorization, token string) {},
@@ -58,7 +58,7 @@ func TestHandler_userIdentity(t *testing.T) {
 		},
 		{
 			name:                 "Empty Token",
-			headerName:           "Authorization",
+			headerName:           "Users",
 			headerValue:          "Bearer ",
 			token:                "token",
 			mockBehavior:         func(r *mockService.MockAuthorization, token string) {},
@@ -67,7 +67,7 @@ func TestHandler_userIdentity(t *testing.T) {
 		},
 		{
 			name:        "Parse Error",
-			headerName:  "Authorization",
+			headerName:  "Users",
 			headerValue: "Bearer token",
 			token:       "token",
 			mockBehavior: func(r *mockService.MockAuthorization, token string) {

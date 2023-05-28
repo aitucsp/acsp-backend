@@ -13,10 +13,10 @@ import (
 
 type MaterialsService struct {
 	repo      repository.Materials
-	usersRepo repository.Authorization
+	usersRepo repository.Users
 }
 
-func NewMaterialsService(repo repository.Materials, usersRepo repository.Authorization) *MaterialsService {
+func NewMaterialsService(repo repository.Materials, usersRepo repository.Users) *MaterialsService {
 	return &MaterialsService{repo: repo, usersRepo: usersRepo}
 }
 
@@ -34,7 +34,7 @@ func (m *MaterialsService) Create(ctx context.Context, userID string, dto dto.Cr
 	material := model.Material{
 		Topic:       dto.Topic,
 		Description: dto.Description,
-		Author:      user,
+		Author:      &user,
 	}
 
 	return m.repo.Create(ctx, material)
@@ -60,7 +60,7 @@ func (m *MaterialsService) Update(ctx context.Context, materialID, userID string
 		ID:          materialId,
 		Topic:       materialDto.Topic,
 		Description: materialDto.Description,
-		Author:      user,
+		Author:      &user,
 	}
 
 	return m.repo.Update(ctx, material)

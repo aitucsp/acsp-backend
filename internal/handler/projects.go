@@ -198,7 +198,10 @@ func (h *Handler) deleteProject(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(http.StatusNoContent).JSON(fiber.Map{"message": "Project deleted"})
+	return c.Status(http.StatusNoContent).JSON(fiber.Map{
+		"errors":  false,
+		"message": "Project deleted",
+	})
 }
 
 // @Summary Get a project by id

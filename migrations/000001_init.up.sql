@@ -47,6 +47,7 @@ CREATE TABLE scholar_articles
     description VARCHAR     NOT NULL,
     upvote      BIGINT      NOT NULL DEFAULT 0,
     downvote    BIGINT      NOT NULL DEFAULT 0,
+    image_url   VARCHAR     NOT NULL DEFAULT '/default',
     created_at  TIMESTAMPTZ NOT NULL DEFAULT (now()),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
@@ -56,8 +57,6 @@ ALTER TABLE scholar_articles
 -- change default value of image_url in scholar_articles to /default
 
 
-select *
-from scholar_articles;
 CREATE TABLE scholar_materials
 (
     id          BIGSERIAL PRIMARY KEY,
@@ -216,4 +215,16 @@ INSERT INTO roles (id, name)
 VALUES (1, 'user');
 INSERT INTO roles (id, name)
 VALUES (2, 'admin');
+
+INSERT INTO contests (contest_name, description, link, start_date, end_date)
+VALUES ('LeetCode Weekly Contest 348',
+        'This LeetCode contest is sponsored by LeetCode.', 'https://leetcode.com/contest/weekly-contest-348/',
+        '2023-06-03 02:30:00',
+        '2023-06-03 04:30:00');
+
+INSERT INTO contests (contest_name, description, link, start_date, end_date)
+VALUES ('LeetCode Biweekly Contest 106',
+        'This LeetCode contest is sponsored by LeetCode.', 'https://leetcode.com/contest/biweekly-contest-106/',
+        '2023-06-03 14:30:00',
+        '2023-06-10 16:30:00');
 

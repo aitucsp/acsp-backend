@@ -35,4 +35,5 @@ const (
 	ErrWhenUpdatingImageURL = Error("error occurred when updating image url")
 	ErrNoAffectedRows       = Error("no affected rows")
 	ErrCreatingDiscipline   = Error("error occurred when creating a discipline")
+	ErrCreatingContest      = Error("error occurred when creating a contest")
 )

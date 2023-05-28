@@ -51,5 +51,5 @@ generate:
 	swag init -g cmd/main.go
 	docker-compose up
 push:
-	docker tag $(IMAGE_NAME) registry.digitalocean.com/$(REGISTRY_NAME)/$(IMAGE_NAME)
-	docker push registry.digitalocean.com/$(REGISTRY_NAME)/$(IMAGE_NAME)
+	docker tag $(IMAGE_NAME):latest registry.digitalocean.com/$(REGISTRY_NAME)/$(IMAGE_NAME):latest
+	docker push registry.digitalocean.com/$(REGISTRY_NAME)/$(IMAGE_NAME):latest

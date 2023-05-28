@@ -360,7 +360,6 @@ func (h *Handler) createInvitation(c *fiber.Ctx) error {
 // @ID get-card-invitations
 // @Accept  json
 // @Produce  json
-// @Param id path int true "card id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -605,5 +604,44 @@ func (h *Handler) declineInvitation(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"errors":  false,
 		"message": "Successfully declined invitation",
+	})
+}
+
+// @Summary Get responses of a user
+// @Security ApiKeyAuth
+// @Tags cards
+// @Description Get all responses of a user
+// @ID get-responses-by-user-id
+// @Accept  json
+// @Produce  json
+// @Success 200 {object} map[string]interface{}
+// @Failure 400,404 {object} map[string]interface{}
+// @Failure 500 {object} map[string]interface{}
+// @Failure default {object} map[string]interface{}
+// @Router /api/v1/code-connection/cards/responses [get]
+func (h *Handler) getResponses(c *fiber.Ctx) error {
+	log.Println("Getting invitation by card id... ")
+
+	userID, err := getUserId(c)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	responses, err := h.services.Cards.GetResponsesByUserID(c.UserContext(), userID)
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"errors":  false,
+		"message": nil,
+		"count":   len(responses),
+		"cards":   responses,
 	})
 }

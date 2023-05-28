@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"acsp/internal/apperror"
+	"acsp/internal/constants"
 	"acsp/internal/dto"
 	"acsp/internal/logging"
 	"acsp/internal/model"
@@ -16,10 +17,10 @@ import (
 
 type CardsService struct {
 	cardsRepo repository.Cards
-	usersRepo repository.Authorization
+	usersRepo repository.Users
 }
 
-func NewCardsService(cardsRepo repository.Cards, usersRepo repository.Authorization) *CardsService {
+func NewCardsService(cardsRepo repository.Cards, usersRepo repository.Users) *CardsService {
 	return &CardsService{cardsRepo: cardsRepo, usersRepo: usersRepo}
 }
 
@@ -39,7 +40,7 @@ func (c *CardsService) Create(ctx context.Context, userID string, dto dto.Create
 		Position:    dto.Position,
 		Skills:      dto.Skills,
 		Description: dto.Description,
-		Author:      *user,
+		Author:      user,
 	}
 
 	err = c.cardsRepo.Create(ctx, card)
@@ -66,7 +67,7 @@ func (c *CardsService) Update(ctx context.Context, userID string, cardID int, dt
 		Position:    dto.Position,
 		Skills:      dto.Skills,
 		Description: dto.Description,
-		Author:      *user,
+		Author:      user,
 	}
 
 	err = c.cardsRepo.Update(ctx, card)
@@ -117,6 +118,10 @@ func (c *CardsService) GetAllByUserID(ctx context.Context, userID string) (*[]mo
 			return nil, err
 		}
 
+		for _, card := range *cards {
+			card.Author = c.getFullURLForUser(card.Author)
+		}
+
 		return cards, nil
 	} else {
 		return nil, errors.Wrap(apperror.ErrUserNotFound, "user not found in database")
@@ -131,6 +136,10 @@ func (c *CardsService) GetAll(ctx context.Context) ([]model.Card, error) {
 		return nil, err
 	}
 
+	for _, card := range cards {
+		card.Author = c.getFullURLForUser(card.Author)
+	}
+
 	return cards, nil
 }
 
@@ -141,6 +150,8 @@ func (c *CardsService) GetByID(ctx context.Context, cardID int) (*model.Card, er
 	if err != nil {
 		return nil, err
 	}
+
+	card.Author = c.getFullURLForUser(card.Author)
 
 	return card, nil
 }
@@ -153,12 +164,12 @@ func (c *CardsService) CreateInvitation(ctx context.Context, userID string, card
 		return errors.Wrap(err, "error when converting string to int")
 	}
 
-	isUserExists, err := c.usersRepo.ExistsUserByID(ctx, userId)
+	userExists, err := c.usersRepo.ExistsUserByID(ctx, userId)
 	if err != nil {
 		return errors.Wrap(err, "error when finding user in database")
 	}
 
-	if isUserExists {
+	if userExists {
 		card, err := c.cardsRepo.GetByID(ctx, cardID)
 		if err != nil {
 			l.Error("Error when getting card from database", zap.Error(err))
@@ -195,8 +206,9 @@ func (c *CardsService) GetInvitationsByUserID(ctx context.Context, userID string
 }
 
 func (c *CardsService) GetInvitationsByCardID(ctx context.Context, userID, cardID string) ([]model.InvitationCard, error) {
-	// TODO: check if user is owner of card
-	_, err := strconv.Atoi(userID)
+	l := logging.LoggerFromContext(ctx).With(zap.String("userID", userID), zap.String("cardID", cardID))
+
+	userId, err := strconv.Atoi(userID)
 	if err != nil {
 		return []model.InvitationCard{}, errors.Wrap(err, "error converting user id to int")
 	}
@@ -206,7 +218,15 @@ func (c *CardsService) GetInvitationsByCardID(ctx context.Context, userID, cardI
 		return []model.InvitationCard{}, errors.Wrap(err, "error converting card id to int")
 	}
 
-	return c.cardsRepo.GetInvitationsByCardID(ctx, cardId)
+	// get card by id and user id
+	card, err := c.cardsRepo.GetByIdAndUserID(ctx, userId, cardId)
+	if err != nil {
+		l.Error("Error when getting card from database", zap.Error(err))
+
+		return []model.InvitationCard{}, err
+	}
+
+	return c.cardsRepo.GetInvitationsByCardID(ctx, card.ID)
 }
 
 func (c *CardsService) GetInvitationByID(ctx context.Context, userID, cardID, invitationID string) (model.InvitationCard, error) {
@@ -264,4 +284,23 @@ func (c *CardsService) DeclineInvitation(ctx context.Context, userID, cardID, in
 	}
 
 	return c.cardsRepo.DeclineCardInvitation(ctx, userId, cardId, invitationId)
+}
+
+func (c *CardsService) GetResponsesByUserID(ctx context.Context, userID string) ([]model.InvitationCard, error) {
+	userId, err := strconv.Atoi(userID)
+	if err != nil {
+		return []model.InvitationCard{}, errors.Wrap(err, "error converting user id to int")
+	}
+
+	return c.cardsRepo.GetResponsesByUserID(ctx, userId)
+}
+
+// getFullURLForUser function gets an article and changes its image_url to a full url
+func (c *CardsService) getFullURLForUser(user model.User) model.User {
+	user.ImageURL = constants.BucketName + "." +
+		constants.EndPoint + "/" +
+		constants.ArticlesImagesFolder +
+		user.ImageURL
+
+	return user
 }

@@ -37,7 +37,7 @@ import (
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name Authorization
+// @name Users
 func main() {
 	fallbackLogger := log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile|log.LUTC|log.Lmsgprefix)
 
@@ -162,7 +162,7 @@ func main() {
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     "*",
 		AllowMethods:     "GET, POST, PUT, DELETE",
-		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowHeaders:     "Origin, Content-Type, Accept, Users",
 		AllowCredentials: false,
 	}))
 

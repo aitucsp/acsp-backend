@@ -18,17 +18,50 @@ import (
 	"acsp/internal/model"
 )
 
-type AuthPostgres struct {
+type UsersRepository struct {
 	db *sqlx.DB
 }
 
-func NewAuthRepository(db *sqlx.DB) *AuthPostgres {
-	return &AuthPostgres{
+func NewUsersRepository(db *sqlx.DB) *UsersRepository {
+	return &UsersRepository{
 		db: db,
 	}
 }
 
-func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
+func (r *UsersRepository) GetUserDetailsByUserId(ctx context.Context, id int) (*model.UserDetails, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", id))
+	var userDetails model.UserDetails
+	query := fmt.Sprintf(`SELECT 
+									u.id,
+									u.user_id,
+									u.first_name,
+									u.last_name,
+									u.phone_number,
+									u.specialization,
+									u.updated_at
+								FROM %s u WHERE u.user_id = $1`,
+		constants.UserDetailsTable)
+
+	err := r.db.
+		QueryRow(query, id).
+		Scan(&userDetails.ID,
+			&userDetails.UserID,
+			&userDetails.FirstName,
+			&userDetails.LastName,
+			&userDetails.PhoneNumber,
+			&userDetails.Specialization,
+			&userDetails.UpdatedAt,
+		)
+	if err != nil {
+		l.Error("Error getting user details by id from database", zap.Error(err))
+
+		return nil, apperror.ErrUserNotFound
+	}
+
+	return &userDetails, nil
+}
+
+func (r *UsersRepository) CreateUser(ctx context.Context, user model.User) error {
 	l := logging.LoggerFromContext(ctx).With(zap.String("email", user.Email))
 
 	// Begin a transaction to create a user and a role for the user
@@ -124,7 +157,62 @@ func (r *AuthPostgres) CreateUser(ctx context.Context, user model.User) error {
 	return nil
 }
 
-func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*model.User, error) {
+func (r *UsersRepository) UpdateDetails(ctx context.Context, userID int, u model.UserDetails) error {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", userID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	query := fmt.Sprintf(`UPDATE %s SET 
+										first_name = $1, 
+										last_name = $2, 
+										phone_number = $3, 
+										specialization = $4, 
+										updated_at = now() 
+								  WHERE user_id = $5`,
+		constants.UserDetailsTable)
+
+	stmt, err := r.db.PrepareContext(ctx, query)
+	if err != nil {
+		l.Error("Error when preparing the query", zap.Error(err))
+
+		return err
+	}
+	defer func(stmt *sql.Stmt) {
+		err := stmt.Close()
+		if err != nil {
+			l.Error("Error when closing the statement", zap.Error(err))
+		}
+	}(stmt)
+
+	res, err := stmt.Exec(u.FirstName,
+		u.LastName,
+		u.PhoneNumber,
+		u.Specialization,
+		userID)
+	if err != nil {
+		l.Error("Error when executing the card updating statement", zap.Error(err))
+
+		return err
+	}
+
+	id, err := res.RowsAffected()
+	if err != nil {
+		l.Error("Error when getting the rows affected of result", zap.Error(err))
+
+		return err
+	}
+
+	if id == 0 {
+		l.Error("Error when getting the id of the card", zap.Error(apperror.ErrUpdatingCard))
+
+		return apperror.ErrUpdatingCard
+	}
+
+	return nil
+}
+
+func (r *UsersRepository) GetUser(ctx context.Context, email, password string) (*model.User, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.String("email", email))
 
 	var user model.User
@@ -148,9 +236,19 @@ func (r *AuthPostgres) GetUser(ctx context.Context, email, password string) (*mo
 	return &user, nil
 }
 
-func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error) {
+func (r *UsersRepository) GetByID(ctx context.Context, id int) (model.User, error) {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", id))
 	var user model.User
+	userDetails := model.UserDetails{
+		ID:             "",
+		UserID:         "",
+		FirstName:      "",
+		LastName:       "",
+		PhoneNumber:    "",
+		Specialization: "",
+		UpdatedAt:      "",
+	}
+
 	query := fmt.Sprintf(`SELECT 
 									u.id,
 									u.email,
@@ -160,9 +258,15 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 									u.updated_at,
 									u.is_admin,
 									u.roles AS roles,
-									u.image_url
-								FROM %s u WHERE id=$1`,
-		constants.UsersTable)
+									u.image_url,
+									ud.id,
+									ud.user_id,
+									ud.first_name,
+									ud.last_name,
+									ud.phone_number,
+									ud.specialization
+								FROM %s u INNER JOIN %s ud ON ud.user_id = u.id WHERE u.id=$1`,
+		constants.UsersTable, constants.UserDetailsTable)
 
 	err := r.db.
 		QueryRow(query, id).
@@ -175,17 +279,24 @@ func (r *AuthPostgres) GetByID(ctx context.Context, id int) (*model.User, error)
 			&user.IsAdmin,
 			&user.Roles,
 			&user.ImageURL,
-		)
+			&userDetails.ID,
+			&userDetails.UserID,
+			&userDetails.FirstName,
+			&userDetails.LastName,
+			&userDetails.PhoneNumber,
+			&userDetails.Specialization)
 	if err != nil {
 		l.Error("Error getting user by id from database", zap.Error(err))
 
-		return nil, apperror.ErrUserNotFound
+		return model.User{}, apperror.ErrUserNotFound
 	}
 
-	return &user, nil
+	user.UserInfo = &userDetails
+
+	return user, nil
 }
 
-func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.User, error) {
+func (r *UsersRepository) GetByEmail(ctx context.Context, email string) (*model.User, error) {
 	var user model.User
 
 	query := fmt.Sprintf(`SELECT 
@@ -218,12 +329,29 @@ func (r *AuthPostgres) GetByEmail(ctx context.Context, email string) (*model.Use
 	return &user, nil
 }
 
-func (r *AuthPostgres) GetAll(ctx context.Context) (*[]model.User, error) {
+func (r *UsersRepository) GetAll(ctx context.Context) ([]model.User, error) {
 	l := logging.LoggerFromContext(ctx)
 
 	var users []model.User
 
-	query := fmt.Sprintf(`SELECT * FROM %s`, constants.UsersTable)
+	query := fmt.Sprintf(`SELECT 
+									u.id,
+									u.email,
+									u.name,
+									u.password,
+									u.created_at,
+									u.updated_at,
+									u.is_admin,
+									u.roles,
+									u.image_url,
+									ud.first_name as "user_details.first_name",
+									ud.last_name as "user_details.last_name",
+									ud.phone_number as "user_details.phone_number",
+									ud.specialization as "user_details.specialization",
+									ud.updated_at as "user_details.updated_at"
+								FROM %s u INNER JOIN %s ud ON u.id = ud.user_id`,
+		constants.UsersTable,
+		constants.UserDetailsTable)
 
 	err := r.db.Select(&users, query)
 	if err != nil {
@@ -232,10 +360,10 @@ func (r *AuthPostgres) GetAll(ctx context.Context) (*[]model.User, error) {
 		return nil, errors.Wrap(apperror.ErrUserNotFound, "user not found")
 	}
 
-	return &users, err
+	return users, err
 }
 
-func (r *AuthPostgres) ExistsUserByID(ctx context.Context, id int) (bool, error) {
+func (r *UsersRepository) ExistsUserByID(ctx context.Context, id int) (bool, error) {
 	l := logging.LoggerFromContext(ctx)
 
 	var isExists bool
@@ -254,7 +382,7 @@ func (r *AuthPostgres) ExistsUserByID(ctx context.Context, id int) (bool, error)
 	return isExists, nil
 }
 
-func (r *AuthPostgres) ExistsUserByEmail(ctx context.Context, email string) (bool, error) {
+func (r *UsersRepository) ExistsUserByEmail(ctx context.Context, email string) (bool, error) {
 	l := logging.LoggerFromContext(ctx)
 
 	var isExists bool
@@ -273,7 +401,7 @@ func (r *AuthPostgres) ExistsUserByEmail(ctx context.Context, email string) (boo
 	return isExists, nil
 }
 
-func (r *AuthPostgres) UpdateImageURL(ctx context.Context, userID int) error {
+func (r *UsersRepository) UpdateImageURL(ctx context.Context, userID int) error {
 	l := logging.LoggerFromContext(ctx).With(zap.Int("userID", userID))
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)

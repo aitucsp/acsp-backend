@@ -16,12 +16,12 @@ import (
 
 type ArticlesService struct {
 	repo      repository.Articles
-	usersRepo repository.Authorization
+	usersRepo repository.Users
 	txManager repository.Transactional
 	s3Bucket  S3Bucket
 }
 
-func NewArticlesService(r repository.Articles, a repository.Authorization, s S3Bucket, t repository.Transactional) *ArticlesService {
+func NewArticlesService(r repository.Articles, a repository.Users, s S3Bucket, t repository.Transactional) *ArticlesService {
 	return &ArticlesService{
 		repo:      r,
 		usersRepo: a,
@@ -50,7 +50,7 @@ func (s *ArticlesService) Create(ctx context.Context, userID string, dto dto.Cre
 	article := model.Article{
 		Topic:       dto.Topic,
 		Description: dto.Description,
-		Author:      user,
+		Author:      &user,
 	}
 
 	tx, err := s.txManager.Begin(ctx, nil)
@@ -186,7 +186,7 @@ func (s *ArticlesService) Update(ctx context.Context, articleID string, userID s
 		ID:          articleId,
 		Topic:       articleDto.Topic,
 		Description: articleDto.Description,
-		Author:      user,
+		Author:      &user,
 	}
 
 	return s.repo.Update(ctx, article)
@@ -200,22 +200,26 @@ func (s *ArticlesService) Delete(ctx context.Context, userID string, projectId s
 }
 
 func (s *ArticlesService) CommentByID(ctx context.Context, articleID, userID string, commentDTO dto.CreateComment) error {
-	userId, _ := strconv.Atoi(userID)
-	user, err := s.usersRepo.GetByID(ctx, userId)
+	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert user id")
 	}
 
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert article id")
+	}
+
+	user, err := s.usersRepo.GetByID(ctx, userId)
+	if err != nil {
+		return errors.Wrap(err, "failed to get user by id")
 	}
 
 	comment := model.Comment{
 		UserID:    userId,
 		ArticleID: articleId,
 		Text:      commentDTO.Text,
-		Author:    *user,
+		Author:    user,
 	}
 
 	return s.repo.CreateComment(ctx, articleId, userId, comment)
@@ -238,17 +242,17 @@ func (s *ArticlesService) ReplyToCommentByArticleIDAndCommentID(ctx context.Cont
 
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert article id")
 	}
 
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert user id")
 	}
 
 	parentCommentId, err := strconv.Atoi(parentCommentID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert parent comment id")
 	}
 
 	replyComment := model.Comment{
@@ -264,18 +268,17 @@ func (s *ArticlesService) ReplyToCommentByArticleIDAndCommentID(ctx context.Cont
 func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context, articleID, commentID string) ([]model.Comment, error) {
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return []model.Comment{}, err
+		return []model.Comment{}, errors.Wrap(err, "failed to convert article id")
 	}
 
 	parentCommentId, err := strconv.Atoi(commentID)
 	if err != nil {
-		return []model.Comment{}, err
+		return []model.Comment{}, errors.Wrap(err, "failed to convert parent comment id")
 	}
 
 	comments, err := s.repo.GetRepliesByArticleIDAndCommentID(ctx, articleId, parentCommentId)
-
 	if err != nil {
-		return []model.Comment{}, err
+		return []model.Comment{}, errors.Wrap(err, "failed to get replies by article id and comment id")
 	}
 
 	// check if comments are empty and if empty, return empty slice
@@ -289,22 +292,22 @@ func (s *ArticlesService) GetRepliesByArticleIDAndCommentID(ctx context.Context,
 func (s *ArticlesService) UpvoteCommentByArticleIDAndCommentID(userContext context.Context, articleID, commentID, userID string) error {
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert article id")
 	}
 
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert user id")
 	}
 
 	commentId, err := strconv.Atoi(commentID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert comment id")
 	}
 
 	voted, err := s.repo.HasUserVotedForComment(userContext, userId, commentId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to check if user has voted for comment")
 	}
 
 	if voted {
@@ -317,22 +320,22 @@ func (s *ArticlesService) UpvoteCommentByArticleIDAndCommentID(userContext conte
 func (s *ArticlesService) DownvoteCommentByArticleIDAndCommentID(userContext context.Context, articleID, commentID, userID string) error {
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert article id")
 	}
 
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert user id")
 	}
 
 	commentId, err := strconv.Atoi(commentID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to convert comment id")
 	}
 
 	voted, err := s.repo.HasUserVotedForComment(userContext, userId, commentId)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to check if user has voted for comment")
 	}
 
 	if voted {
@@ -345,12 +348,12 @@ func (s *ArticlesService) DownvoteCommentByArticleIDAndCommentID(userContext con
 func (s *ArticlesService) GetVotesByArticleIDAndCommentID(userContext context.Context, articleID, commentID string) (int, error) {
 	articleId, err := strconv.Atoi(articleID)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "failed to convert article id")
 	}
 
 	commentId, err := strconv.Atoi(commentID)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "failed to convert comment id")
 	}
 
 	return s.repo.GetVotesByArticleIDAndCommentID(userContext, articleId, commentId)

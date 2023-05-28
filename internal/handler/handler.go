@@ -38,6 +38,7 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		{
 			users.Get("/profile", h.getUserProfile)
 			users.Post("/image", h.uploadUserImage)
+			users.Put("/profile", h.updateUserProfile)
 		}
 
 		// Define user routes with authentication middleware (userIdentity) for all routes
@@ -86,19 +87,20 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 
 			cards := codeConnection.Group("/cards")
 			{
+				cards.Get("/responses", h.getResponses)     // get all cards of user
 				cards.Get("/invitations", h.getInvitations) // get all invitations of a user
+				cards.Get("/:id", h.getCardByID)            // get an information of card by id
 				cards.Get("/", h.getAllCardsByUserID)       // get all cards of user
 				cards.Post("/", h.createCard)               // create a card
-				cards.Get("/:id", h.getCardByID)            // get an information of card by id
 				cards.Put("/:id", h.updateCard)             // update card information by id
 				cards.Delete("/:id", h.deleteCard)          // delete card by id
 
 				invitations := cards.Group("/:id/invitations")
 				{
-					invitations.Get("/", h.getInvitationsByCardID)                  // get all invitations of a card
 					invitations.Post("/", h.createInvitation)                       // send an invitation to a user
-					invitations.Get("/:invitationID", h.getInvitationByID)          // get an invitation by card id and invitation id
 					invitations.Post("/:invitationID/accept", h.acceptInvitation)   // accept an invitation
+					invitations.Get("/:invitationID", h.getInvitationByID)          // get an invitation by card id and invitation id
+					invitations.Get("/", h.getInvitationsByCardID)                  // get all invitations of a card
 					invitations.Post("/:invitationID/decline", h.declineInvitation) // decline an invitation
 				}
 			}
@@ -142,16 +144,16 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 		}
 
 		// Define admin routes
-		// admin := rest.Group("/admin", h.userIdentity, h.Authorize("admin"))
-		// {
-		// 	admin.Get("/users", h.getAllUsers)       // get all users
-		// 	admin.Get("/users/:id", h.getUserByID)   // get user by id
-		// 	admin.Put("/users/:id", h.updateUser)    // update user by id
-		// 	admin.Delete("/users/:id", h.deleteUser) // delete user by id
-		// 	admin.Post("/contests", h.createContest)
-		// 	admin.Post("/contests/:id", h.updateContest)
-		// 	admin.Delete("/contests/:id", h.deleteContest)
-		// }
+		admin := rest.Group("/admin", h.userIdentity, h.Authorize("admin"))
+		{
+			admin.Get("/users", h.getAllUsers)       // get all users
+			admin.Get("/users/:id", h.getUserByID)   // get user by id
+			admin.Put("/users/:id", h.updateUser)    // update user by id
+			admin.Delete("/users/:id", h.deleteUser) // delete user by id
+			admin.Post("/contests", h.createContest)
+			admin.Post("/contests/:id", h.updateContest)
+			admin.Delete("/contests/:id", h.deleteContest)
+		}
 	}
 
 	app.Get("/swagger/*", swagger.HandlerDefault)

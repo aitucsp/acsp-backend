@@ -182,12 +182,56 @@ func (c *CardsDatabase) GetByID(ctx context.Context, cardID int) (*model.Card, e
 	switch {
 	case err == sql.ErrNoRows:
 		l.Error("Error when getting card by id", zap.Error(err))
+
 		return &model.Card{}, errors.Wrap(err, "Error when getting card by id")
 	case err != nil:
 		l.Error("Error when getting card by id", zap.Error(err))
+
 		return &model.Card{}, errors.Wrap(err, "Error when getting card by id")
 	default:
 		return &card, nil
+	}
+}
+
+func (c *CardsDatabase) GetByIdAndUserID(ctx context.Context, userID, cardID int) (model.Card, error) {
+	l := logging.LoggerFromContext(ctx).With(zap.Int("cardID", cardID), zap.Int("userID", userID))
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	var card model.Card
+
+	query := fmt.Sprintf(`SELECT 
+									c.id, 
+									c.user_id, 
+									c.position, 
+									c.skills, 
+									c.description, 
+									c.created_at, 
+									c.updated_at 
+								FROM %s c WHERE id = $1 AND user_id = $2`,
+		constants.CardsTable)
+
+	err := c.db.QueryRowContext(ctx, query, cardID, userID).Scan(
+		&card.ID,
+		&card.UserID,
+		&card.Position,
+		&card.Skills,
+		&card.Description,
+		&card.CreatedAt,
+		&card.UpdatedAt)
+
+	switch {
+	case err == sql.ErrNoRows:
+		l.Error("Error when getting card by id", zap.Error(err))
+
+		return model.Card{}, err
+	case err != nil:
+		l.Error("Error when getting card by id", zap.Error(err))
+
+		return model.Card{}, errors.Wrap(err, "Error when getting card by id")
+	default:
+		return card, nil
 	}
 }
 
@@ -221,7 +265,7 @@ func (c *CardsDatabase) GetAll(ctx context.Context) ([]model.Card, error) {
 
 	var cards []model.Card
 
-	query := fmt.Sprintf(`SELECT c.*, u.id, u.email, u.name FROM %s c INNER JOIN %s u ON c.user_id = u.id`,
+	query := fmt.Sprintf(`SELECT c.*, u.id, u.email, u.name, u.image_url FROM %s c INNER JOIN %s u ON c.user_id = u.id`,
 		constants.CardsTable, constants.UsersTable)
 
 	rows, err := c.db.QueryContext(ctx, query)
@@ -249,7 +293,8 @@ func (c *CardsDatabase) GetAll(ctx context.Context) ([]model.Card, error) {
 			&card.UpdatedAt,
 			&card.Author.ID,
 			&card.Author.Email,
-			&card.Author.Name)
+			&card.Author.Name,
+			&card.Author.ImageURL)
 		if err != nil {
 			l.Error("Error when scanning the card in database", zap.Error(err))
 
@@ -562,4 +607,62 @@ func (c *CardsDatabase) DeclineCardInvitation(ctx context.Context, userID, cardI
 	}
 
 	return nil
+}
+
+func (c *CardsDatabase) GetResponsesByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error) {
+	var invitationCards []model.InvitationCard
+
+	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	query := fmt.Sprintf(`SELECT 
+										c.user_id, 
+										c.skills, 
+										c.position, 
+										c.description, 
+										c.created_at, 
+										c.updated_at,
+										ci.inviter_id,
+										ci.status
+								 FROM %s c 
+							     INNER JOIN %s ci ON ci.card_id = c.id
+								 WHERE ci.inviter_id = $1`,
+		constants.CardsTable,
+		constants.CardInvitationsTable)
+
+	rows, err := c.db.QueryContext(ctx, query, userID)
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			logging.LoggerFromContext(ctx).Error("Error when closing the rows", zap.Error(err))
+		}
+	}(rows)
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			logging.LoggerFromContext(ctx).Error("Error when closing the rows", zap.Error(err))
+		}
+	}(rows)
+
+	for rows.Next() {
+		var card model.Card
+		var invitationCard model.InvitationCard
+
+		err = rows.Scan(&card.UserID,
+			&card.Skills,
+			&card.Position,
+			&card.Description,
+			&card.CreatedAt,
+			&card.UpdatedAt,
+			&invitationCard.InviterID,
+			&invitationCard.Status)
+		if err != nil {
+			return nil, errors.Wrap(err, "Error when scanning the card in database")
+		}
+
+		invitationCard.Card = &card
+		invitationCards = append(invitationCards, invitationCard)
+	}
+
+	return invitationCards, nil
 }

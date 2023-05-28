@@ -24,6 +24,19 @@ definitions:
     required:
     - text
     type: object
+  dto.CreateContest:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      start_date:
+        type: string
+    type: object
   dto.CreateDiscipline:
     properties:
       description:
@@ -105,6 +118,19 @@ definitions:
     - position
     - skills
     type: object
+  dto.UpdateContest:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      start_date:
+        type: string
+    type: object
   dto.UpdateDiscipline:
     properties:
       description:
@@ -148,6 +174,24 @@ definitions:
     - description
     - title
     type: object
+  dto.UpdateUser:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      phone_number:
+        type: string
+      specialization:
+        type: string
+    required:
+    - first_name
+    - last_name
+    - phone_number
+    - specialization
+    type: object
   handler.signInInput:
     properties:
       email:
@@ -165,6 +209,247 @@ info:
   title: ACSP Backend
   version: "1.0"
 paths:
+  /api/v1/admin/contests/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a contest by id
+      operationId: delete-contest-by-id
+      parameters:
+      - description: contest id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contest deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a contest by id
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      description: Update data of contest
+      operationId: update-contest-by-id
+      parameters:
+      - description: contest id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: contest information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateContest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contest updated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a contest by id
+      tags:
+      - admin
+  /api/v1/admin/users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users
+      operationId: get-all-users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all users
+      tags:
+      - admin
+  /api/v1/admin/users/:id:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user by id
+      operationId: delete-user-by-id
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user by id
+      tags:
+      - admin
+    get:
+      consumes:
+      - application/json
+      description: Get a user by id
+      operationId: get-user-by-id
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a user by id
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      description: Update user by id
+      operationId: update-user-by-id
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: user information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User updated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user by id
+      tags:
+      - admin
   /api/v1/auth/logout:
     post:
       consumes:
@@ -766,12 +1051,6 @@ paths:
       - application/json
       description: Get invitations of a user's cards
       operationId: get-card-invitations
-      parameters:
-      - description: card id
-        in: path
-        name: id
-        required: true
-        type: integer
       produces:
       - application/json
       responses:
@@ -805,6 +1084,90 @@ paths:
       summary: Get invitations of user
       tags:
       - cards
+  /api/v1/code-connection/cards/responses:
+    get:
+      consumes:
+      - application/json
+      description: Get all responses of a user
+      operationId: get-responses-by-user-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get responses of a user
+      tags:
+      - cards
+  /api/v1/coding-lab/admin/contests:
+    post:
+      consumes:
+      - application/json
+      description: Request for creating a contest
+      operationId: create-contest
+      parameters:
+      - description: contest information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateContest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a contest
+      tags:
+      - admin
   /api/v1/coding-lab/discipline/:id:
     delete:
       consumes:
@@ -2504,9 +2867,52 @@ paths:
       summary: Get user info by id
       tags:
       - users
+    put:
+      consumes:
+      - application/json
+      description: Update user info by id from the system
+      operationId: update-user-information
+      parameters:
+      - description: user information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update user info by id
+      tags:
+      - users
 securityDefinitions:
   ApiKeyAuth:
     in: header
-    name: Authorization
+    name: Users
     type: apiKey
 swagger: "2.0"

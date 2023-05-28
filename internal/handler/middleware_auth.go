@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -63,7 +64,7 @@ func (h *Handler) userIdentity(c *fiber.Ctx) error {
 	return c.Next()
 }
 
-// Authorize is a middleware that checks if the user has the required role to access the endpoint
+// Authorize is a middleware that checks if the user has the required role(-s) to access the endpoint
 func (h *Handler) Authorize(allowedRoles ...string) func(*fiber.Ctx) error {
 	return func(c *fiber.Ctx) error {
 		// Get the user id from the context that was set in the userIdentity middleware
@@ -71,13 +72,13 @@ func (h *Handler) Authorize(allowedRoles ...string) func(*fiber.Ctx) error {
 		if len(userID) == 0 || userID == "" {
 			return errors.Wrap(err, apperror.ErrUserIDNotFound.Error())
 		}
-
+		fmt.Println(userID)
 		// Get the user roles from the database
 		roles, err := h.services.Roles.GetUserRoles(c.UserContext(), userID)
 		if err != nil {
 			return errors.Wrap(err, "Error when getting roles of user")
 		}
-
+		fmt.Println(roles)
 		// Check if the user has the required role
 		roleAllowed := false
 

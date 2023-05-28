@@ -41,9 +41,11 @@ type Authorization interface {
 
 type Users interface {
 	CreateUser(ctx context.Context, dto dto.CreateUser) error
-	// UpdateUserImageURL GetUserByID(ctx context.Context, userID string) (model.User, error)
+	UpdateUser(ctx context.Context, userID string, dto dto.UpdateUser) error
+	DeleteUser(ctx context.Context, userID string) error
 	UpdateUserImageURL(ctx context.Context, userID string) error
-	// UpdateUser(ctx context.Context, dto dto.UpdateUser) error
+	GetUserByID(ctx context.Context, userID string) (model.User, error)
+	GetAllUsers(userContext context.Context) ([]model.User, error)
 }
 
 type Roles interface {
@@ -93,11 +95,15 @@ type Cards interface {
 	GetInvitationsByUserID(ctx context.Context, userID string) ([]model.InvitationCard, error)
 	GetInvitationByID(ctx context.Context, userID, cardID, invitationID string) (model.InvitationCard, error)
 	GetInvitationsByCardID(ctx context.Context, userID, cardID string) ([]model.InvitationCard, error)
+	GetResponsesByUserID(ctx context.Context, userID string) ([]model.InvitationCard, error)
 	AcceptInvitation(ctx context.Context, userID, cardID, invitationID string) error
 	DeclineInvitation(ctx context.Context, userID, cardID, invitationID string) error
 }
 
 type Contests interface {
+	Create(ctx context.Context, contest dto.CreateContest) error
+	Update(ctx context.Context, contestID string, contest dto.UpdateContest) error
+	Delete(ctx context.Context, contestID string) error
 	GetByID(ctx context.Context, contestID string) (model.Contest, error)
 	GetAll(ctx context.Context) ([]model.Contest, error)
 }
@@ -133,19 +139,19 @@ type S3Bucket interface {
 
 func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfig, bucketName string) *Service {
 	service := &Service{
-		Authorization:   NewAuthService(repo.Authorization, repo.Roles, r, c),
+		Authorization:   NewAuthService(repo.Users, repo.Roles, r, c),
 		S3BucketService: NewS3BucketService(repo.S3Bucket, bucketName),
-		Users:           NewUsersService(repo.Authorization),
-		Roles:           NewRolesService(repo.Roles, repo.Authorization),
-		Cards:           NewCardsService(repo.Cards, repo.Authorization),
-		Materials:       NewMaterialsService(repo.Materials, repo.Authorization),
+		Users:           NewUsersService(repo.Users),
+		Roles:           NewRolesService(repo.Roles, repo.Users),
+		Cards:           NewCardsService(repo.Cards, repo.Users),
+		Materials:       NewMaterialsService(repo.Materials, repo.Users),
 		Disciplines:     NewDisciplinesService(repo.Disciplines, repo.Projects),
 		Projects:        NewProjectsService(repo.Projects, repo.ProjectModules),
 		ProjectModules:  NewProjectModulesService(repo.ProjectModules),
 		Contests:        NewContestsService(repo.Contests),
 	}
 
-	service.Articles = NewArticlesService(repo.Articles, repo.Authorization, service.S3BucketService, repo.Transactional)
+	service.Articles = NewArticlesService(repo.Articles, repo.Users, service.S3BucketService, repo.Transactional)
 
 	return service
 }

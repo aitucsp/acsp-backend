@@ -13,10 +13,10 @@ import (
 
 type RolesService struct {
 	repo      repository.Roles
-	usersRepo repository.Authorization
+	usersRepo repository.Users
 }
 
-func NewRolesService(repo repository.Roles, u repository.Authorization) *RolesService {
+func NewRolesService(repo repository.Roles, u repository.Users) *RolesService {
 	return &RolesService{repo: repo, usersRepo: u}
 }
 
@@ -134,7 +134,7 @@ func (r *RolesService) GetUserRoles(ctx context.Context, userID string) ([]model
 
 	_, err = r.usersRepo.GetByID(ctx, userId)
 	if err != nil {
-		return []model.Role{}, err
+		return []model.Role{}, errors.Wrap(err, "Error when getting roles from user repository")
 	}
 
 	return r.repo.GetUserRoles(ctx, userId)

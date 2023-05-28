@@ -2,6 +2,7 @@ package constants
 
 const (
 	UsersTable                   = "users"
+	UserDetailsTable             = "user_details"
 	RolesTable                   = "roles"
 	UserRolesTable               = "user_roles"
 	MaterialsTable               = "scholar_materials"

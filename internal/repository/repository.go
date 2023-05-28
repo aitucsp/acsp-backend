@@ -11,7 +11,7 @@ import (
 )
 
 type Repository struct {
-	Authorization
+	Users
 	Roles
 	Articles
 	Cards
@@ -24,13 +24,15 @@ type Repository struct {
 	S3Bucket
 }
 
-// Authorization interface provides methods for working with users
-type Authorization interface {
+// Users interface provides methods for working with users
+type Users interface {
 	CreateUser(ctx context.Context, user model.User) error
 	GetUser(ctx context.Context, username, password string) (*model.User, error)
-	GetByID(ctx context.Context, id int) (*model.User, error)
+	GetByID(ctx context.Context, id int) (model.User, error)
+	GetUserDetailsByUserId(ctx context.Context, id int) (*model.UserDetails, error)
 	GetByEmail(ctx context.Context, email string) (*model.User, error)
-	GetAll(ctx context.Context) (*[]model.User, error)
+	GetAll(ctx context.Context) ([]model.User, error)
+	UpdateDetails(ctx context.Context, userID int, userDetails model.UserDetails) error
 	ExistsUserByID(ctx context.Context, id int) (bool, error)
 	ExistsUserByEmail(ctx context.Context, email string) (bool, error)
 	UpdateImageURL(ctx context.Context, userID int) error
@@ -81,17 +83,22 @@ type Cards interface {
 	Update(ctx context.Context, card model.Card) error
 	Delete(ctx context.Context, userID int, cardID int) error
 	GetByID(ctx context.Context, cardID int) (*model.Card, error)
+	GetByIdAndUserID(ctx context.Context, userID, cardID int) (model.Card, error)
 	GetAllByUserID(ctx context.Context, userID int) (*[]model.Card, error)
 	GetAll(ctx context.Context) ([]model.Card, error)
 	CreateInvitation(ctx context.Context, inviterID int, card model.Card) error
 	GetInvitationsByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error)
 	GetInvitationByID(ctx context.Context, userID, cardID, invitationID int) (model.InvitationCard, error)
 	GetInvitationsByCardID(ctx context.Context, cardID int) ([]model.InvitationCard, error)
+	GetResponsesByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error)
 	AcceptCardInvitation(ctx context.Context, userID, cardID, invitationID int) error
 	DeclineCardInvitation(ctx context.Context, userID, cardID, invitationID int) error
 }
 
 type Contests interface {
+	Create(ctx context.Context, contest model.Contest) error
+	Update(ctx context.Context, contest model.Contest) error
+	Delete(ctx context.Context, contestID int) error
 	GetByID(ctx context.Context, contestID int) (model.Contest, error)
 	GetAll(ctx context.Context) ([]model.Contest, error)
 }
@@ -134,7 +141,7 @@ type Transactional interface {
 
 func NewRepository(db *sqlx.DB, sess *session.Session) *Repository {
 	return &Repository{
-		Authorization:  NewAuthRepository(db),
+		Users:          NewUsersRepository(db),
 		Roles:          NewRolesRepository(db),
 		Articles:       NewArticlesRepository(db),
 		Cards:          NewCardsRepository(db),
