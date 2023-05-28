@@ -13,6 +13,7 @@ import (
 
 	"acsp/internal/apperror"
 	"acsp/internal/constants"
+	"acsp/internal/dto"
 	"acsp/internal/logging"
 	"acsp/internal/model"
 )
@@ -367,7 +368,8 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 										c.created_at, 
 										c.updated_at,
 										ci.inviter_id,
-										ci.status
+										ci.status,
+										ci.feedback,	
 								 FROM %s c 
 							     INNER JOIN %s ci ON ci.card_id = c.id
 								 WHERE c.user_id = $1`,
@@ -395,7 +397,9 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 			&card.CreatedAt,
 			&card.UpdatedAt,
 			&invitationCard.InviterID,
-			&invitationCard.Status)
+			&invitationCard.Status,
+			&invitationCard.Feedback,
+		)
 		if err != nil {
 			l.Error("Error when scanning the card in database", zap.Error(err))
 
@@ -424,7 +428,8 @@ func (c *CardsDatabase) GetInvitationsByCardID(ctx context.Context, cardID int) 
 										c.created_at, 
 										c.updated_at,
 										ci.inviter_id,
-										ci.status
+										ci.status,
+										ci.feedback,	
 								 FROM %s c 
 							     INNER JOIN %s ci ON ci.card_id = c.id
 								 WHERE c.id = $1`,
@@ -450,7 +455,9 @@ func (c *CardsDatabase) GetInvitationsByCardID(ctx context.Context, cardID int) 
 			&card.CreatedAt,
 			&card.UpdatedAt,
 			&invitationCard.InviterID,
-			&invitationCard.Status)
+			&invitationCard.Status,
+			&invitationCard.Feedback,
+		)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error when scanning the card in database")
 		}
@@ -464,7 +471,8 @@ func (c *CardsDatabase) GetInvitationsByCardID(ctx context.Context, cardID int) 
 
 // GetInvitationByID gets an invitation by user id, card id and invitation id.
 func (c *CardsDatabase) GetInvitationByID(ctx context.Context, userID, cardID, invitationID int) (model.InvitationCard, error) {
-	var card model.InvitationCard
+	var invitationCard model.InvitationCard
+	var card model.Card
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
@@ -478,8 +486,10 @@ func (c *CardsDatabase) GetInvitationByID(ctx context.Context, userID, cardID, i
 						c.description, 
 						c.created_at, 
 						c.updated_at, 
+						ci.id,
 						ci.inviter_id, 
-						ci.status
+						ci.status,
+						ci.feedback
 					FROM %s c INNER JOIN %s ci ON c.id = ci.card_id 
 						WHERE user_id = $1 AND c.id = $2 AND ci.id = $3`,
 		constants.CardsTable,
@@ -488,25 +498,28 @@ func (c *CardsDatabase) GetInvitationByID(ctx context.Context, userID, cardID, i
 	row := c.db.QueryRowContext(ctx, query, userID, cardID, invitationID)
 
 	err := row.Scan(
-		&card.Card.ID,
-		&card.Card.UserID,
-		&card.Card.Position,
-		&card.Card.Skills,
-		&card.Card.Description,
-		&card.Card.CreatedAt,
-		&card.Card.UpdatedAt,
-		&card.InviterID,
-		&card.Status,
+		&card.ID,
+		&card.UserID,
+		&card.Position,
+		&card.Skills,
+		&card.Description,
+		&card.CreatedAt,
+		&card.UpdatedAt,
+		&invitationCard.InviterID,
+		&invitationCard.Status,
+		&invitationCard.Feedback,
 	)
 	if err != nil {
 		return model.InvitationCard{}, err
 	}
 
-	return card, nil
+	invitationCard.Card = &card
+
+	return invitationCard, nil
 }
 
 // AcceptCardInvitation accepts a card invitation.
-func (c *CardsDatabase) AcceptCardInvitation(ctx context.Context, userID, cardID, invitationID int) error {
+func (c *CardsDatabase) AcceptCardInvitation(ctx context.Context, userID, cardID, invitationID int, input dto.AnswerInvitation) error {
 	l := logging.LoggerFromContext(ctx).With(
 		zap.Int("userID", userID),
 		zap.Int("cardID", cardID),
@@ -516,9 +529,9 @@ func (c *CardsDatabase) AcceptCardInvitation(ctx context.Context, userID, cardID
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf(`UPDATE %s ci SET ci.status = $1, ci.updated_at = now()
+	query := fmt.Sprintf(`UPDATE %s ci SET ci.status = $1, ci.feedback = $2, ci.updated_at = now()
 								  FROM %s c
-								  WHERE c.user_id = $2 AND c.id = $3 AND ci.id = $4`,
+								  WHERE c.user_id = $3 AND c.id = $4 AND ci.id = $5`,
 		constants.CardInvitationsTable, constants.CardsTable)
 
 	stmt, err := c.db.PrepareContext(ctx, query)
@@ -534,7 +547,7 @@ func (c *CardsDatabase) AcceptCardInvitation(ctx context.Context, userID, cardID
 		}
 	}(stmt)
 
-	res, err := stmt.Exec(constants.AcceptedStatus, userID, cardID, invitationID)
+	res, err := stmt.Exec(constants.AcceptedStatus, input.Feedback, userID, cardID, invitationID)
 	if err != nil {
 		l.Error("Error when executing the card updating statement", zap.Error(err))
 
@@ -558,7 +571,7 @@ func (c *CardsDatabase) AcceptCardInvitation(ctx context.Context, userID, cardID
 }
 
 // DeclineCardInvitation rejects a card invitation.
-func (c *CardsDatabase) DeclineCardInvitation(ctx context.Context, userID, cardID, invitationID int) error {
+func (c *CardsDatabase) DeclineCardInvitation(ctx context.Context, userID, cardID, invitationID int, input dto.AnswerInvitation) error {
 	l := logging.LoggerFromContext(ctx).With(
 		zap.Int("userID", userID),
 		zap.Int("cardID", cardID),
@@ -568,9 +581,9 @@ func (c *CardsDatabase) DeclineCardInvitation(ctx context.Context, userID, cardI
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	query := fmt.Sprintf(`UPDATE %s ci SET ci.status = $1, ci.updated_at = now()
+	query := fmt.Sprintf(`UPDATE %s ci SET ci.status = $1, ci.feedback = $2, ci.updated_at = now()
 								  FROM %s c
-								  WHERE c.user_id = $2 AND c.id = $3 AND ci.id = $4`,
+								  WHERE c.user_id = $3 AND c.id = $4 AND ci.id = $5`,
 		constants.CardInvitationsTable, constants.CardsTable)
 
 	stmt, err := c.db.PrepareContext(ctx, query)
@@ -586,7 +599,7 @@ func (c *CardsDatabase) DeclineCardInvitation(ctx context.Context, userID, cardI
 		}
 	}(stmt)
 
-	res, err := stmt.Exec(constants.DeclinedStatus, userID, cardID, invitationID)
+	res, err := stmt.Exec(constants.DeclinedStatus, input.Feedback, userID, cardID, invitationID)
 	if err != nil {
 		l.Error("Error when executing the card invitation declining query", zap.Error(err))
 
@@ -624,6 +637,7 @@ func (c *CardsDatabase) GetResponsesByUserID(ctx context.Context, userID int) ([
 										c.updated_at,
 										ci.inviter_id,
 										ci.status
+										ci.feedback
 								 FROM %s c 
 							     INNER JOIN %s ci ON ci.card_id = c.id
 								 WHERE ci.inviter_id = $1`,
@@ -655,7 +669,9 @@ func (c *CardsDatabase) GetResponsesByUserID(ctx context.Context, userID int) ([
 			&card.CreatedAt,
 			&card.UpdatedAt,
 			&invitationCard.InviterID,
-			&invitationCard.Status)
+			&invitationCard.Status,
+			&invitationCard.Feedback,
+		)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error when scanning the card in database")
 		}

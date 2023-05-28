@@ -17,4 +17,5 @@ type InvitationCard struct {
 	Card      *Card  `json:"card" db:"-"`
 	InviterID int    `json:"inviter_id" db:"inviter_id"`
 	Status    string `json:"status" db:"status"`
+	Feedback  string `json:"feedback" db:"feedback"`
 }

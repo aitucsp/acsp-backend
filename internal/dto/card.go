@@ -13,3 +13,8 @@ type CreateCard struct {
 	Skills      []string `json:"skills" form:"skills" binding:"required" validate:"required"`
 	Description string   `json:"description" form:"description" binding:"required" validate:"required"`
 }
+
+// AnswerInvitation DTO for Creating Invitation Card
+type AnswerInvitation struct {
+	Feedback string `json:"feedback" form:"feedback" binding:"required" validate:"required"`
+}

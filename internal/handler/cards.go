@@ -506,6 +506,7 @@ func (h *Handler) getInvitationsByCardID(c *fiber.Ctx) error {
 // @Produce  json
 // @Param id path int true "card id"
 // @Param invitationID path int true "invitation id"
+// @Param request body dto.AnswerInvitation true "accept invitation feedback"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -538,7 +539,15 @@ func (h *Handler) acceptInvitation(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.services.Cards.AcceptInvitation(c.UserContext(), userID, cardID, invitationID)
+	var input dto.AnswerInvitation
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	err = h.services.Cards.AcceptInvitation(c.UserContext(), userID, cardID, invitationID, input)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,
@@ -561,6 +570,7 @@ func (h *Handler) acceptInvitation(c *fiber.Ctx) error {
 // @Produce  json
 // @Param id path int true "card id"
 // @Param invitationID path int true "invitation id"
+// @Param request body dto.AnswerInvitation true "decline invitation feedback"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -593,7 +603,15 @@ func (h *Handler) declineInvitation(c *fiber.Ctx) error {
 		})
 	}
 
-	err = h.services.Cards.DeclineInvitation(c.UserContext(), userID, cardID, invitationID)
+	var input dto.AnswerInvitation
+	if err := c.BodyParser(&input); err != nil {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
+
+	err = h.services.Cards.DeclineInvitation(c.UserContext(), userID, cardID, invitationID, input)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"errors":  true,

@@ -248,7 +248,7 @@ func (c *CardsService) GetInvitationByID(ctx context.Context, userID, cardID, in
 	return c.cardsRepo.GetInvitationByID(ctx, userId, cardId, invitationId)
 }
 
-func (c *CardsService) AcceptInvitation(ctx context.Context, userID, cardID, invitationID string) error {
+func (c *CardsService) AcceptInvitation(ctx context.Context, userID, cardID, invitationID string, input dto.AnswerInvitation) error {
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
 		return errors.Wrap(err, "error converting user id to int")
@@ -264,10 +264,10 @@ func (c *CardsService) AcceptInvitation(ctx context.Context, userID, cardID, inv
 		return errors.Wrap(err, "error converting invitation id to int")
 	}
 
-	return c.cardsRepo.AcceptCardInvitation(ctx, userId, cardId, invitationId)
+	return c.cardsRepo.AcceptCardInvitation(ctx, userId, cardId, invitationId, input)
 }
 
-func (c *CardsService) DeclineInvitation(ctx context.Context, userID, cardID, invitationID string) error {
+func (c *CardsService) DeclineInvitation(ctx context.Context, userID, cardID, invitationID string, input dto.AnswerInvitation) error {
 	userId, err := strconv.Atoi(userID)
 	if err != nil {
 		return errors.Wrap(err, "error converting user id to int")
@@ -283,7 +283,7 @@ func (c *CardsService) DeclineInvitation(ctx context.Context, userID, cardID, in
 		return errors.Wrap(err, "error converting invitation id to int")
 	}
 
-	return c.cardsRepo.DeclineCardInvitation(ctx, userId, cardId, invitationId)
+	return c.cardsRepo.DeclineCardInvitation(ctx, userId, cardId, invitationId, input)
 }
 
 func (c *CardsService) GetResponsesByUserID(ctx context.Context, userID string) ([]model.InvitationCard, error) {

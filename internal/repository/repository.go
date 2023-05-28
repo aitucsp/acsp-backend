@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/jmoiron/sqlx"
 
+	"acsp/internal/dto"
 	"acsp/internal/model"
 )
 
@@ -91,8 +92,8 @@ type Cards interface {
 	GetInvitationByID(ctx context.Context, userID, cardID, invitationID int) (model.InvitationCard, error)
 	GetInvitationsByCardID(ctx context.Context, cardID int) ([]model.InvitationCard, error)
 	GetResponsesByUserID(ctx context.Context, userID int) ([]model.InvitationCard, error)
-	AcceptCardInvitation(ctx context.Context, userID, cardID, invitationID int) error
-	DeclineCardInvitation(ctx context.Context, userID, cardID, invitationID int) error
+	AcceptCardInvitation(ctx context.Context, userID, cardID, invitationID int, input dto.AnswerInvitation) error
+	DeclineCardInvitation(ctx context.Context, userID, cardID, invitationID int, input dto.AnswerInvitation) error
 }
 
 type Contests interface {
