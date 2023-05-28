@@ -10,7 +10,7 @@ import (
 type CreateArticle struct {
 	Topic       string                `json:"topic" form:"topic" binding:"required" validate:"required"`
 	Description string                `json:"description" form:"description" binding:"required" validate:"required"`
-	Image       *multipart.FileHeader `form:"file" json:"file"`
+	Image       *multipart.FileHeader `form:"-" json:"-"`
 }
 
 // UpdateArticle DTO for Updating Article

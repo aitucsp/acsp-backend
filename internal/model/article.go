@@ -10,6 +10,6 @@ type Article struct {
 	ImageURL    string    `json:"image_url" db:"image_url"`
 	CreatedAt   string    `json:"created_at" db:"created_at"`
 	UpdatedAt   string    `json:"updated_at" db:"updated_at"`
-	Comments    []Comment `json:"comments"`
+	Comments    []Comment `json:"comments,omitempty"`
 	Author      *User     `json:"-" db:"-"`
 }

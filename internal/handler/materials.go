@@ -75,11 +75,12 @@ func (h *Handler) createMaterial(c *fiber.Ctx) error {
 // @ID get-all-materials-by-user-id
 // @Accept  json
 // @Produce  json
+// @Param userID path string true "user id"
 // @Success 200 {object} map[string]interface{}
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/materials/:userID [get]
+// @Router /api/v1/scholar/materials/{userID} [get]
 func (h *Handler) getAllMaterialsByUserID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all materials... ")
@@ -134,11 +135,11 @@ func (h *Handler) getAllMaterials(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(fiber.Map{
-		"errors":   false,
-		"message":  nil,
-		"count":    len(materials),
-		"user_id":  c.GetRespHeader(userCtx, ""),
-		"articles": materials,
+		"errors":    false,
+		"message":   nil,
+		"count":     len(materials),
+		"user_id":   c.GetRespHeader(userCtx, ""),
+		"materials": materials,
 	})
 }
 
@@ -154,7 +155,7 @@ func (h *Handler) getAllMaterials(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/materials/:id [get]
+// @Router /api/v1/scholar/materials/{id} [get]
 func (h *Handler) getMaterialByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting material by id... ")
@@ -196,7 +197,7 @@ func (h *Handler) getMaterialByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/materials/:id [put]
+// @Router /api/v1/scholar/materials/{id} [put]
 func (h *Handler) updateMaterial(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Updating a material... ")
@@ -256,7 +257,7 @@ func (h *Handler) updateMaterial(c *fiber.Ctx) error {
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/materials/:id [delete]
+// @Router /api/v1/scholar/materials/{id} [delete]
 func (h *Handler) deleteMaterial(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Deleting a material")

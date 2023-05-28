@@ -52,11 +52,6 @@ CREATE TABLE scholar_articles
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
 
-ALTER TABLE scholar_articles
-    ALTER COLUMN image_url SET DEFAULT '/default';
--- change default value of image_url in scholar_articles to /default
-
-
 CREATE TABLE scholar_materials
 (
     id          BIGSERIAL PRIMARY KEY,
@@ -119,7 +114,9 @@ CREATE TABLE code_connection_invitations
     card_id    INT         NOT NULL,
     inviter_id INT         NOT NULL,
     status     VARCHAR     NOT NULL DEFAULT ('NOT ANSWERED'),
+    feedback VARCHAR NOT NULL DEFAULT '',
     created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
     FOREIGN KEY (inviter_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (card_id) REFERENCES code_connection_cards (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -134,31 +131,6 @@ CREATE TABLE contests
     end_date     TIMESTAMPTZ NOT NULL DEFAULT (now()),
     created_at   TIMESTAMPTZ NOT NULL DEFAULT (now())
 );
-
--- CREATE TABLE freelance_projects
--- (
---     id           BIGSERIAL   NOT NULL PRIMARY KEY,
---     company_name INT         NOT NULL,
---     title        VARCHAR     NOT NULL,
---     description  VARCHAR     NOT NULL,
---     image_url    VARCHAR     NOT NULL,
---     budget       VARCHAR     NOT NULL,
---     created_at   TIMESTAMPTZ NOT NULL DEFAULT (now()),
---     updated_at   TIMESTAMPTZ NOT NULL DEFAULT (now())
--- );
---
--- CREATE TABLE freelance_project_requests
--- (
---     id         BIGSERIAL   NOT NULL PRIMARY KEY,
---     project_id INT         NOT NULL,
---     user_id    INT         NOT NULL,
---     status     VARCHAR     NOT NULL DEFAULT ('PENDING'),
---     feedback VARCHAR     NOT NULL DEFAULT (''),
---     created_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
---     updated_at TIMESTAMPTZ NOT NULL DEFAULT (now()),
---     FOREIGN KEY (project_id) REFERENCES freelance_projects (id) ON DELETE CASCADE ON UPDATE CASCADE,
---     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
--- );
 
 CREATE TABLE coding_lab_disciplines
 (

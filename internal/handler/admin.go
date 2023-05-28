@@ -52,7 +52,7 @@ func (h *Handler) getAllUsers(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/admin/users/:id [get]
+// @Router /api/v1/admin/users/{id} [get]
 func (h *Handler) getUserByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting user by id... ")
@@ -92,7 +92,7 @@ func (h *Handler) getUserByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/admin/users/:id [put]
+// @Router /api/v1/admin/users/{id} [put]
 func (h *Handler) updateUser(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("updating a user...")
@@ -145,7 +145,7 @@ func (h *Handler) updateUser(c *fiber.Ctx) error {
 // @Success 200 {object} string "User deleted"
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/admin/users/:id [delete]
+// @Router /api/v1/admin/users/{id} [delete]
 func (h *Handler) deleteUser(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("deleting a user...")
@@ -233,7 +233,7 @@ func (h *Handler) createContest(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/admin/contests/:id [put]
+// @Router /api/v1/admin/contests/{id} [put]
 func (h *Handler) updateContest(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Updating a contest... ")
@@ -285,7 +285,7 @@ func (h *Handler) updateContest(c *fiber.Ctx) error {
 // @Success 200 {object} string "Contest deleted"
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/admin/contests/:id [delete]
+// @Router /api/v1/admin/contests/{id} [delete]
 func (h *Handler) deleteContest(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Deleting a contest... ")

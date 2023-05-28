@@ -33,11 +33,11 @@ import (
 // @version 1.0
 // @description Backend for AITU Corporate Self-Study Portal.
 
-// @host squid-app-8kray.ondigitalocean.app
+// @host localhost:8080
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header
-// @name Users
+// @name Authorization
 func main() {
 	fallbackLogger := log.New(os.Stderr, "ERROR ", log.Ldate|log.Ltime|log.Lshortfile|log.LUTC|log.Lmsgprefix)
 
@@ -160,10 +160,14 @@ func main() {
 			EnableStackTrace: true,
 		}))
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "*",
-		AllowMethods:     "GET, POST, PUT, DELETE",
-		AllowHeaders:     "Origin, Content-Type, Accept, Users",
-		AllowCredentials: false,
+		AllowOrigins: "*",
+		AllowMethods: "GET, POST, PUT, DELETE",
+		AllowHeaders: `Origin, Content-Type, Accept, Authorization, 
+						Content-Length, Accept-Language, 
+						Accept-Encoding, Connection, Access-Control-Allow-Origin, 
+						Access-Control-Allow-Headers, Access-Control-Allow-Methods, Access-Control-Allow-Credentials`,
+		ExposeHeaders:    "Origin",
+		AllowCredentials: true,
 	}))
 
 	// Initializing app repository, service and handler

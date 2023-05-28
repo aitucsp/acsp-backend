@@ -22,7 +22,7 @@ import (
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/contests/:id [get]
+// @Router /api/v1/contests/{id} [get]
 func (h *Handler) getContest(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting contest by id... ")

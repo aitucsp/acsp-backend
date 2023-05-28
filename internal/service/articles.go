@@ -108,10 +108,6 @@ func (s *ArticlesService) GetAll(ctx context.Context) ([]model.Article, error) {
 		return []model.Article{}, err
 	}
 
-	if articles == nil {
-		return []model.Article{}, nil
-	}
-
 	articles = s.getFullURLForArticles(articles)
 
 	return articles, nil

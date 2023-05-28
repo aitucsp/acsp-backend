@@ -16,7 +16,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/admin/contests/:id": {
+        "/api/v1/admin/contests/{id}": {
             "put": {
                 "security": [
                     {
@@ -193,7 +193,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/admin/users/:id": {
+        "/api/v1/admin/users/{id}": {
             "get": {
                 "security": [
                     {
@@ -597,7 +597,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/code-connection/applicants/:id": {
+        "/api/v1/code-connection/applicants/{id}": {
             "get": {
                 "security": [
                     {
@@ -788,7 +788,123 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/code-connection/cards/:id": {
+        "/api/v1/code-connection/cards/invitations": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get invitations of a user's cards",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get invitations of user",
+                "operationId": "get-card-invitations",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/code-connection/cards/responses": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all responses of a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get responses of a user",
+                "operationId": "get-responses-by-user-id",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/code-connection/cards/{id}": {
             "put": {
                 "security": [
                     {
@@ -908,7 +1024,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/code-connection/cards/:id/invitations": {
+        "/api/v1/code-connection/cards/{id}/invitations": {
             "get": {
                 "security": [
                     {
@@ -1039,7 +1155,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/code-connection/cards/:id/invitations/:invitationID": {
+        "/api/v1/code-connection/cards/{id}/invitations/{invitationID}": {
             "get": {
                 "security": [
                     {
@@ -1113,7 +1229,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/code-connection/cards/:id/invitations/:invitationID/accept": {
+        "/api/v1/code-connection/cards/{id}/invitations/{invitationID}/accept": {
             "post": {
                 "security": [
                     {
@@ -1187,7 +1303,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/code-connection/cards/:id/invitations/:invitationID/decline": {
+        "/api/v1/code-connection/cards/{id}/invitations/{invitationID}/decline": {
             "post": {
                 "security": [
                     {
@@ -1222,122 +1338,6 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/code-connection/cards/invitations": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get invitations of a user's cards",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Get invitations of user",
-                "operationId": "get-card-invitations",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/code-connection/cards/responses": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all responses of a user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Get responses of a user",
-                "operationId": "get-responses-by-user-id",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1445,7 +1445,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/coding-lab/discipline/:id": {
+        "/api/v1/coding-lab/discipline/{id}": {
             "get": {
                 "security": [
                     {
@@ -1686,7 +1686,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/coding-lab/disciplines/:id": {
+        "/api/v1/coding-lab/disciplines/{id}": {
             "put": {
                 "security": [
                     {
@@ -1754,7 +1754,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/coding-lab/disciplines/:id/projects": {
+        "/api/v1/coding-lab/disciplines/{id}/projects": {
             "get": {
                 "security": [
                     {
@@ -1878,7 +1878,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/coding-lab/disciplines/:id/projects/:projectID": {
+        "/api/v1/coding-lab/disciplines/{id}/projects/{projectID}": {
             "get": {
                 "security": [
                     {
@@ -2082,7 +2082,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/coding-lab/projects/:id/modules": {
+        "/api/v1/coding-lab/projects/{id}/modules": {
             "get": {
                 "security": [
                     {
@@ -2166,6 +2166,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.CreateProjectModule"
                         }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "project id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2206,7 +2213,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/coding-lab/projects/:id/modules/:moduleID": {
+        "/api/v1/coding-lab/projects/{id}/modules/{moduleID}": {
             "get": {
                 "security": [
                     {
@@ -2468,7 +2475,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/contests/:id": {
+        "/api/v1/contests/{id}": {
             "get": {
                 "security": [
                     {
@@ -2619,6 +2626,13 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.CreateArticle"
                         }
+                    },
+                    {
+                        "type": "file",
+                        "description": "article image",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -2659,7 +2673,74 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/scholar/articles/:id": {
+        "/api/v1/scholar/articles/user": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all articles of user by user id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Get all articles of user",
+                "operationId": "get-all-articles-by-user-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "userID",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/scholar/articles/{id}": {
             "get": {
                 "security": [
                     {
@@ -2844,7 +2925,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/scholar/articles/:id/comments": {
+        "/api/v1/scholar/articles/{id}/comments": {
             "get": {
                 "security": [
                     {
@@ -2984,7 +3065,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/scholar/articles/:id/comments/:commentID/downvote": {
+        "/api/v1/scholar/articles/{id}/comments/{commentID}/downvote": {
             "post": {
                 "security": [
                     {
@@ -3058,7 +3139,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/scholar/articles/:id/comments/:commentID/replies": {
+        "/api/v1/scholar/articles/{id}/comments/{commentID}/replies": {
             "get": {
                 "security": [
                     {
@@ -3204,7 +3285,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/scholar/articles/:id/comments/:commentID/upvote": {
+        "/api/v1/scholar/articles/{id}/comments/{commentID}/upvote": {
             "post": {
                 "security": [
                     {
@@ -3278,7 +3359,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/scholar/articles/:id/comments/:commentID/votes": {
+        "/api/v1/scholar/articles/{id}/comments/{commentID}/votes": {
             "get": {
                 "security": [
                     {
@@ -3310,73 +3391,6 @@ const docTemplate = `{
                         "description": "comment id",
                         "name": "commentID",
                         "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "default": {
-                        "description": "",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/scholar/articles/user": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Get all articles of user by user id",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "articles"
-                ],
-                "summary": "Get all articles of user",
-                "operationId": "get-all-articles-by-user-id",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "user id",
-                        "name": "userID",
-                        "in": "query",
                         "required": true
                     }
                 ],
@@ -3542,7 +3556,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/scholar/materials/:id": {
+        "/api/v1/scholar/materials/{id}": {
             "get": {
                 "security": [
                     {
@@ -3727,7 +3741,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/scholar/materials/:userID": {
+        "/api/v1/scholar/materials/{userID}": {
             "get": {
                 "security": [
                     {
@@ -3746,6 +3760,15 @@ const docTemplate = `{
                 ],
                 "summary": "Get all materials by user id",
                 "operationId": "get-all-materials-by-user-id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "user id",
+                        "name": "userID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -4033,7 +4056,19 @@ const docTemplate = `{
     },
     "definitions": {
         "dto.CreateArticle": {
-            "type": "object"
+            "type": "object",
+            "required": [
+                "description",
+                "topic"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "topic": {
+                    "type": "string"
+                }
+            }
         },
         "dto.CreateCard": {
             "type": "object",
@@ -4339,7 +4374,7 @@ const docTemplate = `{
     "securityDefinitions": {
         "ApiKeyAuth": {
             "type": "apiKey",
-            "name": "Users",
+            "name": "Authorization",
             "in": "header"
         }
     }
@@ -4348,7 +4383,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "squid-app-8kray.ondigitalocean.app",
+	Host:             "localhost:8080",
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "ACSP Backend",

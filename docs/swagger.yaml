@@ -1,6 +1,14 @@
 basePath: /
 definitions:
   dto.CreateArticle:
+    properties:
+      description:
+        type: string
+      topic:
+        type: string
+    required:
+    - description
+    - topic
     type: object
   dto.CreateCard:
     properties:
@@ -202,14 +210,14 @@ definitions:
     - email
     - password
     type: object
-host: squid-app-8kray.ondigitalocean.app
+host: localhost:8080
 info:
   contact: {}
   description: Backend for AITU Corporate Self-Study Portal.
   title: ACSP Backend
   version: "1.0"
 paths:
-  /api/v1/admin/contests/:id:
+  /api/v1/admin/contests/{id}:
     delete:
       consumes:
       - application/json
@@ -327,7 +335,7 @@ paths:
       summary: Get all users
       tags:
       - admin
-  /api/v1/admin/users/:id:
+  /api/v1/admin/users/{id}:
     delete:
       consumes:
       - application/json
@@ -599,7 +607,7 @@ paths:
       summary: Get all cards
       tags:
       - cards
-  /api/v1/code-connection/applicants/:id:
+  /api/v1/code-connection/applicants/{id}:
     get:
       consumes:
       - application/json
@@ -727,7 +735,7 @@ paths:
       summary: Create a card
       tags:
       - cards
-  /api/v1/code-connection/cards/:id:
+  /api/v1/code-connection/cards/{id}:
     delete:
       consumes:
       - application/json
@@ -807,7 +815,7 @@ paths:
       summary: Update a card by id
       tags:
       - cards
-  /api/v1/code-connection/cards/:id/invitations:
+  /api/v1/code-connection/cards/{id}/invitations:
     get:
       consumes:
       - application/json
@@ -895,7 +903,7 @@ paths:
       summary: Create an invitation
       tags:
       - cards
-  /api/v1/code-connection/cards/:id/invitations/:invitationID:
+  /api/v1/code-connection/cards/{id}/invitations/{invitationID}:
     get:
       consumes:
       - application/json
@@ -945,7 +953,7 @@ paths:
       summary: Get invitation by id and card id
       tags:
       - cards
-  /api/v1/code-connection/cards/:id/invitations/:invitationID/accept:
+  /api/v1/code-connection/cards/{id}/invitations/{invitationID}/accept:
     post:
       consumes:
       - application/json
@@ -995,7 +1003,7 @@ paths:
       summary: Accept invitation by invitation id and card id
       tags:
       - cards
-  /api/v1/code-connection/cards/:id/invitations/:invitationID/decline:
+  /api/v1/code-connection/cards/{id}/invitations/{invitationID}/decline:
     post:
       consumes:
       - application/json
@@ -1168,7 +1176,7 @@ paths:
       summary: Create a contest
       tags:
       - admin
-  /api/v1/coding-lab/discipline/:id:
+  /api/v1/coding-lab/discipline/{id}:
     delete:
       consumes:
       - application/json
@@ -1329,7 +1337,7 @@ paths:
       summary: Create a discipline
       tags:
       - projects
-  /api/v1/coding-lab/disciplines/:id:
+  /api/v1/coding-lab/disciplines/{id}:
     put:
       consumes:
       - application/json
@@ -1374,7 +1382,7 @@ paths:
       summary: Update a discipline by id
       tags:
       - disciplines
-  /api/v1/coding-lab/disciplines/:id/projects:
+  /api/v1/coding-lab/disciplines/{id}/projects:
     get:
       consumes:
       - application/json
@@ -1458,7 +1466,7 @@ paths:
       summary: Create a project
       tags:
       - projects
-  /api/v1/coding-lab/disciplines/:id/projects/:projectID:
+  /api/v1/coding-lab/disciplines/{id}/projects/{projectID}:
     delete:
       consumes:
       - application/json
@@ -1595,7 +1603,7 @@ paths:
       summary: Update a project by id
       tags:
       - projects
-  /api/v1/coding-lab/projects/:id/modules:
+  /api/v1/coding-lab/projects/{id}/modules:
     get:
       consumes:
       - application/json
@@ -1646,6 +1654,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dto.CreateProjectModule'
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -1678,7 +1691,7 @@ paths:
       summary: Create a module for a project
       tags:
       - projects
-  /api/v1/coding-lab/projects/:id/modules/:moduleID:
+  /api/v1/coding-lab/projects/{id}/modules/{moduleID}:
     delete:
       consumes:
       - application/json
@@ -1854,7 +1867,7 @@ paths:
       summary: Get all contests
       tags:
       - contests
-  /api/v1/contests/:id:
+  /api/v1/contests/{id}:
     get:
       consumes:
       - application/json
@@ -1951,6 +1964,11 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dto.CreateArticle'
+      - description: article image
+        in: formData
+        name: file
+        required: true
+        type: file
       produces:
       - application/json
       responses:
@@ -1983,7 +2001,7 @@ paths:
       summary: Create an article
       tags:
       - articles
-  /api/v1/scholar/articles/:id:
+  /api/v1/scholar/articles/{id}:
     delete:
       consumes:
       - application/json
@@ -2107,7 +2125,7 @@ paths:
       summary: Update an article by id
       tags:
       - articles
-  /api/v1/scholar/articles/:id/comments:
+  /api/v1/scholar/articles/{id}/comments:
     get:
       consumes:
       - application/json
@@ -2201,7 +2219,7 @@ paths:
       summary: Comment an article
       tags:
       - articles
-  /api/v1/scholar/articles/:id/comments/:commentID/downvote:
+  /api/v1/scholar/articles/{id}/comments/{commentID}/downvote:
     post:
       consumes:
       - application/json
@@ -2251,7 +2269,7 @@ paths:
       summary: Downvote comment
       tags:
       - articles
-  /api/v1/scholar/articles/:id/comments/:commentID/replies:
+  /api/v1/scholar/articles/{id}/comments/{commentID}/replies:
     get:
       consumes:
       - application/json
@@ -2350,7 +2368,7 @@ paths:
       summary: Reply to comment by article id and comment id
       tags:
       - articles
-  /api/v1/scholar/articles/:id/comments/:commentID/upvote:
+  /api/v1/scholar/articles/{id}/comments/{commentID}/upvote:
     post:
       consumes:
       - application/json
@@ -2400,7 +2418,7 @@ paths:
       summary: Upvote comment
       tags:
       - articles
-  /api/v1/scholar/articles/:id/comments/:commentID/votes:
+  /api/v1/scholar/articles/{id}/comments/{commentID}/votes:
     get:
       consumes:
       - application/json
@@ -2578,7 +2596,7 @@ paths:
       summary: Create a material
       tags:
       - materials
-  /api/v1/scholar/materials/:id:
+  /api/v1/scholar/materials/{id}:
     delete:
       consumes:
       - application/json
@@ -2702,12 +2720,18 @@ paths:
       summary: Update a material by id
       tags:
       - materials
-  /api/v1/scholar/materials/:userID:
+  /api/v1/scholar/materials/{userID}:
     get:
       consumes:
       - application/json
       description: Get all materials of user
       operationId: get-all-materials-by-user-id
+      parameters:
+      - description: user id
+        in: path
+        name: userID
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -2913,6 +2937,6 @@ paths:
 securityDefinitions:
   ApiKeyAuth:
     in: header
-    name: Users
+    name: Authorization
     type: apiKey
 swagger: "2.0"

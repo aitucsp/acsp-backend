@@ -81,7 +81,7 @@ func (h *Handler) createCard(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/:id [put]
+// @Router /api/v1/code-connection/cards/{id} [put]
 func (h *Handler) updateCard(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Updating a card... ")
@@ -146,7 +146,7 @@ func (h *Handler) updateCard(c *fiber.Ctx) error {
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/:id [delete]
+// @Router /api/v1/code-connection/cards/{id} [delete]
 func (h *Handler) deleteCard(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Deleting a card")
@@ -268,7 +268,7 @@ func (h *Handler) getAllCards(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/applicants/:id [get]
+// @Router /api/v1/code-connection/applicants/{id} [get]
 func (h *Handler) getCardByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting card by id... ")
@@ -314,7 +314,7 @@ func (h *Handler) getCardByID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/:id/invitations [post]
+// @Router /api/v1/code-connection/cards/{id}/invitations [post]
 func (h *Handler) createInvitation(c *fiber.Ctx) error {
 	log.Println("Creating a card... ")
 
@@ -406,7 +406,7 @@ func (h *Handler) getInvitations(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/:id/invitations/:invitationID [get]
+// @Router /api/v1/code-connection/cards/{id}/invitations/{invitationID} [get]
 func (h *Handler) getInvitationByID(c *fiber.Ctx) error {
 	log.Println("Creating a card... ")
 
@@ -461,7 +461,7 @@ func (h *Handler) getInvitationByID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/:id/invitations [get]
+// @Router /api/v1/code-connection/cards/{id}/invitations [get]
 func (h *Handler) getInvitationsByCardID(c *fiber.Ctx) error {
 	log.Println("Getting invitation by card id... ")
 
@@ -510,7 +510,7 @@ func (h *Handler) getInvitationsByCardID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/:id/invitations/:invitationID/accept [post]
+// @Router /api/v1/code-connection/cards/{id}/invitations/{invitationID}/accept [post]
 func (h *Handler) acceptInvitation(c *fiber.Ctx) error {
 	log.Println("Accepting an invitation... ")
 
@@ -565,7 +565,7 @@ func (h *Handler) acceptInvitation(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/code-connection/cards/:id/invitations/:invitationID/decline [post]
+// @Router /api/v1/code-connection/cards/{id}/invitations/{invitationID}/decline [post]
 func (h *Handler) declineInvitation(c *fiber.Ctx) error {
 	log.Println("Creating a card... ")
 

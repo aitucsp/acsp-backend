@@ -21,11 +21,12 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param request body dto.CreateProjectModule true "module information"
+// @Param id path int true "project id"
 // @Success 200 {integer} map[string]interface{} "message"
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects/:id/modules [post]
+// @Router /api/v1/coding-lab/projects/{id}/modules [post]
 func (h *Handler) createProjectModule(c *fiber.Ctx) error {
 	log.Println("Creating a module for a project... ")
 
@@ -88,7 +89,7 @@ func (h *Handler) createProjectModule(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects/:id/modules/:moduleID [put]
+// @Router /api/v1/coding-lab/projects/{id}/modules/{moduleID} [put]
 func (h *Handler) updateProjectModule(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Updating a project... ")
@@ -159,7 +160,7 @@ func (h *Handler) updateProjectModule(c *fiber.Ctx) error {
 // @Success 200 {object} string "Project module deleted"
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects/:id/modules/:moduleID [delete]
+// @Router /api/v1/coding-lab/projects/{id}/modules/{moduleID} [delete]
 func (h *Handler) deleteProjectModule(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Deleting a project")
@@ -214,7 +215,7 @@ func (h *Handler) deleteProjectModule(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects/:id/modules/:moduleID [get]
+// @Router /api/v1/coding-lab/projects/{id}/modules/{moduleID} [get]
 func (h *Handler) getProjectModuleByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting project module by id... ")
@@ -272,7 +273,7 @@ func (h *Handler) getProjectModuleByID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/projects/:id/modules [get]
+// @Router /api/v1/coding-lab/projects/{id}/modules [get]
 func (h *Handler) getAllProjectModules(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all project modules... ")

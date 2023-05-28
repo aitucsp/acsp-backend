@@ -25,7 +25,7 @@ import (
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/disciplines/:id/projects [post]
+// @Router /api/v1/coding-lab/disciplines/{id}/projects [post]
 func (h *Handler) createProject(c *fiber.Ctx) error {
 	log.Println("Creating a project... ")
 
@@ -88,7 +88,7 @@ func (h *Handler) createProject(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/disciplines/:id/projects/:projectID [put]
+// @Router /api/v1/coding-lab/disciplines/{id}/projects/{projectID} [put]
 func (h *Handler) updateProject(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Updating a project... ")
@@ -159,7 +159,7 @@ func (h *Handler) updateProject(c *fiber.Ctx) error {
 // @Success 200 {object} string "Project deleted"
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/disciplines/:id/projects/:projectID [delete]
+// @Router /api/v1/coding-lab/disciplines/{id}/projects/{projectID} [delete]
 func (h *Handler) deleteProject(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Deleting a project")
@@ -217,7 +217,7 @@ func (h *Handler) deleteProject(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/disciplines/:id/projects/:projectID [get]
+// @Router /api/v1/coding-lab/disciplines/{id}/projects/{projectID} [get]
 func (h *Handler) getProjectByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting project by id... ")
@@ -275,7 +275,7 @@ func (h *Handler) getProjectByID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/coding-lab/disciplines/:id/projects [get]
+// @Router /api/v1/coding-lab/disciplines/{id}/projects [get]
 func (h *Handler) getAllProjectsByDisciplineID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting all projects by discipline... ")

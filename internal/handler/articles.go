@@ -21,6 +21,7 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param request body dto.CreateArticle true "article information"
+// @Param file formData file true "article image"
 // @Success 200 {integer} integer 1
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
@@ -45,7 +46,13 @@ func (h *Handler) createArticle(c *fiber.Ctx) error {
 		})
 	}
 
-	input.Image, _ = c.FormFile("file")
+	input.Image, err = c.FormFile("file")
+	if err != nil {
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"errors":  true,
+			"message": err.Error(),
+		})
+	}
 
 	validate := validator.New()
 	err = validate.Struct(input)
@@ -157,7 +164,7 @@ func (h *Handler) getAllArticlesByUserID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id [get]
+// @Router /api/v1/scholar/articles/{id} [get]
 func (h *Handler) getArticleByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Getting article by id... ")
@@ -199,7 +206,7 @@ func (h *Handler) getArticleByID(c *fiber.Ctx) error {
 // @Failure 400 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id [put]
+// @Router /api/v1/scholar/articles/{id} [put]
 func (h *Handler) updateArticle(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Updating a project... ")
@@ -259,7 +266,7 @@ func (h *Handler) updateArticle(c *fiber.Ctx) error {
 // @Success 200 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id [delete]
+// @Router /api/v1/scholar/articles/{id} [delete]
 func (h *Handler) deleteArticle(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Deleting an article")
@@ -304,7 +311,7 @@ func (h *Handler) deleteArticle(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments [post]
+// @Router /api/v1/scholar/articles/{id}/comments [post]
 func (h *Handler) commentArticle(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Commenting an article")
@@ -364,7 +371,7 @@ func (h *Handler) commentArticle(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments [get]
+// @Router /api/v1/scholar/articles/{id}/comments [get]
 func (h *Handler) getCommentsByArticleID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Get all comments by article id... ")
@@ -407,7 +414,7 @@ func (h *Handler) getCommentsByArticleID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:commentID/replies [post]
+// @Router /api/v1/scholar/articles/{id}/comments/{commentID}/replies [post]
 func (h *Handler) replyToCommentByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Replying to comment... ")
@@ -484,7 +491,7 @@ func (h *Handler) replyToCommentByID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:commentID/replies [get]
+// @Router /api/v1/scholar/articles/{id}/comments/{commentID}/replies [get]
 func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Get all replies by comment id... ")
@@ -535,7 +542,7 @@ func (h *Handler) getRepliesByCommentID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:commentID/upvote [post]
+// @Router /api/v1/scholar/articles/{id}/comments/{commentID}/upvote [post]
 func (h *Handler) upvoteCommentByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Up-voting a comment... ")
@@ -592,7 +599,7 @@ func (h *Handler) upvoteCommentByID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:commentID/downvote [post]
+// @Router /api/v1/scholar/articles/{id}/comments/{commentID}/downvote [post]
 func (h *Handler) downvoteCommentByID(c *fiber.Ctx) error {
 	l := logging.LoggerFromContext(c.UserContext())
 	l.Info("Down-voting comment id... ")
@@ -649,7 +656,7 @@ func (h *Handler) downvoteCommentByID(c *fiber.Ctx) error {
 // @Failure 400,404 {object} map[string]interface{}
 // @Failure 500 {object} map[string]interface{}
 // @Failure default {object} map[string]interface{}
-// @Router /api/v1/scholar/articles/:id/comments/:commentID/votes [get]
+// @Router /api/v1/scholar/articles/{id}/comments/{commentID}/votes [get]
 func (h *Handler) getVotesByCommentID(ctx *fiber.Ctx) error {
 	l := logging.LoggerFromContext(ctx.UserContext())
 	l.Info("Getting votes of comment... ")
