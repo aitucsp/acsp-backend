@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: acsp-backend
+    build: ./
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - app:/usr/src/app/
+    environment:
+      - DB_PASSWORD=1245emer
+    networks:
+      - cloud
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    container_name: postgres
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1245emer
+      - POSTGRES_DB=acsp
+      - DATABASE_HOST=localhost
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - ./postgres:/data/db
+      - ./migrations/000001_init.up.sql:/docker-entrypoint-initdb.d/000001_init.up.sql
+    networks:
+      - cloud
+
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-volume:/data
+    networks:
+      - cloud
+
+volumes:
+  app:
+  postgres:
+  redis-volume:
+
+networks:
+  cloud:
+    driver: bridge

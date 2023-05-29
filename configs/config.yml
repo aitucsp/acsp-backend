@@ -1,0 +1,11 @@
+http:
+  port: 8080
+  maxHeaderBytes: 1
+  readTimeout: 10s
+  writeTimeout: 10s
+  host: localhost
+
+auth:
+  accessTokenTTL: 1h
+  refreshTokenTTL: 2h
+  verificationCodeLength: 8

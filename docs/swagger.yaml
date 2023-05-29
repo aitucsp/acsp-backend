@@ -1,0 +1,3844 @@
+basePath: /
+definitions:
+  dto.AnswerInvitation:
+    properties:
+      feedback:
+        type: string
+    required:
+    - feedback
+    type: object
+  dto.CreateArticle:
+    properties:
+      description:
+        type: string
+      topic:
+        type: string
+    required:
+    - description
+    - topic
+    type: object
+  dto.CreateCard:
+    properties:
+      description:
+        type: string
+      position:
+        type: string
+      skills:
+        items:
+          type: string
+        type: array
+    required:
+    - description
+    - position
+    - skills
+    type: object
+  dto.CreateComment:
+    properties:
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  dto.CreateContest:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      start_date:
+        type: string
+    type: object
+  dto.CreateCourse:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  dto.CreateCourseModule:
+    properties:
+      expected_result:
+        type: string
+      title:
+        type: string
+    required:
+    - expected_result
+    - title
+    type: object
+  dto.CreateCourseModuleLesson:
+    properties:
+      description:
+        type: string
+      reference_url:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  dto.CreateDiscipline:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  dto.CreateLessonComment:
+    properties:
+      text:
+        type: string
+    required:
+    - text
+    type: object
+  dto.CreateMaterial:
+    properties:
+      description:
+        type: string
+      topic:
+        type: string
+    required:
+    - description
+    - topic
+    type: object
+  dto.CreateProject:
+    properties:
+      description:
+        type: string
+      level:
+        type: string
+      title:
+        type: string
+      work_hours:
+        type: integer
+    type: object
+  dto.CreateProjectModule:
+    properties:
+      description:
+        type: string
+      reference_url:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  dto.CreateUser:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  dto.UpdateArticle:
+    properties:
+      description:
+        type: string
+      topic:
+        type: string
+    required:
+    - description
+    - topic
+    type: object
+  dto.UpdateCard:
+    properties:
+      description:
+        type: string
+      position:
+        type: string
+      skills:
+        items:
+          type: string
+        type: array
+    required:
+    - description
+    - position
+    - skills
+    type: object
+  dto.UpdateContest:
+    properties:
+      description:
+        type: string
+      end_date:
+        type: string
+      link:
+        type: string
+      name:
+        type: string
+      start_date:
+        type: string
+    type: object
+  dto.UpdateCourse:
+    properties:
+      description:
+        type: string
+      rating:
+        type: integer
+      title:
+        type: string
+    required:
+    - description
+    - rating
+    - title
+    type: object
+  dto.UpdateCourseModule:
+    properties:
+      expected_result:
+        type: string
+      title:
+        type: string
+    required:
+    - expected_result
+    - title
+    type: object
+  dto.UpdateCourseModuleLesson:
+    properties:
+      description:
+        type: string
+      reference_url:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  dto.UpdateDiscipline:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  dto.UpdateMaterial:
+    properties:
+      description:
+        type: string
+      topic:
+        type: string
+    required:
+    - description
+    - topic
+    type: object
+  dto.UpdateProject:
+    properties:
+      description:
+        type: string
+      level:
+        type: string
+      title:
+        type: string
+      work_hours:
+        type: integer
+    type: object
+  dto.UpdateProjectModule:
+    properties:
+      description:
+        type: string
+      reference_url:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  dto.UpdateUser:
+    properties:
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
+        type: string
+      phone_number:
+        type: string
+      specialization:
+        type: string
+    required:
+    - first_name
+    - last_name
+    - phone_number
+    - specialization
+    type: object
+  handler.signInInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+host: squid-app-8kray.ondigitalocean.app
+info:
+  contact: {}
+  description: Backend for AITU Corporate Self-Study Portal.
+  title: ACSP Backend
+  version: "1.0"
+paths:
+  /api/v1/admin/contests/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a contest by id
+      operationId: delete-contest-by-id
+      parameters:
+      - description: contest id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contest deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a contest by id
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      description: Update data of contest
+      operationId: update-contest-by-id
+      parameters:
+      - description: contest id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: contest information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateContest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Contest updated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a contest by id
+      tags:
+      - admin
+  /api/v1/admin/users:
+    get:
+      consumes:
+      - application/json
+      description: Get all users
+      operationId: get-all-users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all users
+      tags:
+      - admin
+  /api/v1/admin/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user by id
+      operationId: delete-user-by-id
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a user by id
+      tags:
+      - admin
+    get:
+      consumes:
+      - application/json
+      description: Get a user by id
+      operationId: get-user-by-id
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a user by id
+      tags:
+      - admin
+    put:
+      consumes:
+      - application/json
+      description: Update user by id
+      operationId: update-user-by-id
+      parameters:
+      - description: user id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: user information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User updated
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a user by id
+      tags:
+      - admin
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout user and delete refresh token from cache by user ID
+      operationId: logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: logout user
+      tags:
+      - auth
+  /api/v1/auth/sign-in:
+    post:
+      consumes:
+      - application/json
+      description: signing in a user to the system and returning a token pair (access
+        and refresh) to the client for further requests
+      operationId: sign-in
+      parameters:
+      - description: credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/handler.signInInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token pair
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      summary: SignIn
+      tags:
+      - auth
+  /api/v1/auth/sign-up:
+    post:
+      consumes:
+      - application/json
+      description: signing up a new user to the system
+      operationId: sign-up
+      parameters:
+      - description: account info
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      summary: SignUp
+      tags:
+      - auth
+  /api/v1/code-connection/applicants:
+    get:
+      consumes:
+      - application/json
+      description: Get all cards
+      operationId: get-all-cards
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all cards
+      tags:
+      - cards
+  /api/v1/code-connection/applicants/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get applicant card by id
+      operationId: get-applicant-card-by-id
+      parameters:
+      - description: applicant id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get applicant card by id
+      tags:
+      - cards
+  /api/v1/code-connection/cards:
+    get:
+      consumes:
+      - application/json
+      description: Get all cards of a user
+      operationId: get-all-cards-by-user-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all cards of a user
+      tags:
+      - cards
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a card
+      operationId: card-id
+      parameters:
+      - description: card information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCard'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a card
+      tags:
+      - cards
+  /api/v1/code-connection/cards/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a card from database
+      operationId: delete-card-by-id
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a card by id
+      tags:
+      - cards
+    put:
+      consumes:
+      - application/json
+      description: Update data of card
+      operationId: update-card-by-id
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: card information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCard'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a card by id
+      tags:
+      - cards
+  /api/v1/code-connection/cards/{id}/invitations:
+    get:
+      consumes:
+      - application/json
+      description: Get all invitations by card id
+      operationId: get-invitations-by-card-id
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all invitations by card
+      tags:
+      - cards
+    post:
+      consumes:
+      - application/json
+      description: Invite a user by a card id
+      operationId: create-an-invitation
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create an invitation
+      tags:
+      - cards
+  /api/v1/code-connection/cards/{id}/invitations/{invitationID}:
+    get:
+      consumes:
+      - application/json
+      description: Get invitation by id and card id
+      operationId: get-invitation-by-id
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: invitation id
+        in: path
+        name: invitationID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get invitation by id and card id
+      tags:
+      - cards
+  /api/v1/code-connection/cards/{id}/invitations/{invitationID}/accept:
+    post:
+      consumes:
+      - application/json
+      description: Accept invitation by invitation id and card id
+      operationId: accept-invitation-by-id-and-card-id
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: invitation id
+        in: path
+        name: invitationID
+        required: true
+        type: integer
+      - description: accept invitation feedback
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AnswerInvitation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Accept invitation by invitation id and card id
+      tags:
+      - cards
+  /api/v1/code-connection/cards/{id}/invitations/{invitationID}/decline:
+    post:
+      consumes:
+      - application/json
+      description: Decline invitation by invitation id and card id
+      operationId: decline-invitation-by-id-and-card-id
+      parameters:
+      - description: card id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: invitation id
+        in: path
+        name: invitationID
+        required: true
+        type: integer
+      - description: decline invitation feedback
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AnswerInvitation'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Decline invitation by invitation id and card id
+      tags:
+      - cards
+  /api/v1/code-connection/cards/invitations:
+    get:
+      consumes:
+      - application/json
+      description: Get invitations of a user's cards
+      operationId: get-card-invitations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get invitations of user
+      tags:
+      - cards
+  /api/v1/code-connection/cards/responses:
+    get:
+      consumes:
+      - application/json
+      description: Get all responses of a user
+      operationId: get-responses-by-user-id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get responses of a user
+      tags:
+      - cards
+  /api/v1/coding-lab/admin/contests:
+    post:
+      consumes:
+      - application/json
+      description: Request for creating a contest
+      operationId: create-contest
+      parameters:
+      - description: contest information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateContest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a contest
+      tags:
+      - admin
+  /api/v1/coding-lab/discipline/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a discipline by id
+      operationId: delete-discipline-by-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Discipline deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a discipline by id
+      tags:
+      - disciplines
+    get:
+      consumes:
+      - application/json
+      description: Get a discipline by id
+      operationId: get-discipline-by-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a discipline by id
+      tags:
+      - disciplines
+  /api/v1/coding-lab/disciplines:
+    get:
+      consumes:
+      - application/json
+      description: Get all disciplines
+      operationId: get-all-disciplines
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all disciplines
+      tags:
+      - disciplines
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a discipline
+      operationId: create-discipline
+      parameters:
+      - description: discipline information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateDiscipline'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a discipline
+      tags:
+      - projects
+  /api/v1/coding-lab/disciplines/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Update data of a discipline by id
+      operationId: update-discipline-by-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: discipline information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateDiscipline'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Discipline updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a discipline by id
+      tags:
+      - disciplines
+  /api/v1/coding-lab/disciplines/{id}/projects:
+    get:
+      consumes:
+      - application/json
+      description: Get all projects of discipline
+      operationId: get-all-projects-by-discipline-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all projects by discipline id
+      tags:
+      - projects
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a project for a user by id in the database
+        by user id
+      operationId: create-project
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: project information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a project
+      tags:
+      - projects
+  /api/v1/coding-lab/disciplines/{id}/projects/{projectID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a project by id
+      operationId: delete-project-by-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: project id
+        in: path
+        name: projectID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a project by id
+      tags:
+      - projects
+    get:
+      consumes:
+      - application/json
+      description: Get a project by id
+      operationId: get-project-by-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: project id
+        in: path
+        name: projectID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a project by id
+      tags:
+      - projects
+    put:
+      consumes:
+      - application/json
+      description: Update data of project
+      operationId: update-project-by-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: project id
+        in: path
+        name: projectID
+        required: true
+        type: integer
+      - description: project information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProject'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a project by id
+      tags:
+      - projects
+  /api/v1/coding-lab/projects/{id}/modules:
+    get:
+      consumes:
+      - application/json
+      description: Get all project modules
+      operationId: get-all-project-modules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all project modules
+      tags:
+      - projects
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a module of a project
+      operationId: create-project-module
+      parameters:
+      - description: module information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateProjectModule'
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a module for a project
+      tags:
+      - projects
+  /api/v1/coding-lab/projects/{id}/modules/{moduleID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a project module by id
+      operationId: delete-project-module-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project module deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a project module by id
+      tags:
+      - projects
+    get:
+      consumes:
+      - application/json
+      description: Get a project module by id
+      operationId: get-project-module-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a project module by id
+      tags:
+      - projects
+    put:
+      consumes:
+      - application/json
+      description: Update data of a project module
+      operationId: update-project-module-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: card information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateProjectModule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a project module by id
+      tags:
+      - projects
+  /api/v1/contests:
+    get:
+      consumes:
+      - application/json
+      description: Get all contests
+      operationId: get-all-contests
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all contests
+      tags:
+      - contests
+  /api/v1/contests/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Get contest by id
+      operationId: get-contest-by-id
+      parameters:
+      - description: contest id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get contest by id
+      tags:
+      - contests
+  /api/v1/course/{id}/modules/{moduleID}:
+    get:
+      consumes:
+      - application/json
+      description: Get a course module by id
+      operationId: get-course-module-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a course module by id
+      tags:
+      - courses
+  /api/v1/course/{id}/modules/{moduleID}/lessons/{lessonID}:
+    get:
+      consumes:
+      - application/json
+      description: Get a course module lesson by id
+      operationId: get-course-module-lesson-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a course module lesson by id
+      tags:
+      - courses
+  /api/v1/courses:
+    get:
+      consumes:
+      - application/json
+      description: Get all courses
+      operationId: get-all-courses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all courses
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a course
+      operationId: create-course
+      parameters:
+      - description: course information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourse'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a course
+      tags:
+      - courses
+  /api/v1/courses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a course by id
+      operationId: delete-course-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a course by id
+      tags:
+      - courses
+    get:
+      consumes:
+      - application/json
+      description: Get a course by id
+      operationId: get-course-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a course by id
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update data of a course
+      operationId: update-course-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: course information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCourse'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a course by id
+      tags:
+      - courses
+  /api/v1/courses/{id}/lessons/{lessonID}/comments:
+    get:
+      consumes:
+      - application/json
+      description: Get a course module by id
+      operationId: get-lesson-comments-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a course module by id
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a module of a course
+      operationId: create-lesson-comment
+      parameters:
+      - description: comment information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateLessonComment'
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a module for a course
+      tags:
+      - courses
+  /api/v1/courses/{id}/modules:
+    get:
+      consumes:
+      - application/json
+      description: Get all courses modules
+      operationId: get-all-course-modules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all course modules
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a module of a course
+      operationId: create-course-module
+      parameters:
+      - description: module information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseModule'
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a module for a course
+      tags:
+      - courses
+  /api/v1/courses/{id}/modules/{moduleID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a course module by id
+      operationId: delete-course-module-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course module deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a course module by id
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update data of a course module
+      operationId: update-course-module-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: module information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCourseModule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a course module by id
+      tags:
+      - courses
+  /api/v1/courses/{id}/modules/{moduleID}/lessons:
+    get:
+      consumes:
+      - application/json
+      description: Get all course module lessons
+      operationId: get-all-course-module-lessons
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all lessons of a module
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a lesson for a module of a course
+      operationId: create-course-module-lesson
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: lesson information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseModuleLesson'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a lesson for a module of course
+      tags:
+      - courses
+  /api/v1/courses/{id}/modules/{moduleID}/lessons/{lessonID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a course module by id
+      operationId: delete-course-module-lesson-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course module deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a course module lesson by id
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update data of a lesson of a module of a course by id
+      operationId: update-course-module-lesson-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      - description: lesson information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCourseModuleLesson'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a lesson of a module of a course by id
+      tags:
+      - courses
+  /api/v1/scholar/articles:
+    get:
+      consumes:
+      - application/json
+      description: Get all articles in the database
+      operationId: get-all-articles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all articles
+      tags:
+      - articles
+    post:
+      consumes:
+      - application/json
+      description: Method for creating an article for a user by id in the database
+        by user id
+      operationId: create-article
+      parameters:
+      - description: article information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateArticle'
+      - description: article image
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create an article
+      tags:
+      - articles
+  /api/v1/scholar/articles/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an article from database
+      operationId: delete-article-by-id
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete an article by id
+      tags:
+      - articles
+    get:
+      consumes:
+      - application/json
+      description: Get articles by id and user id
+      operationId: get-article-by-id-and-user-id
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get article by id and user id
+      tags:
+      - articles
+    put:
+      consumes:
+      - application/json
+      description: Update data of article
+      operationId: update-title-by-id
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: article information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateArticle'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update an article by id
+      tags:
+      - articles
+  /api/v1/scholar/articles/{id}/comments:
+    get:
+      consumes:
+      - application/json
+      description: Get all comments of an article
+      operationId: get-all-comments-by-article-id
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all comments by article id
+      tags:
+      - articles
+    post:
+      consumes:
+      - application/json
+      description: Method for commenting an article by id and user id
+      operationId: comment-an-article
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateComment'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Comment an article
+      tags:
+      - articles
+  /api/v1/scholar/articles/{id}/comments/{commentID}/downvote:
+    post:
+      consumes:
+      - application/json
+      description: Downvote comment of an article by article id and comment id
+      operationId: downvote-comment
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Downvote comment
+      tags:
+      - articles
+  /api/v1/scholar/articles/{id}/comments/{commentID}/replies:
+    get:
+      consumes:
+      - application/json
+      description: Get all comments of an article
+      operationId: get-all-replies-of-comment
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all comments by article id
+      tags:
+      - articles
+    post:
+      consumes:
+      - application/json
+      description: Reply to comment of an article
+      operationId: reply-to-comment-by-article-id-and-comment-id
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Reply to comment by article id and comment id
+      tags:
+      - articles
+  /api/v1/scholar/articles/{id}/comments/{commentID}/upvote:
+    post:
+      consumes:
+      - application/json
+      description: Upvote comment of an article by article id and comment id
+      operationId: upvote-comment
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upvote comment
+      tags:
+      - articles
+  /api/v1/scholar/articles/{id}/comments/{commentID}/votes:
+    get:
+      consumes:
+      - application/json
+      description: Downvote comment of an article by article id and comment id
+      operationId: get-votes-of-comment
+      parameters:
+      - description: article id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: comment id
+        in: path
+        name: commentID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get vote difference of comment
+      tags:
+      - articles
+  /api/v1/scholar/articles/user:
+    get:
+      consumes:
+      - application/json
+      description: Get all articles of user by user id
+      operationId: get-all-articles-by-user-id
+      parameters:
+      - description: user id
+        in: query
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all articles of user
+      tags:
+      - articles
+  /api/v1/scholar/materials:
+    get:
+      consumes:
+      - application/json
+      description: Get all materials of all users
+      operationId: get-all-materials
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - materials
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a material for a user by id in the database
+        by user id
+      operationId: create-material
+      parameters:
+      - description: material information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateMaterial'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a material
+      tags:
+      - materials
+  /api/v1/scholar/materials/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a material from database by id
+      operationId: delete-material-by-id
+      parameters:
+      - description: material id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a material by id
+      tags:
+      - materials
+    get:
+      consumes:
+      - application/json
+      description: Get materials by id and user id
+      operationId: get-material-by-id-and-user-id
+      parameters:
+      - description: material id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get material by id and user id
+      tags:
+      - materials
+    put:
+      consumes:
+      - application/json
+      description: Update data of material by id
+      operationId: update-material-by-id
+      parameters:
+      - description: material id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: material information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateMaterial'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a material by id
+      tags:
+      - materials
+  /api/v1/scholar/materials/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: Get all materials of user
+      operationId: get-all-materials-by-user-id
+      parameters:
+      - description: user id
+        in: path
+        name: userID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all materials by user id
+      tags:
+      - materials
+  /api/v1/token/renew:
+    post:
+      consumes:
+      - application/json
+      description: Renew access and refresh tokens by refresh token from request body
+        and set new expiration time for refresh token in database
+      operationId: refresh-token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: token pair
+          schema:
+            type: string
+        "400":
+          description: error" "message
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: error" "message
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: error" "message
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: error" "message
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: renew access and refresh tokens
+      tags:
+      - auth
+  /api/v1/users/image:
+    post:
+      consumes:
+      - application/json
+      description: upload user image to the system
+      operationId: upload-user-image
+      parameters:
+      - description: user image
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Upload user image
+      tags:
+      - users
+  /api/v1/users/profile:
+    get:
+      consumes:
+      - application/json
+      description: get user info by id from the system
+      operationId: get-user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get user info by id
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update user info by id from the system
+      operationId: update-user-information
+      parameters:
+      - description: user information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update user info by id
+      tags:
+      - users
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
