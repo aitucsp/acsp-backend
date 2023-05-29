@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  dto.AnswerInvitation:
+    properties:
+      feedback:
+        type: string
+    required:
+    - feedback
+    type: object
   dto.CreateArticle:
     properties:
       description:
@@ -45,6 +52,38 @@ definitions:
       start_date:
         type: string
     type: object
+  dto.CreateCourse:
+    properties:
+      description:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  dto.CreateCourseModule:
+    properties:
+      expected_result:
+        type: string
+      title:
+        type: string
+    required:
+    - expected_result
+    - title
+    type: object
+  dto.CreateCourseModuleLesson:
+    properties:
+      description:
+        type: string
+      reference_url:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
   dto.CreateDiscipline:
     properties:
       description:
@@ -54,6 +93,13 @@ definitions:
     required:
     - description
     - title
+    type: object
+  dto.CreateLessonComment:
+    properties:
+      text:
+        type: string
+    required:
+    - text
     type: object
   dto.CreateMaterial:
     properties:
@@ -139,6 +185,41 @@ definitions:
       start_date:
         type: string
     type: object
+  dto.UpdateCourse:
+    properties:
+      description:
+        type: string
+      rating:
+        type: integer
+      title:
+        type: string
+    required:
+    - description
+    - rating
+    - title
+    type: object
+  dto.UpdateCourseModule:
+    properties:
+      expected_result:
+        type: string
+      title:
+        type: string
+    required:
+    - expected_result
+    - title
+    type: object
+  dto.UpdateCourseModuleLesson:
+    properties:
+      description:
+        type: string
+      reference_url:
+        type: string
+      title:
+        type: string
+    required:
+    - description
+    - title
+    type: object
   dto.UpdateDiscipline:
     properties:
       description:
@@ -210,7 +291,7 @@ definitions:
     - email
     - password
     type: object
-host: localhost:8080
+host: squid-app-8kray.ondigitalocean.app
 info:
   contact: {}
   description: Backend for AITU Corporate Self-Study Portal.
@@ -970,6 +1051,12 @@ paths:
         name: invitationID
         required: true
         type: integer
+      - description: accept invitation feedback
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AnswerInvitation'
       produces:
       - application/json
       responses:
@@ -1020,6 +1107,12 @@ paths:
         name: invitationID
         required: true
         type: integer
+      - description: decline invitation feedback
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AnswerInvitation'
       produces:
       - application/json
       responses:
@@ -1388,6 +1481,12 @@ paths:
       - application/json
       description: Get all projects of discipline
       operationId: get-all-projects-by-discipline-id
+      parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -1428,6 +1527,11 @@ paths:
         by user id
       operationId: create-project
       parameters:
+      - description: discipline id
+        in: path
+        name: id
+        required: true
+        type: integer
       - description: project information
         in: body
         name: request
@@ -1912,6 +2016,798 @@ paths:
       summary: Get contest by id
       tags:
       - contests
+  /api/v1/course/{id}/modules/{moduleID}:
+    get:
+      consumes:
+      - application/json
+      description: Get a course module by id
+      operationId: get-course-module-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a course module by id
+      tags:
+      - courses
+  /api/v1/course/{id}/modules/{moduleID}/lessons/{lessonID}:
+    get:
+      consumes:
+      - application/json
+      description: Get a course module lesson by id
+      operationId: get-course-module-lesson-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a course module lesson by id
+      tags:
+      - courses
+  /api/v1/courses:
+    get:
+      consumes:
+      - application/json
+      description: Get all courses
+      operationId: get-all-courses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all courses
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a course
+      operationId: create-course
+      parameters:
+      - description: course information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourse'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a course
+      tags:
+      - courses
+  /api/v1/courses/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a course by id
+      operationId: delete-course-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Project deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a course by id
+      tags:
+      - courses
+    get:
+      consumes:
+      - application/json
+      description: Get a course by id
+      operationId: get-course-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a course by id
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update data of a course
+      operationId: update-course-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: course information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCourse'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a course by id
+      tags:
+      - courses
+  /api/v1/courses/{id}/lessons/{lessonID}/comments:
+    get:
+      consumes:
+      - application/json
+      description: Get a course module by id
+      operationId: get-lesson-comments-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get a course module by id
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a module of a course
+      operationId: create-lesson-comment
+      parameters:
+      - description: comment information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateLessonComment'
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a module for a course
+      tags:
+      - courses
+  /api/v1/courses/{id}/modules:
+    get:
+      consumes:
+      - application/json
+      description: Get all courses modules
+      operationId: get-all-course-modules
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all course modules
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a module of a course
+      operationId: create-course-module
+      parameters:
+      - description: module information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseModule'
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a module for a course
+      tags:
+      - courses
+  /api/v1/courses/{id}/modules/{moduleID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a course module by id
+      operationId: delete-course-module-by-id
+      parameters:
+      - description: project id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course module deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a course module by id
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update data of a course module
+      operationId: update-course-module-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: module information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCourseModule'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a course module by id
+      tags:
+      - courses
+  /api/v1/courses/{id}/modules/{moduleID}/lessons:
+    get:
+      consumes:
+      - application/json
+      description: Get all course module lessons
+      operationId: get-all-course-module-lessons
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get all lessons of a module
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      description: Method for creating a lesson for a module of a course
+      operationId: create-course-module-lesson
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: lesson information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateCourseModuleLesson'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: message
+          schema:
+            type: integer
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Create a lesson for a module of course
+      tags:
+      - courses
+  /api/v1/courses/{id}/modules/{moduleID}/lessons/{lessonID}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a course module by id
+      operationId: delete-course-module-lesson-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Course module deleted
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Delete a course module lesson by id
+      tags:
+      - courses
+    put:
+      consumes:
+      - application/json
+      description: Update data of a lesson of a module of a course by id
+      operationId: update-course-module-lesson-by-id
+      parameters:
+      - description: course id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: module id
+        in: path
+        name: moduleID
+        required: true
+        type: integer
+      - description: lesson id
+        in: path
+        name: lessonID
+        required: true
+        type: integer
+      - description: lesson information
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCourseModuleLesson'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lesson updated
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties: true
+            type: object
+        default:
+          description: ""
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Update a lesson of a module of a course by id
+      tags:
+      - courses
   /api/v1/scholar/articles:
     get:
       consumes:
@@ -2851,6 +3747,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Upload user image
       tags:
       - users
@@ -2888,6 +3786,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Get user info by id
       tags:
       - users
@@ -2931,6 +3831,8 @@ paths:
           schema:
             additionalProperties: true
             type: object
+      security:
+      - ApiKeyAuth: []
       summary: Update user info by id
       tags:
       - users

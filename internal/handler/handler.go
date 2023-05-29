@@ -106,11 +106,46 @@ func (h *Handler) InitRoutesFiber(app *fiber.App) *fiber.App {
 			}
 		}
 
+		// Define contest routes
 		contests := rest.Group("/contests", h.userIdentity)
 		{
 			// contests.Post("/", h.Authorize("admin"), h.createContest) // create a contest
 			contests.Get("/", h.getAllContests) // get all contests
 			contests.Get("/:id", h.getContest)  // get contest by id
+		}
+
+		// Define course routes
+		courses := rest.Group("/courses", h.userIdentity)
+		{
+			courses.Post("/", h.Authorize("admin"), h.createCourse)      // create a course
+			courses.Put("/:id", h.Authorize("admin"), h.updateCourse)    // update a course
+			courses.Delete("/:id", h.Authorize("admin"), h.deleteCourse) // delete a course
+			courses.Get("/", h.getAllCourses)                            // get all courses
+			courses.Get("/:id", h.getCourseByID)                         // get course by id
+
+			modules := courses.Group("/:id/modules")
+			{
+				modules.Post("/", h.Authorize("admin"), h.createCourseModule)     // create a module
+				modules.Put("/:id", h.Authorize("admin"), h.updateCourseModule)   // update a module
+				modules.Delete(":id", h.Authorize("admin"), h.deleteCourseModule) // delete a module
+				modules.Get("/", h.getAllCourseModules)                           // get all modules
+				modules.Get("/:id", h.getCourseModuleByID)                        // get module by id
+
+				lessons := modules.Group("/:id/lessons")
+				{
+					lessons.Post("/", h.Authorize("admin"), h.createCourseLesson) // create a lesson
+					lessons.Put("/:id", h.Authorize("admin"), h.updateLesson)     // update a lesson
+					lessons.Delete("/:id", h.Authorize("admin"), h.deleteLesson)  // delete a lesson
+					lessons.Get("/", h.getAllLessonsByModuleID)                   // get all lessons
+					lessons.Get("/:id", h.getLessonByID)                          // get lesson by id
+				}
+			}
+
+			lessonComments := courses.Group("/:id/lessons")
+			{
+				lessonComments.Post("/:id/comments", h.commentLesson)        // comment a lesson
+				lessonComments.Get("/:id/comments", h.getLessonCommentsByID) // get all comments of a lesson
+			}
 		}
 
 		codingLab := rest.Group("/coding-lab", h.userIdentity)

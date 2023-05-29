@@ -361,6 +361,7 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 	defer cancel()
 
 	query := fmt.Sprintf(`SELECT 
+										c.id,
 										c.user_id, 
 										c.skills, 
 										c.position, 
@@ -369,7 +370,7 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 										c.updated_at,
 										ci.inviter_id,
 										ci.status,
-										ci.feedback,	
+										ci.feedback	
 								 FROM %s c 
 							     INNER JOIN %s ci ON ci.card_id = c.id
 								 WHERE c.user_id = $1`,
@@ -377,12 +378,20 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 		constants.CardInvitationsTable)
 
 	rows, err := c.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		l.Error("Error when querying get all applicants in database", zap.Error(err))
+
+		return nil, errors.Wrap(err, "Error when querying get all applicants in database")
+	}
+
 	defer func(rows *sql.Rows) {
+		if rows == nil {
+			return // rows is already closed
+		}
+
 		err := rows.Close()
 		if err != nil {
 			l.Error("Error when closing the rows", zap.Error(err))
-
-			logging.LoggerFromContext(ctx).Error("Error when closing the rows", zap.Error(err))
 		}
 	}(rows)
 
@@ -390,7 +399,9 @@ func (c *CardsDatabase) GetInvitationsByUserID(ctx context.Context, userID int) 
 		var card model.Card
 		var invitationCard model.InvitationCard
 
-		err = rows.Scan(&card.UserID,
+		err = rows.Scan(
+			&card.ID,
+			&card.UserID,
 			&card.Skills,
 			&card.Position,
 			&card.Description,
@@ -429,7 +440,7 @@ func (c *CardsDatabase) GetInvitationsByCardID(ctx context.Context, cardID int) 
 										c.updated_at,
 										ci.inviter_id,
 										ci.status,
-										ci.feedback,	
+										ci.feedback	
 								 FROM %s c 
 							     INNER JOIN %s ci ON ci.card_id = c.id
 								 WHERE c.id = $1`,
@@ -636,7 +647,7 @@ func (c *CardsDatabase) GetResponsesByUserID(ctx context.Context, userID int) ([
 										c.created_at, 
 										c.updated_at,
 										ci.inviter_id,
-										ci.status
+										ci.status,
 										ci.feedback
 								 FROM %s c 
 							     INNER JOIN %s ci ON ci.card_id = c.id

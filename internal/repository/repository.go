@@ -21,6 +21,10 @@ type Repository struct {
 	Disciplines
 	Projects
 	ProjectModules
+	Courses
+	CourseModules
+	CourseLessons
+	CourseLessonComments
 	Transactional
 	S3Bucket
 }
@@ -129,6 +133,38 @@ type ProjectModules interface {
 	GetByID(ctx context.Context, moduleID int) (model.ProjectModule, error)
 }
 
+type Courses interface {
+	Create(ctx context.Context, course model.Course) error
+	Update(ctx context.Context, course model.Course) error
+	Delete(ctx context.Context, courseID int) error
+	GetAll(ctx context.Context) ([]model.Course, error)
+	GetByID(ctx context.Context, courseID int) (model.Course, error)
+}
+
+type CourseModules interface {
+	Create(ctx context.Context, module model.CourseModule) error
+	Update(ctx context.Context, module model.CourseModule) error
+	Delete(ctx context.Context, courseID, moduleID int) error
+	GetAllByCourseID(ctx context.Context, courseID int) ([]model.CourseModule, error)
+	GetByID(ctx context.Context, moduleID int) (model.CourseModule, error)
+}
+
+type CourseLessons interface {
+	Create(ctx context.Context, lesson model.CourseModuleLesson) error
+	Update(ctx context.Context, lesson model.CourseModuleLesson) error
+	Delete(ctx context.Context, lessonID, moduleID int) error
+	GetAllByModuleId(ctx context.Context, moduleID int) ([]model.CourseModuleLesson, error)
+	GetByID(ctx context.Context, lessonID int) (model.CourseModuleLesson, error)
+}
+
+type CourseLessonComments interface {
+	Create(ctx context.Context, comment model.CourseModuleLessonComment) error
+	Update(ctx context.Context, comment model.CourseModuleLessonComment) error
+	Delete(ctx context.Context, lessonID, commentID int) error
+	GetAllByLessonId(ctx context.Context, lessonID int) ([]model.CourseModuleLessonComment, error)
+	GetByID(ctx context.Context, commentID int) (model.CourseModuleLessonComment, error)
+}
+
 // S3Bucket interface provides methods for storing and retrieving objects from an S3 bucket.
 type S3Bucket interface {
 	PutObject(bucketName string, objectName string, fileBytes []byte) error
@@ -142,16 +178,20 @@ type Transactional interface {
 
 func NewRepository(db *sqlx.DB, sess *session.Session) *Repository {
 	return &Repository{
-		Users:          NewUsersRepository(db),
-		Roles:          NewRolesRepository(db),
-		Articles:       NewArticlesRepository(db),
-		Cards:          NewCardsRepository(db),
-		Materials:      NewMaterialsRepository(db),
-		Contests:       NewContestsRepository(db),
-		Disciplines:    NewDisciplinesRepository(db),
-		Projects:       NewProjectsRepository(db),
-		ProjectModules: NewProjectModulesRepository(db),
-		S3Bucket:       NewS3BucketRepository(sess),
-		Transactional:  NewTransactionManager(db),
+		Users:                NewUsersRepository(db),
+		Roles:                NewRolesRepository(db),
+		Articles:             NewArticlesRepository(db),
+		Cards:                NewCardsRepository(db),
+		Materials:            NewMaterialsRepository(db),
+		Contests:             NewContestsRepository(db),
+		Disciplines:          NewDisciplinesRepository(db),
+		Projects:             NewProjectsRepository(db),
+		ProjectModules:       NewProjectModulesRepository(db),
+		Courses:              NewCoursesRepository(db),
+		CourseModules:        NewCourseModulesRepository(db),
+		CourseLessons:        NewCourseModuleLessonsRepository(db),
+		CourseLessonComments: NewCourseModuleLessonCommentsRepository(db),
+		S3Bucket:             NewS3BucketRepository(sess),
+		Transactional:        NewTransactionManager(db),
 	}
 }

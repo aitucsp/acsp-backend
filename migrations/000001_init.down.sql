@@ -1,3 +1,8 @@
+DROP TABLE course_lesson_comment_answers;
+DROP TABLE course_lesson_comments;
+DROP TABLE course_module_lessons;
+DROP TABLE course_modules;
+DROP TABLE courses;
 DROP TABLE coding_lab_project_enrollments;
 DROP TABLE coding_lab_project_modules;
 DROP TABLE coding_lab_projects;

@@ -33,7 +33,7 @@ import (
 // @version 1.0
 // @description Backend for AITU Corporate Self-Study Portal.
 
-// @host localhost:8080
+// @host squid-app-8kray.ondigitalocean.app
 // @BasePath /
 // @securityDefinitions.apikey ApiKeyAuth
 // @in header

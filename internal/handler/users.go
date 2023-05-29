@@ -9,6 +9,7 @@ import (
 )
 
 // @Summary Get user info by id
+// @Security ApiKeyAuth
 // @Tags users
 // @Description get user info by id from the system
 // @ID get-user
@@ -50,6 +51,7 @@ func (h *Handler) getUserProfile(c *fiber.Ctx) error {
 }
 
 // @Summary Upload user image
+// @Security ApiKeyAuth
 // @Tags users
 // @Description upload user image to the system
 // @ID upload-user-image
@@ -101,6 +103,7 @@ func (h *Handler) uploadUserImage(c *fiber.Ctx) error {
 }
 
 // @Summary Update user info by id
+// @Security ApiKeyAuth
 // @Tags users
 // @Description Update user info by id from the system
 // @ID update-user-information

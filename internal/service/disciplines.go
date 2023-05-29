@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"acsp/internal/constants"
 	"acsp/internal/dto"
 	"acsp/internal/logging"
 	"acsp/internal/model"
@@ -87,6 +88,8 @@ func (d DisciplinesService) GetAll(ctx context.Context) ([]model.Discipline, err
 		return nil, errors.Wrap(err, "error when getting all disciplines")
 	}
 
+	disciplines = d.getFullURLs(disciplines)
+
 	return disciplines, nil
 }
 
@@ -110,6 +113,27 @@ func (d DisciplinesService) GetByID(ctx context.Context, disciplineID int) (mode
 	}
 
 	discipline.Projects = projects
+	discipline = d.getFullURL(discipline)
 
 	return discipline, nil
+}
+
+func (d DisciplinesService) getFullURLs(disciplines []model.Discipline) []model.Discipline {
+	for i := range disciplines {
+		disciplines[i].ImageURL = constants.BucketName + "." +
+			constants.EndPoint + "/" +
+			constants.DisciplinesImagesFolder +
+			disciplines[i].ImageURL
+	}
+
+	return disciplines
+}
+
+func (d DisciplinesService) getFullURL(discipline model.Discipline) model.Discipline {
+	discipline.ImageURL = constants.BucketName + "." +
+		constants.EndPoint + "/" +
+		constants.DisciplinesImagesFolder +
+		discipline.ImageURL
+
+	return discipline
 }

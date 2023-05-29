@@ -27,6 +27,10 @@ type Service struct {
 	Disciplines
 	Projects
 	ProjectModules
+	Courses
+	CourseModules
+	ModuleLessons
+	LessonComments
 	S3BucketService S3Bucket
 }
 
@@ -133,6 +137,38 @@ type ProjectModules interface {
 	GetByID(ctx context.Context, moduleID int) (model.ProjectModule, error)
 }
 
+type Courses interface {
+	Create(ctx context.Context, course dto.CreateCourse) error
+	Update(ctx context.Context, courseID int, course dto.UpdateCourse) error
+	Delete(ctx context.Context, courseID int) error
+	GetAll(ctx context.Context) ([]model.Course, error)
+	GetByID(ctx context.Context, courseID int) (model.Course, error)
+}
+
+type CourseModules interface {
+	Create(ctx context.Context, courseID int, module dto.CreateCourseModule) error
+	Update(ctx context.Context, courseID, moduleID int, module dto.UpdateCourseModule) error
+	Delete(ctx context.Context, courseID, moduleID int) error
+	GetAll(ctx context.Context, courseID int) ([]model.CourseModule, error)
+	GetByID(ctx context.Context, moduleID int) (model.CourseModule, error)
+}
+
+type ModuleLessons interface {
+	Create(ctx context.Context, moduleID int, lesson dto.CreateCourseModuleLesson) error
+	Update(ctx context.Context, moduleID, lessonID int, lesson dto.UpdateCourseModuleLesson) error
+	Delete(ctx context.Context, moduleID, lessonID int) error
+	GetAll(ctx context.Context, moduleID int) ([]model.CourseModuleLesson, error)
+	GetByID(ctx context.Context, lessonID int) (model.CourseModuleLesson, error)
+}
+
+type LessonComments interface {
+	Create(ctx context.Context, lessonID int, comment dto.CreateLessonComment) error
+	Update(ctx context.Context, lessonID, commentID int, comment dto.UpdateLessonComment) error
+	Delete(ctx context.Context, lessonID, commentID int) error
+	GetAll(ctx context.Context, lessonID int) ([]model.CourseModuleLessonComment, error)
+	GetByID(ctx context.Context, commentID int) (model.CourseModuleLessonComment, error)
+}
+
 type S3Bucket interface {
 	UploadFile(ctx context.Context, key string, file *multipart.FileHeader) error
 }
@@ -148,6 +184,10 @@ func NewService(repo *repository.Repository, r *redis.Client, c config.AuthConfi
 		Disciplines:     NewDisciplinesService(repo.Disciplines, repo.Projects),
 		Projects:        NewProjectsService(repo.Projects, repo.ProjectModules),
 		ProjectModules:  NewProjectModulesService(repo.ProjectModules),
+		Courses:         NewCoursesService(repo.Courses, repo.CourseModules),
+		CourseModules:   NewCourseModulesService(repo.CourseModules),
+		ModuleLessons:   NewCourseModuleLessonsService(repo.CourseLessons),
+		LessonComments:  NewCourseModuleLessonCommentsService(repo.CourseLessonComments),
 		Contests:        NewContestsService(repo.Contests),
 	}
 
